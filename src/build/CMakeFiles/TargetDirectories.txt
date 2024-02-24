@@ -1,0 +1,3 @@
+/home/khushi/Documents/lox.cpp/src/build/CMakeFiles/the_executable.dir
+/home/khushi/Documents/lox.cpp/src/build/CMakeFiles/edit_cache.dir
+/home/khushi/Documents/lox.cpp/src/build/CMakeFiles/rebuild_cache.dir

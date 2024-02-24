@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/the_executable.dir/Lox.cpp.o CMakeFiles/the_executable.dir/Token.cpp.o CMakeFiles/the_executable.dir/Expr.cpp.o CMakeFiles/the_executable.dir/ASTPrinter.cpp.o CMakeFiles/the_executable.dir/main.cpp.o -o the_executable  -lfmtd 
