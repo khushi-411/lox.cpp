@@ -6,7 +6,9 @@
 #include <cstddef>
 #include <sstream>
 
+#include "Expr.h"
 #include "Lox.h"
+#include "Parser.h"
 #include "Scanner.h"
 #include "Token.h"
 
@@ -58,6 +60,15 @@ void Lox::run(const std::string& source) {
         // TODO: check another way (https://stackoverflow.com/questions/45172025)
         std::cout << token;
     }
+
+    Parser parser(tokens);
+    Expr expression = parser.parse();
+
+    if (hadError) {
+        return;
+    }
+
+    std::cout << ASTPrinter().print(expression);
 }
 
 // https://stackoverflow.com/questions/24288855
@@ -98,10 +109,11 @@ void Lox::error(Token token, std::string message) {
     }
 }
 
-// void Lox::runtimeError(RuntimeError error) {
+void Lox::runtimeError(RuntimeError error) {
     // TODO
-//     hadRuntimeError = true;
-// }
+    std::cerr << error.getMessage() << "[" << line << error.token.line << "]";
+    hadRuntimeError = true;
+}
 
 
 }  // namespace lox
