@@ -14,15 +14,14 @@ permissions: read-all
 jobs:
   lint:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
-  steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Install clang-format
+        run: sudo apt-get install -y clang-format
 
-    - name: Install clang-format
-      run: sudo apt-get install -y clang-format
-
-    - name: Check code style
-      run: |
-        set -e
-        find . \( -name "*.cpp" -o -name "*.h" \) -print | xargs clang-format --style=file --verbose
+      - name: Check code style
+        run: |
+          set -e
+          find . \( -name "*.cpp" -o -name "*.h" \) -print | xargs clang-format --style=file --verbose
