@@ -7,169 +7,200 @@
 
 namespace lox {
 
+namespace expr {
+
+// https://en.cppreference.com/w/cpp/language/template_specialization
+template <class T>
 class Expr {};
 
-template <typename R>
-class Visitor<R> {
-public:
-    virtual R visitAssignExpr(Assign expr);
-    virtual R visitBinaryExpr(Binary expr);
-    virtual R visitCallExpr(Call expr);
-    virtual R visitGetExpr(Get expr);
-    virtual R visitGroupingExpr(Grouping expr);
-    virtual R visitLiteralExpr(Literal expr);
-    virtual R visitLogicalExpr(Logical expr);
-    virtual R visitSetExpr(Set expr);
-    virtual R visitSuperExpr(Super expr);
-    virtual R visitThisExpr(This expr);
-    virtual R visitUnaryExpr(Unary expr);
-    virtual R visitVariableExpr(Variable expr);
-}
+template <class T>
+class Visitor;
 
-template <typename R>
-class Visitor::Assign : public Expr {
+/*template <class T>
+class Visitor : public Expr<T> {
 public:
-    Visitor::Assign(Token name, Expr value);
+    virtual T visitAssignExpr(const Assign<T>& expr) = 0;  // TODO
+    virtual T visitBinaryExpr(const Binary<T>& expr) = 0;
+    virtual T visitCallExpr(const Call<T>& expr) = 0;
+    virtual T visitGetExpr(const Get<T>& expr) = 0;
+    virtual T visitGroupingExpr(const Grouping<T>& expr) = 0;
+    virtual T visitLiteralExpr(const Literal<T>& expr) = 0;
+    virtual T visitLogicalExpr(const Logical<T>& expr) = 0;
+    virtual T visitSetExpr(const Set<T>& expr) = 0;
+    virtual T visitSuperExpr(const Super<T>& expr) = 0;
+    virtual T visitThisExpr(const This<T>& expr) = 0;
+    virtual T visitUnaryExpr(const Unary<T>& expr) = 0;
+    virtual T visitVariableExpr(const Variable<T>& expr) = 0;
+};*/
 
-    R accept(Visitor<R> visitor);
+
+// TODO: template specialization
+template <class T>
+class Assign : public Expr<T> {  // TODO: why not Assign<T>
+public:
+    Assign(Token name, Expr<T> value);
+
+    T accept(Visitor<T>& visitor);
 
     const Token name;
-    const Expr value;
+    const Expr<T> value;
 };
 
 
-template <typename R>
-class Visitor::Binary : public Expr {
+template <class T>
+class Binary : public Expr<T> {
 public:
-    Visitor::Binary(Expr left, Token op, Expr right);
+    Binary(Expr<T> left, Token op, Expr<T> right);
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T>& visitor);
 
-    const Expr left;
+    const Expr<T> left;
     const Token op;
-    const Expr right;
+    const Expr<T> right;
 };
 
 
-template <typename R>
-class Visitor::Call : public Expr {
+template <class T>
+class Call : public Expr<T> {
 public:
-    Visitor::Call(Expr callee, Token paren, std::vector<Expr> arguments);
+    Call(Expr<T> callee, Token paren, std::vector<Expr<T>> arguments);
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T>& visitor);
 
-    const Expr callee;
+    const Expr<T> callee;
     const Token paren;
-    const std::vector<Expr> arguments;
+    const std::vector<Expr<T>> arguments;
 };
 
 
-template <typename R>
-class Visitor::Get : public Expr {
+template <class T>
+class Get : public Expr<T> {
 public:
-    Visitor::Get(Expr object, Token name);
+    Get(Expr<T> object, Token name);
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T>& visitor);
 
-    const Expr object;
+    const Expr<T> object;
     const Token name;
 };
 
 
-template <typename R>
-class Visitor::Grouping : public Expr {
+template <class T>
+class Grouping : public Expr<T> {
 public:
-    Visitor::Grouping(Expr expression);
+    Grouping(Expr<T> expression);
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T>& visitor);
 
-    const Expr expression;
+    const Expr<T> expression;
 };
 
 
-template <typename R>
-class Visitor::Literal : public Expr {
+template <class T>
+class Literal : public Expr<T> {
 public:
-    Visitor::Literal(std::string value);  // TODO: java object
+    Literal(std::string value);  // TODO: java object
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T>& visitor);
 
     const std::string value;
 };
 
 
-template <typename R>
-class Visitor::Logical : public Expr {
+template <class T>
+class Logical : public Expr<T> {
 public:
-    Visitor::Logical(Expr left, Token op, Expr right);
+    Logical(Expr<T> left, Token op, Expr<T> right);
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T>& visitor);
 
-    const Expr left;
+    const Expr<T> left;
     const Token op;
-    const Expr right;
+    const Expr<T> right;
 };
 
 
-template <typename R>
-class Visitor::Set : public Expr {
+template <class T>
+class Set : public Expr<T> {
 public:
-    Visitor::Set(Expr object, Token name, Expr value);
+    Set(Expr<T> object, Token name, Expr<T> value);
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T>& visitor);
 
-    const Expr object;
+    const Expr<T> object;
     const Token name;
-    const Expr value;
+    const Expr<T> value;
 };
 
 
-template <typename R>
-class Visitor::Super : public Expr {
+template <class T>
+class Super : public Expr<T> {
 public:
-    Visitor::Super(Token keyword, Token method);
+    Super(Token keyword, Token method);
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T>& visitor);
 
     const Token keyword;
     const Token method;
 };
 
 
-template <typename R>
-class Visitor::This : public Expr {
+template <class T>
+class This : public Expr<T> {
 public:
-    Visitor::This(Token keyword);
+    This(Token keyword);
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T>& visitor);
 
     const Token keyword;
 };
 
 
-template <typename R>
-class Visitor::Unary : public Expr {
+template <class T>
+class Unary : public Expr<T> {
 public:
-    Visitor::Unary(Token op, Expr right);
+    Unary(Token op, Expr<T> right);
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T>& visitor);
 
     const Token op;
-    const Expr right;
+    const Expr<T> right;
 };
 
 
-template <typename R>
-class Visitor::Variable : public Expr {
+template <class T>
+class Variable : public Expr<T> {
 public:
-    Visitor::Variable(Token name);
+    Variable(Token name);
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T>& visitor);
 
     const Token name;
 };
 
-R accept(Visitor<R> visitor);
+template <class T>
+class Visitor : public Expr<T> {
+public:
+    virtual T visitAssignExpr(const Assign<T>& expr) = 0;  // TODO
+    virtual T visitBinaryExpr(const Binary<T>& expr) = 0;
+    virtual T visitCallExpr(const Call<T>& expr) = 0;
+    virtual T visitGetExpr(const Get<T>& expr) = 0;
+    virtual T visitGroupingExpr(const Grouping<T>& expr) = 0;
+    virtual T visitLiteralExpr(const Literal<T>& expr) = 0;
+    virtual T visitLogicalExpr(const Logical<T>& expr) = 0;
+    virtual T visitSetExpr(const Set<T>& expr) = 0;
+    virtual T visitSuperExpr(const Super<T>& expr) = 0;
+    virtual T visitThisExpr(const This<T>& expr) = 0;
+    virtual T visitUnaryExpr(const Unary<T>& expr) = 0;
+    virtual T visitVariableExpr(const Variable<T>& expr) = 0;
+};
+
+
+template <typename T>
+T accept(Visitor<T>& visitor);
+
+
+}  // namespace expr
 
 }  // namespace lox
 

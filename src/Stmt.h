@@ -9,142 +9,171 @@
 
 namespace lox {
 
+namespace stmt {
+
+template <class T>
 class Stmt {};
 
-template <typename R>
-class Visitor<R> {
+
+template <class T>
+class Visitor;
+
+/*template <typename T>
+class Visitor<T> {
 
 public:
-    virtual R visitBlockStmt(Block stmt);
-    virtual R visitClassStmt(Class stmt);
-    virtual R visitExpressionStmt(Expression stmt);
-    virtual R visitFunctionStmt(Function stmt);
-    virtual R visitIfStmt(If stmt);
-    virtual R visitPrintStmt(Print stmt);
-    virtual R visitReturnStmt(Return stmt);
-    virtual R visitVarStmt(Var stmt);
-    virtual R visitWhileStmt(While stmt);
+    virtual T visitBlockStmt(Block stmt);
+    virtual T visitClassStmt(Class stmt);
+    virtual T visitExpressionStmt(Expression stmt);
+    virtual T visitFunctionStmt(Function stmt);
+    virtual T visitIfStmt(If stmt);
+    virtual T visitPrintStmt(Print stmt);
+    virtual T visitReturnStmt(Return stmt);
+    virtual T visitVarStmt(Var stmt);
+    virtual T visitWhileStmt(While stmt);
 
-};
-
-template <typename R>
-class Block : public Stmt {
-
-public:
-    Block(std::vector<Stmt> statements);
-
-    R accept(Visitor<R> visitor);
-
-    const std::vector<Stmt> statements;
-};
+};*/
 
 
-template <typename R>
-class Class : public Stmt {
+template <typename T>
+class Block : public Stmt<T> {
 
 public:
-    Class(Token::Token, Expr::Expr::Variable superclass, std::vector<Stmt::Stmt::Function> methods);
+    Block(std::vector<Stmt<T>> statements);
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T> visitor);
 
-    const Token::Token name;
-    const Expr::Expr::Variable superclass;
-    const std::vector<Stmt::Stmt::Function> methods;
+    const std::vector<Stmt<T>> statements;
 };
 
 
-template <typename R>
+template <typename T>
+class Class : public Stmt<T> {
+
+public:
+    Class(Token, lox::expr::Expr::Variable superclass, std::vector<Stmt::Function> methods);
+
+    T accept(Visitor<T> visitor);
+
+    const Token name;
+    const lox::expr::Expr::Variable superclass;
+    const std::vector<Stmt::Function> methods;
+};
+
+
+template <class T>
 class Expression : public Stmt {
     
 public:
-    Expression(Expr::Expr expression);
+    Expression(lox::expr::Expr expression);
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T> visitor);
 
-    const Expr::Expr expression;
+    const lox::expr::Expr expression;
 };
 
 
-template <typename R>
+template <class T>
 class Function : public Stmt {
 
 public:
-    Function(Token::Token name, std::vector<Token::Token params, std::vector<Stmt> body);
+    Function(Token name, std::vector<Token> params, std::vector<Stmt> body);
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T> visitor);
 
-    const Token::Token name;
-    const std::vector<Token::Token> params;
-    const std::vector<Stmt::Stmt> body;
+    const Token name;
+    const std::vector<Token> params;
+    const std::vector<Stmt> body;
 };
 
 
-template <typename R>
+template <class T>
 class If : public Stmt {
 
 public:
-    If(Expr::Expr condition, Stmt::Stmt thenBranch, Stmt::Stmt elseBranch);
+    If(lox::expr::Expr condition, Stmt thenBranch, Stmt elseBranch);
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T> visitor);
 
-    const Expr::Expr condition;
-    const Stmt::Stmt thenBranch;
-    const Stmt::Stmt elseBranch;
+    const lox::expr::Expr condition;
+    const Stmt thenBranch;
+    const Stmt elseBranch;
 };
 
 
-template <typename R>
+template <class T>
 class Print : public Stmt {
 
 public:
-    Print(Expr::Expr expression);
+    Print(lox::expr::Expr expression);
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T> visitor);
 
-    const Expr::Expr expression;
+    const lox::expr::Expr expression;
 };
 
 
-template <typename R>
+template <class T>
 class Return : public Stmt {
 
 public:
-    Return(Token::Token keyword, Expr::Expr value);
+    Return(Token keyword, lox::expr::Expr value);
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T> visitor);
 
-    const Token::Token keyword;
-    const Expr::Expr value;
+    const Token keyword;
+    const lox::expr::Expr value;
 };
 
 
-template <typename R>
+template <class T>
 class Var : public Stmt {
 
 public:
-    Var(Token::Token name, Expr::Expr initializer);
+    Var(Token name, lox::expr::Expr initializer);
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T> visitor);
 
-    const Token::Token name;
-    const Expr::Expr initializer;
+    const Token name;
+    const lox::expr::Expr initializer;
 };
 
 
-template <typename R>
+template <class T>
 class While : public Stmt {
 
 public:
-    While(Expr::Expr condition, Stmt::Stmt body);
+    While(lox::expr::Expr condition, Stmt body);
 
-    R accept(Visitor<R> visitor);
+    T accept(Visitor<T> visitor);
 
-    const Expr::Expr condition;
-    const Stmt::Stmt body;
+    const lox::expr::Expr condition;
+    const Stmt body;
 };
 
 
-R accept(Visitor<R> visitor);
+template <class T>
+T accept(Visitor<T> visitor);
+
+
+template <class T>
+class Visitor : public Stmt<T> {
+
+public:
+    virtual T visitBlockStmt(const Block<T>& stmt) = 0;
+    virtual T visitClassStmt(const Class<T>& stmt) = 0;
+    virtual T visitExpressionStmt(const Expression<T>& stmt) = 0;
+    virtual T visitFunctionStmt(const Function<T>& stmt) = 0;
+    virtual T visitIfStmt(const If<T>& stmt) = 0;
+    virtual T visitPrintStmt(const Print<T>& stmt) = 0;
+    virtual T visitReturnStmt(const Return<T>& stmt) = 0;
+    virtual T visitVarStmt(const Var<T>& stmt) = 0;
+    virtual T visitWhileStmt(const While<T>& stmt) = 0;
+
+};
+
+
+}  // namespace stmt
 
 }  // namespace lox
 

@@ -1,6 +1,7 @@
 #ifndef RUNTIMEERROR_H
 #define RUNTIMEERROR_H
 
+#include "Token.h"
 
 namespace lox {
 

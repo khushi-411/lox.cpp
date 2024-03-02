@@ -12,7 +12,7 @@ Parser::Parser(std::vector<Token> tokens) {
 }
 
 
-Expr::Expr parse() {
+lox::expr::Expr parse() {
     try {
         return Parser::expression();
     } catch (ParseError error) {
@@ -20,16 +20,16 @@ Expr::Expr parse() {
     }
 }
 
-Expr::Expr Parser::expression() {
+lox::expr::Expr Parser::expression() {
     return Parser::equality();
 }
 
 
-Expr::Expr Parser::equality() {
-    Expr::Expr expr = Parser::comparison();
+lox::expr::Expr Parser::equality() {
+    lox::expr::Expr expr = Parser::comparison();
     while (Parser::match(TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL)) {
         Token op = Parser::previous();
-        Expr::Expr right = Parser::comparison();
+        lox::expr::Expr right = Parser::comparison();
         expr = Expr::Binary(expr, op, right);
     }
     return expr;
@@ -78,21 +78,21 @@ Token Parser::previous() {
 }
 
 
-Expr::Expr Parser::comparison() {
-    Expr expr = Parser::term();
+lox::expr::Expr Parser::comparison() {
+    lox::expr expr = Parser::term();
 
     while(Parser::match(TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS, TokenType::LESS_EQUAL)) {
         Token op = Parser::previous();
-        Expr right = Parser::term();
-        expr = Expr::Binary(expr, op, right);
+        lox::expr::expr right = Parser::term();
+        expr = lox::expr::Binary(expr, op, right);
     }
 
     return expr;
 }
 
 
-Expr::Expr Parser::term() {
-    Expr expr = Parser::factor();
+lox::expr::Expr Parser::term() {
+    lox::expr expr = Parser::factor();
 
     while(Parser::match(TokenType::MINUS, TokenType::PLUS)) {
         Token op = Parser::previous();
@@ -104,8 +104,8 @@ Expr::Expr Parser::term() {
 }
 
 
-Expr::Expr Parser::factor() {
-    Expr expr = Parser::unary();
+lox::expr::Expr Parser::factor() {
+    lox::expr expr = Parser::unary();
 
     while(Parser::match(TokenType::SLASH, TokenType::STAR)) {
         Token op = Parser::previous();
@@ -117,7 +117,7 @@ Expr::Expr Parser::factor() {
 }
 
 
-Expr::Expr Parser::unary() {
+lox::expr::Expr Parser::unary() {
     if (Parser::match(TokenType::BANG, TokenType::MINUS)) {
         Token op = Parser::previous();
         Expr right = Parser::unary();
@@ -128,7 +128,7 @@ Expr::Expr Parser::unary() {
 }
 
 
-Expr::Expr Parser::primary() {
+lox::expr::Expr Parser::primary() {
     if (Parser::match(TokenType::FALSE)) {
         return Expr::Literal(false);
     }

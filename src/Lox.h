@@ -1,7 +1,9 @@
 #ifndef LOX_H
 #define LOX_H
 
+#include "RuntimeError.h"
 #include "Token.h"
+
 
 namespace lox {
 
@@ -21,7 +23,7 @@ public:
     static void error(int line, std::string message);
     static void report(int line, std::string where, std::string message);
     static void error(Token token, std::string message);
-    void runtimeError();
+    void runtimeError(RuntimeError error);
 
 };
 

@@ -9,6 +9,7 @@
 #include "Expr.h"
 #include "Lox.h"
 #include "Parser.h"
+#include "RuntimeError.h"
 #include "Scanner.h"
 #include "Token.h"
 
@@ -61,8 +62,9 @@ void Lox::run(const std::string& source) {
         std::cout << token;
     }
 
-    Parser parser(tokens);
-    Expr expression = parser.parse();
+    Parser::Parser parser;
+    parser(tokens);
+    Expr::Expr expression = parser.parse();
 
     if (hadError) {
         return;
