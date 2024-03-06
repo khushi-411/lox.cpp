@@ -2,8 +2,6 @@
 #define ENVIRONMENT_H
 
 
-namespace lox {
-
-}  // namespace lox
+namespace lox {}  // namespace lox
 
 #endif

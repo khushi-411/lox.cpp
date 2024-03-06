@@ -6,11 +6,11 @@
 namespace Lox {
 
 class LoxCallable {
-
-public:
-    int arity();
-    std::string call(Interpreter::Interpreter interpreter, std::vector<std::string> arguments);
-
+ public:
+  int arity();
+  std::string call(
+      Interpreter::Interpreter interpreter,
+      std::vector<std::string> arguments);
 };
 
 }  // namespace Lox

@@ -11,7 +11,7 @@ typedef std::runtime_error super;
 
 namespace lox {
 
-RuntimeError::RuntimeError(const Token &token, const std::string &message)
+RuntimeError::RuntimeError(const Token& token, const std::string& message)
     : super(message), token(token) {}
 
 }  // namespace lox

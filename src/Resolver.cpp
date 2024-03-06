@@ -1,6 +1,4 @@
 #include "Resolver.h"
 
 
-namespace lox {
-
-}  // namespace lox
+namespace lox {}  // namespace lox

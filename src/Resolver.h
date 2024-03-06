@@ -8,9 +8,7 @@
 
 namespace lox {
 
-class Resolver {
-
-};
+class Resolver {};
 
 }  // namespace lox
 

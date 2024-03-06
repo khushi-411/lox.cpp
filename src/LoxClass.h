@@ -2,8 +2,6 @@
 #define LOXCLASS_H
 
 
-namespace lox {
-
-}  // namespace lox
+namespace lox {}  // namespace lox
 
 #endif
