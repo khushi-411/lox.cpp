@@ -12,9 +12,9 @@ namespace lox {
 
 
 // https://stackoverflow.com/questions/19918369
-Scanner::Scanner(std::string source) {
-     this->source = source;
-}
+Scanner::Scanner(const std::string &source)
+     : source(source) {}
+
 
 Scanner::Scanner() : keywords {
     {"and", AND},
@@ -35,6 +35,7 @@ Scanner::Scanner() : keywords {
     {"while", WHILE}
 } {}
 
+
 std::vector<Token> Scanner::scanTokens() {
     while(!Scanner::isAtEnd()) {
         start = current;
@@ -43,6 +44,7 @@ std::vector<Token> Scanner::scanTokens() {
     tokens.push_back(Token(TokenType::_EOF, "", nullptr, line));
     return tokens;
 }
+
 
 void Scanner::scanToken() {
     char c = Scanner::advance();
@@ -119,12 +121,13 @@ void Scanner::scanToken() {
     }
 }
 
+
 void Scanner::identifier() {
     while (Scanner::isAlphaNumeric(Scanner::peek())) {
         Scanner::advance();
     }
 
-    static std::string text = this->source.substr(start, current);
+    std::string text = this->source.substr(start, current);
     TokenType type = keywords[text];
 
     if (type == NULL) {
@@ -132,6 +135,7 @@ void Scanner::identifier() {
     }
     Scanner::addToken(type);
 }
+
 
 void Scanner::number() {
     while (Scanner::isDigit(peek())) {
@@ -147,6 +151,7 @@ void Scanner::number() {
 
     Scanner::addToken(TokenType::NUMBER, std::stod(source.substr(start, current))); // todo
 }
+
 
 void Scanner::string() {
     while (Scanner::peek() != '"' && !Scanner::isAtEnd()) {
@@ -166,7 +171,8 @@ void Scanner::string() {
     Scanner::addToken(STRING, value);
 }
 
-bool Scanner::match(char expected) {
+
+bool Scanner::match(const char &expected) {
     if (Scanner::isAtEnd()) {
         return false;
     }
@@ -178,12 +184,14 @@ bool Scanner::match(char expected) {
     return true;
 }
 
+
 char Scanner::peek() {
     if (Scanner::isAtEnd()) {
         return '\0';
     }
     return source.at(current);
 }
+
 
 char Scanner::peekNext() {
     if (current + 1 >= source.length()) {
@@ -192,38 +200,43 @@ char Scanner::peekNext() {
     return source.at(current + 1);
 }
 
-bool Scanner::isAlpha(char c) {
+
+bool Scanner::isAlpha(const char &c) {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
 }
 
-bool Scanner::isAlphaNumeric(char c) {
+
+bool Scanner::isAlphaNumeric(const char &c) {
     return Scanner::isAlpha(c) || Scanner::isDigit(c);
 }
 
-bool Scanner::isDigit(char c) {
+
+bool Scanner::isDigit(const char &c) {
     return c >= '0' && c <= '9';
 }
+
 
 bool Scanner::isAtEnd() {
     return current >= source.length();
 }
 
+
 char Scanner::advance() {
     return source.at(current++);
 }
 
-void Scanner::addToken(TokenType type) {
+
+void Scanner::addToken(const TokenType &type) {
     Scanner::addToken(type, nullptr);
 }
 
-void Scanner::addToken(TokenType type, std::string literal) {  // todo: Object type
+
+void Scanner::addToken(
+        const TokenType &type,
+        std::variant<std::nullptr_t, std::string, double, bool> literal) {
     std::string text = source.substr(start, current);
     tokens.push_back(Token(type, text, literal, line));
 }
 
-void Scanner::addToken(TokenType type, double literal) {        // TODO: object type
-    std::string text = source.substr(start, current);
-    tokens.push_back(Token(type, text, std::to_string(literal), line));
-}
 
 }  // namespace lox

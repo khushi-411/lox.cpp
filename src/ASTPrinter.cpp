@@ -23,7 +23,7 @@ std::string visitLiteralExpr(Expr::Literal expr) {
     if (expr::value == NULL) {
         return "nil";
     }
-    return expr::value::toString();
+    return expr::value::to_string();
 }
 
 std::string visitUnaryExpr(Expr::Unary expr) {
@@ -40,7 +40,7 @@ std::string parenthesize(std::string name, Expr... exprs) {
         builder.push_back(expr::accept(this));
     }
     builder.push_back(")");
-    return builder.toString();
+    return builder.to_string();
 }
 
 static void main(std::vector<std::string> args) {

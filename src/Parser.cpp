@@ -7,9 +7,8 @@
 
 namespace lox {
 
-Parser::Parser(std::vector<Token> tokens) {
-    this->tokens = tokens;
-}
+Parser::Parser(const std::vector<Token> &tokens)
+    : tokens(tokens) {}
 
 
 lox::expr::Expr parse() {
@@ -19,6 +18,7 @@ lox::expr::Expr parse() {
         return NULL;
     }
 }
+
 
 lox::expr::Expr Parser::expression() {
     return Parser::equality();
@@ -30,13 +30,13 @@ lox::expr::Expr Parser::equality() {
     while (Parser::match(TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL)) {
         Token op = Parser::previous();
         lox::expr::Expr right = Parser::comparison();
-        expr = Expr::Binary(expr, op, right);
+        expr = lox::expr::Expr::Binary(expr, op, right);
     }
     return expr;
 }
 
 
-bool Parser::match(TokenType... types) {
+bool Parser::match(const TokenType... &types) {
     for (TokenType type : types) {
         if (Parser::check(type)) {
             Parser::advance();
@@ -79,7 +79,7 @@ Token Parser::previous() {
 
 
 lox::expr::Expr Parser::comparison() {
-    lox::expr expr = Parser::term();
+    lox::expr::Expr expr = Parser::term();
 
     while(Parser::match(TokenType::GREATER, TokenType::GREATER_EQUAL, TokenType::LESS, TokenType::LESS_EQUAL)) {
         Token op = Parser::previous();
@@ -92,12 +92,12 @@ lox::expr::Expr Parser::comparison() {
 
 
 lox::expr::Expr Parser::term() {
-    lox::expr expr = Parser::factor();
+    lox::expr::Expr expr = Parser::factor();
 
     while(Parser::match(TokenType::MINUS, TokenType::PLUS)) {
         Token op = Parser::previous();
         Expr right = Parser::factor();
-        expr = Expr::Binary(expr, op, right);
+        expr = lox::expr::Expr::Binary(expr, op, right);
     }
 
     return expr;
@@ -105,12 +105,12 @@ lox::expr::Expr Parser::term() {
 
 
 lox::expr::Expr Parser::factor() {
-    lox::expr expr = Parser::unary();
+    lox::expr::Expr expr = Parser::unary();
 
     while(Parser::match(TokenType::SLASH, TokenType::STAR)) {
         Token op = Parser::previous();
         Expr right = Parser::unary();
-        expr = Expr::Binary(expr, op, right);
+        expr = lox::expr::Expr::Binary(expr, op, right);
     }
 
     return expr;
@@ -121,7 +121,7 @@ lox::expr::Expr Parser::unary() {
     if (Parser::match(TokenType::BANG, TokenType::MINUS)) {
         Token op = Parser::previous();
         Expr right = Parser::unary();
-        return Expr::Unary(op, right);
+        return lox::expr::Expr::Unary(op, right);
     }
 
     return Parser::primary();
@@ -130,30 +130,30 @@ lox::expr::Expr Parser::unary() {
 
 lox::expr::Expr Parser::primary() {
     if (Parser::match(TokenType::FALSE)) {
-        return Expr::Literal(false);
+        return lox::expr::Expr::Literal(false);
     }
     if (Parser::match(TokenType::TRUE)) {
-        return Expr::Literal(true);
+        return lox::expr::Expr::Literal(true);
     }
     if (Parser::match(TokenType::NIL)) {
-        return Expr::Literal(NULL);
+        return lox::expr::Expr::Literal(NULL);
     }
 
     if (Parser::match(TokenType::NUMBER, TokenType::STRING)) {
-        return Expr::Literal(Parser::previous().literal());
+        return lox::expr::Expr::Literal(Parser::previous().literal());
     }
 
     if (Parser::match(TokenType::LEFT_PAREN)) {
-        Expr expr = Parser::expression();
+        lox::expr::Expr expr = Parser::expression();
         Parser::consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
-        return Expr::Grouping(expr);
+        return lox::expr::Expr::Grouping(expr);
     }
 
     throw Parser::error(Parser::peek(), "Expect expression.");
 }
 
 
-Token Parser::consume(TokenType type, std::string message) {
+Token Parser::consume(const TokenType &type, const std::string &message) {
     if (Parser::check(type)) {
         return Parser::advance();
     }
@@ -161,7 +161,7 @@ Token Parser::consume(TokenType type, std::string message) {
 }
 
 
-ParseError error(Token token, std::string message) {
+ParseError error(const Token &token, const std::string &message) {
     Lox::error(token, message);
     return ParseError();
 }
@@ -175,14 +175,14 @@ void Parser::synchronize() {
             return;
         }
         switch (Parser::peek().type) {
-            case TokenType::CLASS:
-            case TokenType::FOR:
-            case TokenTyoe::FUN:
-            case TokenType::IF:
-            case TokenType::PRINT:
-            case TokenType::RETURN:
-            case TokenType::Var:
-            case TokenType::WHILE:
+            case CLASS:
+            case FUN:
+            case VAR:
+            case FOR:
+            case IF:
+            case WHILE:
+            case PRINT:
+            case RETURN:
                 return;
         }
         Parser::advance();

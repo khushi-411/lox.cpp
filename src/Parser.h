@@ -1,6 +1,8 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include <stdexcept>
+#include <string>
 #include <vector>
 
 #include "Expr.h"
@@ -9,6 +11,9 @@
 
 namespace lox {
 
+class ParseError : public std::runtime_error {};
+
+
 template <class T>
 class Parser {
 
@@ -16,7 +21,7 @@ public:
     const std::vector<Token> tokens;
     int current = 0;
 
-    Parser(std::vector<Token> tokens);
+    Parser(const std::vector<Token> &tokens);
 
     lox::expr::Expr parse();
 
@@ -24,25 +29,21 @@ public:
     lox::expr::Expr equality();
 
     template <typename T, typename... TokenType>
-    bool match(TokenType... types);
+    bool match(const TokenType... &types);
 
-    Token consume(TokenType type, std::string message);
-    bool check(TokenType type);
+    Token consume(const TokenType &type, const std::string &message);
+    bool check(const TokenType &type);
     Token advance();
     bool isAtEnd();
     Token peek();
     Token previous();
-    //ParseError error(Token token, std::string message);
+    ParseError error(const Token &token, const std::string &message);
     lox::expr::Expr comparision();
     lox::expr::Expr term();
     lox::expr::Expr factor();
     lox::expr::Expr unary();
     lox::expr::Expr primary();
     void synchronize();
-};
-
-class ParseError : public Parser {
-
 };
 
 }  // namespace lox

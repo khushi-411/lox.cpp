@@ -17,13 +17,13 @@ public:
     static bool hadError;
     static bool hadRuntimeError;
 
-    static void runFile(const std::string& path);
+    static void runFile(const std::string &path);
     static void runPrompt();
-    static void run(const std::string& source);
-    static void error(int line, std::string message);
-    static void report(int line, std::string where, std::string message);
-    static void error(Token token, std::string message);
-    void runtimeError(RuntimeError error);
+    static void run(const std::string &source);
+    static void error(const int &line, const std::string &message);
+    static void report(const int &line, const std::string &where, const std::string &message);
+    static void error(const Token &token, const std::string &message);
+    static void runtimeError(const RuntimeError &error);
 
 };
 

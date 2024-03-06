@@ -136,14 +136,14 @@ std::string stringify(std::string object) {
     }
 
     if (typeid(object).name() == double) {
-        std::string text = object.toString();
+        std::string text = object.to_string();
         if (text.endswidth(".0")) {
             text = text.substr(0, strlen(text) - 2);
         }
         return text;
     }
 
-    return object.toString();
+    return object.to_string();
 }
 
 }  // namespace lox

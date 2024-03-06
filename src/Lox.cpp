@@ -6,12 +6,13 @@
 #include <cstddef>
 #include <sstream>
 
-#include "Expr.h"
+//#include "Expr.h"
 #include "Lox.h"
-#include "Parser.h"
+//#include "Parser.h"
 #include "RuntimeError.h"
 #include "Scanner.h"
 #include "Token.h"
+
 
 namespace lox {
 
@@ -34,6 +35,7 @@ void Lox::runFile(const std::string& path) {
     }
 }
 
+
 // error: cannot declare member function 'static void lox::Lox::runPrompt()' to have static linkage [-fpermissive]
 // same errors for runFile, run
 void Lox::runPrompt() {
@@ -53,6 +55,7 @@ void Lox::runPrompt() {
     }
 }
 
+
 void Lox::run(const std::string& source) {
     // chatgpt
     Scanner scanner(source);
@@ -62,16 +65,18 @@ void Lox::run(const std::string& source) {
         std::cout << token;
     }
 
-    Parser::Parser parser;
-    parser(tokens);
-    Expr::Expr expression = parser.parse();
+//    Parser::Parser parser;
+//    parser(tokens);
+//    Expr::Expr expression = parser.parse();
 
+    // To ensure code has error and we have to return the program
     if (hadError) {
         return;
     }
 
-    std::cout << ASTPrinter().print(expression);
+//    std::cout << ASTPrinter().print(expression);
 }
+
 
 // https://stackoverflow.com/questions/24288855
 static void main(int argc, char** argv) {
@@ -85,7 +90,7 @@ static void main(int argc, char** argv) {
         } else {
             Lox::runPrompt();
         }
-    } catch (const std::exception& e) {
+    } catch (const std::exception &e) {
         // TODO: check std::nested_exception, std::throw_with_nested, std::invalid_argument
         // https://stackoverflow.com/questions/8480640/how-to-throw-a-c-exception
         std::cerr << "Exception: " << e.what() << std::endl;
@@ -94,16 +99,19 @@ static void main(int argc, char** argv) {
     return;
 }
 
-void Lox::error(int line, std::string message) {
+
+void Lox::error(const int &line, const std::string &message) {
     report(line, "", message);
 }
 
-void Lox::report(int line, std::string where, std::string message) {
+
+void Lox::report(const int &line, const std::string &where, const std::string &message) {
     std::cout << "[line " << line << "] Error" << where << ": " << message;
     hadError = true;
 }
 
-void Lox::error(Token token, std::string message) {
+
+void Lox::error(const Token &token, const std::string &message) {
     if (token.type == TokenType::_EOF) {
         report(token.line, " at end", message);
     } else {
@@ -111,10 +119,11 @@ void Lox::error(Token token, std::string message) {
     }
 }
 
-void Lox::runtimeError(RuntimeError error) {
-    // TODO
-    std::cerr << error.getMessage() << "[" << line << error.token.line << "]";
+
+void Lox::runtimeError(const RuntimeError &error) {
+    std::cerr << error.what() << "[" << error.token.line << "]";
     hadRuntimeError = true;
+    std::exit(1);
 }
 
 

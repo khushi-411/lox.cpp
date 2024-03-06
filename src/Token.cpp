@@ -1,21 +1,25 @@
 #include <iostream>
 #include <string.h>
+#include <variant>
 
-#include "Lox.h"
 #include "Token.h"
 
 namespace lox {
 
-Token::Token(TokenType type, std::string lexeme, std::string literal, int line) {
-    this->type = type;
-    this->lexeme = lexeme;
-    this->literal = literal;
-    this->line = line;
-}
+// check the difference between assignment method and initialization list way
+// We have declared all the parameters as constant, assigning it here, is contradictory,
+// therefore we'll have to use initialization list
+// TODO: why std::move
+Token::Token(
+        const TokenType &type,
+        const std::string &lexeme,
+        std::variant<std::nullptr_t, std::string, double, bool> literal,
+        const int &line)
+    : type(type), lexeme(std::move(lexeme)), literal(std::move(literal)), line(line) {}
 
-std::string Token::toString() {
-    return type + " " + lexeme + " " + literal;
+
+const std::string Token::to_string() const {
+    return type + " " + lexeme + " " + std::get<std::string>(literal);
 }
 
 }  // namespace lox
-
