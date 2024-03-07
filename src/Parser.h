@@ -11,39 +11,44 @@
 
 namespace lox {
 
-class ParseError : public std::runtime_error {};
+namespace parser {
+
+inline std::vector<Token> tokens;
+inline int current = 0;
+
+
+class ParseError : public std::runtime_error {
+ public:
+  const Token token;
+  ParseError error(const Token& token, const std::string& message);
+};
 
 
 template <class T>
 class Parser {
  public:
-  const std::vector<Token> tokens;
-  int current = 0;
-
   Parser(const std::vector<Token>& tokens);
 
-  lox::expr::Expr parse();
-
-  lox::expr::Expr expression();
-  lox::expr::Expr equality();
-
-  template <typename T, typename... TokenType>
-  bool match(const TokenType...& types);
-
+  lox::expr::Expr<T> parse();
+  lox::expr::Expr<T> expression();
+  lox::expr::Expr<T> equality();
+  bool match(const TokenType& types);
   Token consume(const TokenType& type, const std::string& message);
   bool check(const TokenType& type);
   Token advance();
   bool isAtEnd();
   Token peek();
   Token previous();
-  ParseError error(const Token& token, const std::string& message);
-  lox::expr::Expr comparision();
-  lox::expr::Expr term();
-  lox::expr::Expr factor();
-  lox::expr::Expr unary();
-  lox::expr::Expr primary();
+  lox::expr::Expr<T> comparison();
+  lox::expr::Expr<T> term();
+  lox::expr::Expr<T> factor();
+  lox::expr::Expr<T> unary();
+  lox::expr::Expr<T> primary();
   void synchronize();
 };
+
+
+}  // namespace parser
 
 }  // namespace lox
 

@@ -1,44 +1,56 @@
 #include <vector>
 
 #include "Expr.h"
+#include "Lox.h"
 #include "Parser.h"
+#include "Token.h"
 #include "TokenType.h"
 
 
 namespace lox {
 
-Parser::Parser(const std::vector<Token>& tokens) : tokens(tokens) {}
+template <class T>
+lox::parser::Parser<T>::Parser(const std::vector<Token>& tokens) {
+  // don't use constructor initialization, because tokens
+  // is not a member of parser class
+  this->tokens = tokens;
+}
 
 
-lox::expr::Expr parse() {
+template <class T>
+lox::expr::Expr<T> lox::parser::Parser<T>::parse() {
   try {
-    return Parser::expression();
-  } catch (ParseError error) {
+    return lox::parser::Parser<T>::expression();
+  } catch (lox::parser::ParseError error) {
     return NULL;
   }
 }
 
 
-lox::expr::Expr Parser::expression() {
-  return Parser::equality();
+template <class T>
+lox::expr::Expr<T> lox::parser::Parser<T>::expression() {
+  return lox::parser::Parser<T>::equality();
 }
 
 
-lox::expr::Expr Parser::equality() {
-  lox::expr::Expr expr = Parser::comparison();
-  while (Parser::match(TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL)) {
-    Token op = Parser::previous();
-    lox::expr::Expr right = Parser::comparison();
-    expr = lox::expr::Expr::Binary(expr, op, right);
+template <class T>
+lox::expr::Expr<T> lox::parser::Parser<T>::equality() {
+  lox::expr::Expr<T> expr = lox::parser::Parser<T>::comparison();
+  while (lox::parser::Parser<T>::match(
+      TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL)) {
+    Token op = lox::parser::Parser<T>::previous();
+    lox::expr::Expr<T> right = lox::parser::Parser<T>::comparison();
+    expr = lox::expr::Expr<T>::Binary(expr, op, right);
   }
   return expr;
 }
 
 
-bool Parser::match(const TokenType...& types) {
+template <class T>
+bool lox::parser::Parser<T>::match(const TokenType& types) {
   for (TokenType type : types) {
-    if (Parser::check(type)) {
-      Parser::advance();
+    if (lox::parser::Parser<T>::check(type)) {
+      lox::parser::Parser<T>::advance();
       return true;
     }
   }
@@ -46,138 +58,158 @@ bool Parser::match(const TokenType...& types) {
 }
 
 
-bool Parser::check(TokenType type) {
-  if (Parser::isAtEnd()) {
+template <class T>
+bool lox::parser::Parser<T>::check(const TokenType& type) {
+  if (lox::parser::Parser<T>::isAtEnd()) {
     return false;
   }
-  return Parser::peek().type == type;
+  return lox::parser::Parser<T>::peek().type == type;
 }
 
 
-Token Parser::advance() {
-  if (!Parser::isAtEnd()) {
+template <class T>
+Token lox::parser::Parser<T>::advance() {
+  if (!lox::parser::Parser<T>::isAtEnd()) {
     current++;
   }
-  return Parser::previous();
+  return lox::parser::Parser<T>::previous();
 }
 
 
-bool Parser::isAtEnd() {
-  return Parser::peek().type == TokenType::_EOF;
+template <class T>
+bool lox::parser::Parser<T>::isAtEnd() {
+  return lox::parser::Parser<T>::peek().type == TokenType::_EOF;
 }
 
 
-Token Parser::peek() {
-  return tokens.get(current);
+template <class T>
+Token lox::parser::Parser<T>::peek() {
+  return tokens[current];
 }
 
 
-Token Parser::previous() {
-  return tokens.get(current - 1);
+template <class T>
+Token lox::parser::Parser<T>::previous() {
+  return tokens[current - 1];
 }
 
 
-lox::expr::Expr Parser::comparison() {
-  lox::expr::Expr expr = Parser::term();
+template <class T>
+lox::expr::Expr<T> lox::parser::Parser<T>::comparison() {
+  lox::expr::Expr<T> expr = lox::parser::Parser<T>::term();
 
-  while (Parser::match(
+  while (lox::parser::Parser<T>::match(
       TokenType::GREATER,
       TokenType::GREATER_EQUAL,
       TokenType::LESS,
       TokenType::LESS_EQUAL)) {
-    Token op = Parser::previous();
-    lox::expr::expr right = Parser::term();
-    expr = lox::expr::Binary(expr, op, right);
+    Token op = lox::parser::Parser<T>::previous();
+    lox::expr::Expr<T> right = lox::parser::Parser<T>::term();
+    expr = lox::expr::Expr<T>::Binary(expr, op, right);
   }
 
   return expr;
 }
 
 
-lox::expr::Expr Parser::term() {
-  lox::expr::Expr expr = Parser::factor();
+template <class T>
+lox::expr::Expr<T> lox::parser::Parser<T>::term() {
+  lox::expr::Expr<T> expr = lox::parser::Parser<T>::factor();
 
-  while (Parser::match(TokenType::MINUS, TokenType::PLUS)) {
-    Token op = Parser::previous();
-    Expr right = Parser::factor();
-    expr = lox::expr::Expr::Binary(expr, op, right);
+  while (lox::parser::Parser<T>::match(TokenType::MINUS, TokenType::PLUS)) {
+    Token op = lox::parser::Parser<T>::previous();
+    lox::expr::Expr<T> right = lox::parser::Parser<T>::factor();
+    expr = lox::expr::Expr<T>::Binary(expr, op, right);
   }
 
   return expr;
 }
 
 
-lox::expr::Expr Parser::factor() {
-  lox::expr::Expr expr = Parser::unary();
+template <class T>
+lox::expr::Expr<T> lox::parser::Parser<T>::factor() {
+  lox::expr::Expr<T> expr = lox::parser::Parser<T>::unary();
 
-  while (Parser::match(TokenType::SLASH, TokenType::STAR)) {
-    Token op = Parser::previous();
-    Expr right = Parser::unary();
-    expr = lox::expr::Expr::Binary(expr, op, right);
+  while (lox::parser::Parser<T>::match(TokenType::SLASH, TokenType::STAR)) {
+    Token op = lox::parser::Parser<T>::previous();
+    lox::expr::Expr<T> right = lox::parser::Parser<T>::unary();
+    expr = lox::expr::Expr<T>::Binary(expr, op, right);
   }
 
   return expr;
 }
 
 
-lox::expr::Expr Parser::unary() {
-  if (Parser::match(TokenType::BANG, TokenType::MINUS)) {
-    Token op = Parser::previous();
-    Expr right = Parser::unary();
-    return lox::expr::Expr::Unary(op, right);
+template <class T>
+lox::expr::Expr<T> lox::parser::Parser<T>::unary() {
+  if (lox::parser::Parser<T>::match(TokenType::BANG, TokenType::MINUS)) {
+    Token op = lox::parser::Parser<T>::previous();
+    lox::expr::Expr<T> right = lox::parser::Parser<T>::unary();
+    return lox::expr::Expr<T>::Unary(op, right);
   }
 
-  return Parser::primary();
+  return lox::parser::Parser<T>::primary();
 }
 
 
-lox::expr::Expr Parser::primary() {
-  if (Parser::match(TokenType::FALSE)) {
-    return lox::expr::Expr::Literal(false);
-  }
-  if (Parser::match(TokenType::TRUE)) {
-    return lox::expr::Expr::Literal(true);
-  }
-  if (Parser::match(TokenType::NIL)) {
-    return lox::expr::Expr::Literal(NULL);
+template <class T>
+lox::expr::Expr<T> lox::parser::Parser<T>::primary() {
+  if (lox::parser::Parser<T>::match(TokenType::FALSE)) {
+    return lox::expr::Expr<T>::Literal(false);
   }
 
-  if (Parser::match(TokenType::NUMBER, TokenType::STRING)) {
-    return lox::expr::Expr::Literal(Parser::previous().literal());
+  if (lox::parser::Parser<T>::match(TokenType::TRUE)) {
+    return lox::expr::Expr<T>::Literal(true);
   }
 
-  if (Parser::match(TokenType::LEFT_PAREN)) {
-    lox::expr::Expr expr = Parser::expression();
-    Parser::consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
-    return lox::expr::Expr::Grouping(expr);
+  if (lox::parser::Parser<T>::match(TokenType::NIL)) {
+    return lox::expr::Expr<T>::Literal(NULL);
   }
 
-  throw Parser::error(Parser::peek(), "Expect expression.");
+  if (lox::parser::Parser<T>::match(TokenType::NUMBER, TokenType::STRING)) {
+    return lox::expr::Expr<T>::Literal(
+        lox::parser::Parser<T>::previous().literal());
+  }
+
+  if (lox::parser::Parser<T>::match(TokenType::LEFT_PAREN)) {
+    lox::expr::Expr<T> expr = lox::parser::Parser<T>::expression();
+    lox::parser::Parser<T>::consume(
+        TokenType::RIGHT_PAREN, "Expect ')' after expression.");
+    return lox::expr::Expr<T>::Grouping(expr);
+  }
+
+  throw lox::parser::Parser<T>::error(
+      lox::parser::Parser<T>::peek(), "Expect expression.");
 }
 
 
-Token Parser::consume(const TokenType& type, const std::string& message) {
-  if (Parser::check(type)) {
-    return Parser::advance();
+template <class T>
+Token lox::parser::Parser<T>::consume(
+    const TokenType& type,
+    const std::string& message) {
+  if (lox::parser::Parser<T>::check(type)) {
+    return lox::parser::Parser<T>::advance();
   }
-  throw Parser::error(Parser::peek(), message);
+  throw lox::parser::Parser<T>::error(lox::parser::Parser<T>::peek(), message);
 }
 
 
-ParseError error(const Token& token, const std::string& message) {
-  Lox::error(token, message);
-  return ParseError();
-}
+// lox::parser::ParseError error(const Token& token, const std::string& message)
+// {
+//   Lox::error(token, message);
+//   return new lox::parser::ParseError();
+// }
 
 
-void Parser::synchronize() {
-  Parser::advance();
+template <class T>
+void lox::parser::Parser<T>::synchronize() {
+  lox::parser::Parser<T>::advance();
 
-  while (!Parser::isAtEnd()) {
-    if (Parser::previous().type == TokenType::SEMICOLON) {
+  while (!lox::parser::Parser<T>::isAtEnd()) {
+    if (lox::parser::Parser<T>::previous().type == TokenType::SEMICOLON) {
       return;
     }
-    switch (Parser::peek().type) {
+    switch (lox::parser::Parser<T>::peek().type) {
       case CLASS:
       case FUN:
       case VAR:
@@ -188,7 +220,7 @@ void Parser::synchronize() {
       case RETURN:
         return;
     }
-    Parser::advance();
+    lox::parser::Parser<T>::advance();
   }
 }
 
