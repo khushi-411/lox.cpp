@@ -10,7 +10,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 
 set(LOXCPP_SRCS)
 list(APPEND LOXCPP_SRCS
-    #${LOXCPP_SRCS_DIR}/ASTPrinter.cpp
+    ${LOXCPP_SRCS_DIR}/ASTPrinter.cpp
     #${LOXCPP_SRCS_DIR}/Environment.cpp
     ${LOXCPP_SRCS_DIR}/Expr.cpp
     #${LOXCPP_SRCS_DIR}/GenerateAST.cpp

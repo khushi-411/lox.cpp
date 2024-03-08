@@ -1,42 +1,56 @@
 #ifndef GENERATEAST_H
 #define GENERATEAST_H
 
+#include <string>
+
+
 namespace lox {
+
 
 class GenerateAST {
  public:
-  static void main(std::string args);
-  static void defineAST(
-      std::string outputDir,
-      std::string baseName,
-      std::vector<std::string> types);
-  static void defineType(
-      /*todo*/ writer,
-      std::string baseName,
-      std::string className,
-      std::string fieldList);
-  static void defineVisitor(
-      /*todo type*/ writer,
-      std::string baseName,
-      std::vector<std::string> types);
+  void defineAST(
+      const std::string& outputDir,
+      const std::string& baseName,
+      const std::vector<std::string>& types);
+  void defineType(
+      const std::string& baseName,
+      const std::string& className,
+      const std::string& fieldList);
+  void defineVisitor(
+      const std::string& baseName,
+      const std::vector<std::string>& types);
 };
+
+
+class Beignet;
+class Cruller;
+
+
+class PastryVisitor {
+ public:
+  virtual void visitBeignet(const Beignet& beignet) = 0;
+  virtual void visitCruller(const Cruller& cruller) = 0;
+};
+
 
 class Pastry {
  public:
-  void visitBeignet(Beignet beignet);
-  void visitCruller(Cruller cruller);
-  void accept(PastryVisitor visitor);
+  virtual void accept(const PastryVisitor& visitor) = 0;
 };
+
 
 class Beignet : public Pastry {
  public:
-  void accept(PastryVisitor visitor);
+  void accept(const PastryVisitor& visitor);
 };
 
-class Cruller : class Pastry {
+
+class Cruller : public Pastry {
  public:
-  void accept(PastryVisitor visitor);
+  void accept(const PastryVisitor& visitor);
 };
+
 
 }  // namespace lox
 
