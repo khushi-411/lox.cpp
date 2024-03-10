@@ -36,19 +36,19 @@ class PastryVisitor {
 
 class Pastry {
  public:
-  virtual void accept(const PastryVisitor& visitor) = 0;
+  virtual void accept(PastryVisitor& visitor) = 0;
 };
 
 
 class Beignet : public Pastry {
  public:
-  void accept(const PastryVisitor& visitor);
+  void accept(PastryVisitor& visitor);
 };
 
 
 class Cruller : public Pastry {
  public:
-  void accept(const PastryVisitor& visitor);
+  void accept(PastryVisitor& visitor);
 };
 
 

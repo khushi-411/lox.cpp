@@ -44,8 +44,7 @@ class Scanner {
   void addToken(const TokenType& type);
   void addToken(
       const TokenType& type,
-      const std::variant<std::nullptr_t, std::string, double, bool> literal);
-  // void addToken(const TokenType &type, double literal);
+      const std::variant<std::nullptr_t, std::string, double, bool>& literal);
 };
 
 }  // namespace lox

@@ -1,6 +1,6 @@
+#include <string.h>
 #include <cstddef>
 #include <iostream>
-#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -10,10 +10,16 @@
 
 namespace lox {
 
+// TODO: use auto instead of bool datatype?
+// TODO: maybe use static inline function during declaration?
+// TODO: use std::unique_ptr, std::shared_ptr etc
+// TODO: use constexpr?
 
 // https://stackoverflow.com/questions/19918369
 Scanner::Scanner(const std::string& source) : source(source) {}
 
+
+// reserved words
 
 Scanner::Scanner()
     : keywords{
@@ -35,6 +41,8 @@ Scanner::Scanner()
           {"while", WHILE}} {}
 
 
+// scan single character lexemes
+
 std::vector<Token> Scanner::scanTokens() {
   while (!Scanner::isAtEnd()) {
     start = current;
@@ -44,6 +52,8 @@ std::vector<Token> Scanner::scanTokens() {
   return tokens;
 }
 
+
+// scan two or more number of characters
 
 void Scanner::scanToken() {
   char c = Scanner::advance();
@@ -125,6 +135,8 @@ void Scanner::scanToken() {
 }
 
 
+// reserved words
+
 void Scanner::identifier() {
   while (Scanner::isAlphaNumeric(Scanner::peek())) {
     Scanner::advance();
@@ -139,6 +151,8 @@ void Scanner::identifier() {
   Scanner::addToken(type);
 }
 
+
+// number literals
 
 void Scanner::number() {
   while (Scanner::isDigit(peek())) {
@@ -156,6 +170,8 @@ void Scanner::number() {
       TokenType::NUMBER, std::stod(source.substr(start, current)));  // todo
 }
 
+
+// string literals
 
 void Scanner::string() {
   while (Scanner::peek() != '"' && !Scanner::isAtEnd()) {
@@ -176,6 +192,8 @@ void Scanner::string() {
 }
 
 
+// check for two-character lexeme
+
 bool Scanner::match(const char& expected) {
   if (Scanner::isAtEnd()) {
     return false;
@@ -189,6 +207,8 @@ bool Scanner::match(const char& expected) {
 }
 
 
+// longer lexeme
+
 char Scanner::peek() {
   if (Scanner::isAtEnd()) {
     return '\0';
@@ -196,6 +216,8 @@ char Scanner::peek() {
   return source.at(current);
 }
 
+
+// used in number literals, because we don't want "." to consume
 
 char Scanner::peekNext() {
   if (current + 1 >= source.length()) {
@@ -225,10 +247,14 @@ bool Scanner::isAtEnd() {
 }
 
 
+// to consume the input character
+
 char Scanner::advance() {
   return source.at(current++);
 }
 
+
+// to produce the output
 
 void Scanner::addToken(const TokenType& type) {
   Scanner::addToken(type, nullptr);
@@ -237,7 +263,7 @@ void Scanner::addToken(const TokenType& type) {
 
 void Scanner::addToken(
     const TokenType& type,
-    std::variant<std::nullptr_t, std::string, double, bool> literal) {
+    const std::variant<std::nullptr_t, std::string, double, bool>& literal) {
   std::string text = source.substr(start, current);
   tokens.push_back(Token(type, text, literal, line));
 }

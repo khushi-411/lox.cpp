@@ -9,6 +9,8 @@
 #include "Token.h"
 
 
+// convert tree to the string
+
 namespace lox {
 
 
@@ -23,6 +25,8 @@ std::string ASTPrinter<T>::print(const lox::stmt::Stmt<T>& _stmt) {
   return _stmt.accept(*this);
 }
 
+
+// all exprs....
 
 template <class T>
 std::string ASTPrinter<T>::visitBinaryExpr(
@@ -54,6 +58,8 @@ std::string ASTPrinter<T>::visitUnaryExpr(
   return ASTPrinter<T>::parenthesize(_expr.op.lexeme, _expr.right);
 }
 
+
+// all Stmt....
 
 template <class T>
 std::string ASTPrinter<T>::visitBlockStmt(
