@@ -9,6 +9,7 @@
 #include "Token.h"
 #include "TokenType.h"
 
+
 namespace lox {
 
 namespace parser {
@@ -19,7 +20,10 @@ inline int current = 0;
 
 class ParseError : public std::runtime_error {
  public:
-  const Token token;
+  ParseError(const Token& token, const std::string& message)
+      : std::runtime_error(message), token(token) {}
+
+  const Token& token;
   ParseError error(const Token& token, const std::string& message);
 };
 

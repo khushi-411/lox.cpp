@@ -3,15 +3,21 @@
 
 #include "Interpreter.h"
 
+
+using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+
+
 namespace Lox {
 
+template <class T>
 class LoxCallable {
  public:
   int arity();
-  std::string call(
-      Interpreter::Interpreter interpreter,
-      std::vector<std::string> arguments);
+  Object call(
+      Interpreter<T>::Interpreter interpreter,
+      std::vector<Object> arguments);
 };
+
 
 }  // namespace Lox
 

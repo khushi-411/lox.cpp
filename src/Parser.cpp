@@ -9,6 +9,8 @@
 
 namespace lox {
 
+// input: sequence of tokens
+
 template <class T>
 lox::parser::Parser<T>::Parser(const std::vector<Token>& tokens) {
   // don't use constructor initialization, because tokens
@@ -22,10 +24,13 @@ lox::expr::Expr<T> lox::parser::Parser<T>::parse() {
   try {
     return lox::parser::Parser<T>::expression();
   } catch (lox::parser::ParseError error) {
+    // returns NULL because we want to take this to the interpreter
     return NULL;
   }
 }
 
+
+// below are the rules, converting themselves to the tree structure
 
 template <class T>
 lox::expr::Expr<T> lox::parser::Parser<T>::expression() {
@@ -183,6 +188,8 @@ lox::expr::Expr<T> lox::parser::Parser<T>::primary() {
 }
 
 
+// entering panic mode
+
 template <class T>
 Token lox::parser::Parser<T>::consume(
     const TokenType& type,
@@ -194,12 +201,13 @@ Token lox::parser::Parser<T>::consume(
 }
 
 
-// lox::parser::ParseError error(const Token& token, const std::string& message)
-// {
-//   Lox::error(token, message);
-//   return new lox::parser::ParseError();
-// }
+lox::parser::ParseError error(const Token& token, const std::string& message) {
+  Lox::error(token, message);
+  return lox::parser::ParseError(token, message);
+}
 
+
+// synchronizing the rcursive decent parser
 
 template <class T>
 void lox::parser::Parser<T>::synchronize() {

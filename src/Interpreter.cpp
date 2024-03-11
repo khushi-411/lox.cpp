@@ -1,151 +1,198 @@
-#include "Interpreter.h"
+#include <iostream>
+#include <string>
+#include <type_traits>
+
 #include "Expr.h"
+#include "Interpreter.h"
+#include "Lox.h"
+#include "RuntimeError.h"
+#include "Stmt.h"
+#include "Token.h"
 #include "TokenType.h"
 
 
+using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+
 namespace lox {
 
-std::string Interpreter::visitLiteralExpr(Expr::Literal expr) {
-  return expr::value;
+
+template <class T>
+Object Interpreter<T>::visitLiteralExpr(
+    const lox::expr::Expr<T>::Literal& _expr) {
+  return _expr.value;
 }
 
 
-std::string Interpreter::visitGroupingExpr(Expr::Grouping expr) {
-  return Interpreter::evaluate(Expr::expression);
+template <class T>
+Object Interpreter<T>::visitGroupingExpr(
+    const lox::expr::Expr<T>::Grouping& _expr) {
+  return Interpreter<T>::evaluate(_expr.expression);
 }
 
 
-std::string Interpreter::evaluate(Expr expr) {
-  return Expr::expr.accept(this);
+template <class T>
+Object Interpreter<T>::evaluate(const lox::expr::Expr<T>& _expr) {
+  return _expr.accept(*this);
 }
 
 
-std::string Interpreter::visitUnaryExpr(Expr::Unary expr) {
-  std::string right = Interpreter::evaluate(expr.right);
+template <class T>
+Object Interpreter<T>::visitUnaryExpr(const lox::expr::Expr<T>::Unary& _expr) {
+  std::string right = Interpreter<T>::evaluate(_expr.right);
 
-  switch (expr.op.type) {
+  switch (_expr.op.type) {
     case TokenType::BANG:
-      checkNumberOperands(expr.op, right);
-      return !Interpreter::isTruthy(right);
+      Interpreter<T>::checkNumberOperands(_expr.op, right);
+      return !Interpreter<T>::isTruthy(right);
+
     case TokenType::MINUS:
-      checkNumberOperands(expr.op, right);
+      Interpreter<T>::checkNumberOperands(_expr.op, right);
       return -(double)right;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 
-void checkNumberOperand(Token op, std::string operand) {
-  if (typeid(operand).name() == double) {
+template <class T>
+void Interpreter<T>::checkNumberOperand(
+    const Token& op,
+    const std::string& operand) {
+  if (std::is_same<decltype(operand), double>::value) {
     return;
   }
+
   throw RuntimeError(op, "Operand must be a number.");
 }
 
 
-bool Interpreter::isTruthy(std::string object) {
-  if (object == NULL) {
+template <class T>
+bool Interpreter<T>::isTruthy(const std::string& object) {
+  if (object.empty()) {
     return false;
   }
-  if (typeid(object).name() == bool) {
+
+  if (std::is_same<decltype(object), bool>::value) {
     return bool(object);
   }
+
   return true;
 }
 
 
-std::string Interpreter::visitBinaryExpr(Expr::Binary expr) {
-  std::string left = Interpreter::evaluate(expr.left);
-  std::string right = Interpreter::evaluate(expr.right);
+template <class T>
+Object Interpreter<T>::visitBinaryExpr(
+    const lox::expr::Expr<T>::Binary& _expr) {
+  std::string left = Interpreter<T>::evaluate(_expr.left);
+  std::string right = Interpreter<T>::evaluate(_expr.right);
 
-  switch (expr.op.type) {
+  switch (_expr.op.type) {
     case TokenType::MINUS:
-      checkNumberOperands(expr.op, left, right);
+      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
       return (double)left - (double)right;
+
     case TokenType::PLUS:
-      checkNumberOperands(expr.op, left, right);
-      if (typeid(left).name() == double&& typeid(right).name() == double) {
+      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
+      if ((std::is_same<decltype(left), double>::value) &&
+          (std::is_same<decltype(right), double>::value)) {
         return (double)left + (double)right;
       }
-      if (typeid(left).name() == std::string &&
-          typeid(right).name() == std::string) {
+      if ((std::is_same<decltype(left), std::string>::value) &&
+          (std::is_same<decltype(right), std::string>::value)) {
         return (std::string)left + (std::string)right;
       }
       break;
+
     case TokenType::GREATER:
-      checkNumberOperands(expr.op, left, right);
+      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
+
       return (double)left > (double)right;
+
     case TokenType::GREATER_EQUAL:
-      checkNumberOperands(expr.op, left, right);
+      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
       return (double)left >= (double)right;
+
     case TokenType::LESS:
-      checkNumberOperands(expr.op, left, right);
+      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
       return (double)left < (double)right;
+
     case TokenType::LESS_EQUAL:
-      checkNumberOperands(expr.op, left, right);
+      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
       return (double)left <= (double)right;
+
     case TokenType::BANG_EQUAL:
-      checkNumberOperands(expr.op, left, right);
-      return !Interpreter::isEqual(left, right);
+      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
+      return !Interpreter<T>::isEqual(left, right);
+
     case TokenType::EQUAL_EQUAL:
-      checkNumberOperands(expr.op, left, right);
-      return !Interpreter::isEqual(left, right);
+      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
+      return !Interpreter<T>::isEqual(left, right);
+
     case TokenType::SLASH:
-      checkNumberOperands(expr.op, left, right);
+      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
       return (double)left / (double)right;
+
     case TokenType::STAR:
-      checkNumberOperands(expr.op, left, right);
+      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
       return (double)left * (double)right;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 
-void checkNumberOperands(Token op, std::string left, std::string right) {
-  if (typeid(left).name() == double&& typeid(right).name() == double) {
+template <class T>
+void Interpreter<T>::checkNumberOperands(
+    const Token& op,
+    const std::string& left,
+    const std::string& right) {
+  if ((std::is_same<decltype(left), double>::value) &&
+      (std::is_same<decltype(right), double>::value)) {
     return;
   }
   throw RuntimeError(op, "Operands must be numbers.");
 }
 
 
-bool Interpreter::isEqual(std::string a, std::string b) {
-  if (a == NULL && b == NULL) {
+template <class T>
+bool Interpreter<T>::isEqual(const std::string& a, const std::string& b) {
+  if (a.empty() && b.empty()) {
     return true;
   }
-  if (a == NULL) {
+  if (a.empty()) {
     return false;
   }
-  return a.equals(b);
+  return a == b;
 }
 
 
-void Interpreter::interpret(Expr expression) {
+template <class T>
+void Interpreter<T>::interpret(const lox::expr::Expr<T>& expression) {
   try {
-    std::string value = Interpreter::evaluate(expression);
-    std::cout << Interpreter::stringify(value);
-  } catch (RuntimeError::RuntimeError error) {
+    std::string value = Interpreter<T>::evaluate(expression);
+    std::cout << Interpreter<T>::stringify(value);
+  } catch (RuntimeError error) {
     Lox::runtimeError(error);
   }
 }
 
 
-std::string stringify(std::string object) {
-  if (object == NULL) {
+template <class T>
+std::string Interpreter<T>::stringify(const std::string& object) {
+  if (object.empty()) {
     return NULL;
   }
 
-  if (typeid(object).name() == double) {
-    std::string text = object.to_string();
-    if (text.endswidth(".0")) {
-      text = text.substr(0, strlen(text) - 2);
+  if (std::is_same<decltype(object), double>::value) {
+    std::string text = std::string(object);
+    if (text.ends_with(".0")) {
+      text = text.substr(0, text.length() - 2);
     }
     return text;
   }
 
-  return object.to_string();
+  return std::string(object);
 }
+
 
 }  // namespace lox
