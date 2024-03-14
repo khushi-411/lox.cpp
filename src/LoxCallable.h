@@ -1,6 +1,9 @@
 #ifndef LOXCALLABLE_H
 #define LOXCALLABLE_H
 
+#include <string>
+#include <vector>
+
 #include "Interpreter.h"
 
 

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 #include "Expr.h"
 #include "Interpreter.h"
@@ -14,6 +15,47 @@
 using Object = std::variant<std::nullptr_t, std::string, double, bool>;
 
 namespace lox {
+
+
+template <class T>
+void Interpreter<T>::visitExpressionStmt(
+    const lox::stmt::Stmt<T>::Expression& _stmt) {
+  Interpreter<T>::evaluate(_stmt.expression);
+  return;
+}
+
+
+template <class T>
+void Interpreter<T>::visitPrintStmt(const lox::stmt::Stmt<T>::Print& _stmt) {
+  Object value = evaluate(_stmt.expression);
+  std::cout << stringify(value);
+  return;
+}
+
+
+template <class T>
+void Interpreter<T>::interpret(
+    const std::vector<lox::stmt::Stmt<T>>& statements) {
+  try {
+    for (lox::stmt::Stmt<T> statement : statements) {
+      Interpreter<T>::execute(statement);
+    }
+  } catch (RuntimeError error) {
+    Lox::runtimeError(error);
+  }
+}
+
+
+template <class T>
+void Interpreter<T>::evaluate(const lox::stmt::Stmt<T>& _stmt) {
+  return _stmt.accept(*this);
+}
+
+
+template <class T>
+void Interpreter<T>::execute(const lox::stmt::Stmt<T>& _stmt) {
+  _stmt.accept(*this);
+}
 
 
 template <class T>

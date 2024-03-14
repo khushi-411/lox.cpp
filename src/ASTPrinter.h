@@ -15,10 +15,18 @@ template <class T>
 class ASTPrinter : public lox::expr::Expr<T>::Visitor<std::string>,
                    lox::stmt::Stmt<T>::Visitor<std::string> {
  public:
+  std::string visitAssignExpr(const lox::expr::Expr<T>::Assign& _expr);
   std::string visitBinaryExpr(const lox::expr::Expr<T>::Binary& _expr);
+  std::string visitCallExpr(const lox::expr::Expr<T>::Call& _expr);
+  std::string visitGetExpr(const lox::expr::Expr<T>::Get& _expr);
   std::string visitGroupingExpr(const lox::expr::Expr<T>::Grouping& _expr);
   std::string visitLiteralExpr(const lox::expr::Expr<T>::Literal& _expr);
+  std::string visitLogicalExpr(const lox::expr::Expr<T>::Logical& _expr);
+  std::string visitSetExpr(const lox::expr::Expr<T>::Set& _expr);
+  std::string visitSuperExpr(const lox::expr::Expr<T>::Super& _expr);
+  std::string visitThisExpr(const lox::expr::Expr<T>::This& _expr);
   std::string visitUnaryExpr(const lox::expr::Expr<T>::Unary& _expr);
+  std::string visitVariableExpr(const lox::expr::Expr<T>::Variable& _expr);
 
   std::string visitBlockStmt(const lox::stmt::Stmt<T>::Block& _stmt);
   // std::string visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt);

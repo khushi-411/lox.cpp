@@ -6,9 +6,9 @@
 #include <sstream>
 #include <vector>
 
-//#include "Expr.h"
+#include "Expr.h"
 #include "Lox.h"
-//#include "Parser.h"
+#include "Parser.h"
 #include "RuntimeError.h"
 #include "Scanner.h"
 #include "Token.h"

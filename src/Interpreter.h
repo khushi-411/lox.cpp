@@ -2,6 +2,7 @@
 #define INTERPRETER_H
 
 #include <string.h>
+#include <vector>
 
 #include "Expr.h"
 #include "Stmt.h"
@@ -17,16 +18,17 @@ class Interpreter : public lox::expr::Expr<T>::Visitor<Object>,
  public:
   // void visitBlockStmt(const lox::stmt::Stmt<T>::Block& _stmt);
   // void visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt);
-  // void visitExpressionStmt(const lox::stmt::Stmt::Expression<T>& _stmt);
+  void visitExpressionStmt(const lox::stmt::Stmt<T>::Expression& _stmt);
   // void visitFunctionStmt(const lox::stmt::Stmt<T>::Function& _stmt);
   // void visitIfStmt(const lox::stmt::Stmt<T>::If& _stmt);
-  // void visitPrintStmt(const lox::stmt::Stmt<T>::Print& _stmt);
+  void visitPrintStmt(const lox::stmt::Stmt<T>::Print& _stmt);
   // void visitReturnStmt(const lox::stmt::Stmt<T>::Return& _stmt);
   // void visitVarStmt(const lox::stmt::Stmt<T>::Var& _stmt);
   // void visitWhileStmt(const lox::stmt::Stmt<T>::While& _stmt);
 
-  // void interpret(const lox::stmt::Stmt<T>& statements);
-  // void execute(const lox::stmt::Stmt<T>& _stmt);
+  void interpret(const std::vector<lox::stmt::Stmt<T>>& statements);
+  void execute(const lox::stmt::Stmt<T>& _stmt);
+  void evaluate(const lox::stmt::Stmt<T>& _stmt);
   // void resolve(const lox::expr::Expr<T>& _expr, const int& depth);
   // void executeBlock(const std::vector<lox::stmt::Stmt<T>& statements,
   // Environment environment);
