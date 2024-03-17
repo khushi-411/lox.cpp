@@ -16,7 +16,7 @@ namespace lox {
 
 class Environment {
  private:
-  Environment enclosing;
+  const Environment* enclosing;
   std::unordered_map<std::string, Object> values;
 
  public:

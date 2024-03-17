@@ -1,8 +1,10 @@
+#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <variant>
 
 #include "Environment.h"
+#include "RuntimeError.h"
 #include "Token.h"
 
 
@@ -13,7 +15,8 @@ namespace lox {
 
 Environment::Environment() : enclosing(nullptr) {}
 
-Environment::Environment(const Environment& enclosing) : enclosing(enclosing) {}
+Environment::Environment(const Environment& enclosing)
+    : enclosing(&enclosing) {}
 
 
 Object Environment::get(const Token& name) {
@@ -22,11 +25,10 @@ Object Environment::get(const Token& name) {
   }
 
   if (enclosing != nullptr) {
-    return enclosing->get(name);
+    return Environment::get(name);  // TODO
   }
 
-  throw new RuntimeError::RuntimeError(
-      name, "Undefined variable '" + name.lexeme + "'.");
+  throw RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
 }
 
 
@@ -37,12 +39,11 @@ void Environment::assign(const Token& name, const Object& value) {
   }
 
   if (enclosing != nullptr) {
-    enclosing->assign(name, value);
+    Environment::assign(name, value);
     return;
   }
 
-  throw new RuntimeError::RuntimeError(
-      name, "Undefined variable '" + name.lexeme + "'.");
+  throw RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
 }
 
 
@@ -52,10 +53,10 @@ void Environment::define(const std::string& name, const Object& value) {
 
 
 Environment Environment::ancestor(const int& distance) {
-  Environment* environment = this;
+  const Environment* environment = this;
 
   for (int i = 0; i < distance; i++) {
-    environment = environment->enclosing;  // TODO
+    environment = (*environment).enclosing;  // TODO
   }
 
   return *environment;
@@ -63,7 +64,7 @@ Environment Environment::ancestor(const int& distance) {
 
 
 Object Environment::getAt(const int& distance, const std::string& name) {
-  return Environment::ancestor(distance).values.get(name);
+  return Environment::ancestor(distance).values.at(name);
 }
 
 
@@ -75,13 +76,38 @@ void Environment::assignAt(
 }
 
 
-const std::string Environment::to_string() const {
-  std::string result = values.to_string();
-  if (enclosing != nullptr) {
-    result += " -> " + enclosing->to_string();
+std::string object_to_string(const Object& values) {
+  if (std::holds_alternative<std::nullptr_t>(values)) {
+    return "nullptr";
+
+  } else if (std::holds_alternative<std::string>(values)) {
+    return std::get<std::string>(values);
+
+  } else if (std::holds_alternative<double>(values)) {
+    return std::to_string(std::get<double>(values));
+
+  } else if (std::holds_alternative<bool>(values)) {
+    return std::get<bool>(values) ? "true" : "false";
   }
 
-  return result;
+  return "Encountered unknown data type.";
+}
+
+
+const std::string Environment::to_string() const {
+  std::ostringstream result;
+
+  result << "{ ";
+  for (const auto& pair : values) {
+    result << pair.first << ": " << object_to_string(pair.second) << ", ";
+  }
+  result << " }";
+
+  if (enclosing != nullptr) {
+    result << " -> " + enclosing->to_string();
+  }
+
+  return result.str();
 }
 
 }  // namespace lox

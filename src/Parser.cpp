@@ -60,6 +60,8 @@ lox::stmt::Stmt<T> lox::parser::Parser<T>::statement() {
 }
 
 
+// for stmt
+
 template <class T>
 lox::stmt::Stmt<T> lox::parser::Parser<T>::forStatement() {
   lox::parser::Parser<T>::consume(
@@ -115,6 +117,8 @@ lox::stmt::Stmt<T> lox::parser::Parser<T>::forStatement() {
 }
 
 
+// if stmt
+
 template <class T>
 lox::stmt::Stmt<T> lox::parser::Parser<T>::ifStatement() {
   lox::parser::Parser<T>::consume(
@@ -134,6 +138,8 @@ lox::stmt::Stmt<T> lox::parser::Parser<T>::ifStatement() {
 }
 
 
+// print stmt
+
 template <class T>
 lox::stmt::Stmt<T> lox::parser::Parser<T>::printStatement() {
   lox::expr::Expr<T> value = lox::parser::Parser<T>::expression();
@@ -142,6 +148,8 @@ lox::stmt::Stmt<T> lox::parser::Parser<T>::printStatement() {
   return new lox::stmt::Stmt<T>::Print(value);
 }
 
+
+// return stmt
 
 template <class T>
 lox::stmt::Stmt<T> lox::parser::Parser<T>::returnStatement() {
@@ -158,6 +166,8 @@ lox::stmt::Stmt<T> lox::parser::Parser<T>::returnStatement() {
   return lox::stmt::Stmt<T>::Return(keyword, value);
 }
 
+
+// var declaration
 
 template <class T>
 lox::stmt::Stmt<T> lox::parser::Parser<T>::varDeclaration() {
@@ -176,6 +186,8 @@ lox::stmt::Stmt<T> lox::parser::Parser<T>::varDeclaration() {
 }
 
 
+// while stmt
+
 template <class T>
 lox::stmt::Stmt<T> lox::parser::Parser<T>::whileStatement() {
   lox::parser::Parser<T>::consume(
@@ -189,6 +201,8 @@ lox::stmt::Stmt<T> lox::parser::Parser<T>::whileStatement() {
   return lox::stmt::Stmt<T>::While(condition, body);
 }
 
+
+// expression stmt
 
 template <class T>
 lox::stmt::Stmt<T> lox::parser::Parser<T>::expressionStatement() {
