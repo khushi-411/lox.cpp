@@ -4,6 +4,7 @@
 #include <string.h>
 #include <vector>
 
+#include "Environment.h"
 #include "Expr.h"
 #include "Stmt.h"
 
@@ -17,7 +18,7 @@ class Interpreter : public lox::expr::Expr<T>::Visitor<Object>,
                     public lox::stmt::Stmt<T>::Visitor<void> {
  public:
   void visitBlockStmt(const lox::stmt::Stmt<T>::Block& _stmt);
-  void visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt);
+  // void visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt);
   void visitExpressionStmt(const lox::stmt::Stmt<T>::Expression& _stmt);
   void visitFunctionStmt(const lox::stmt::Stmt<T>::Function& _stmt);
   void visitIfStmt(const lox::stmt::Stmt<T>::If& _stmt);
@@ -31,8 +32,8 @@ class Interpreter : public lox::expr::Expr<T>::Visitor<Object>,
   void evaluate(const lox::stmt::Stmt<T>& _stmt);
   void resolve(const lox::expr::Expr<T>& _expr, const int& depth);
   void executeBlock(
-      const std::vector < lox::stmt::Stmt<T> & statements,
-      Environment environment);
+      const std::vector<lox::stmt::Stmt<T>>& statements,
+      const Environment& environment);
 
   Object visitAssignExpr(const lox::expr::Expr<T>::Assign& _expr);
   Object visitBinaryExpr(const lox::expr::Expr<T>::Binary& _expr);

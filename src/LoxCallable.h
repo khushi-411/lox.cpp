@@ -16,9 +16,7 @@ template <class T>
 class LoxCallable {
  public:
   int arity();
-  Object call(
-      Interpreter<T>::Interpreter interpreter,
-      std::vector<Object> arguments);
+  Object call(lox::Interpreter<T> interpreter, std::vector<Object> arguments);
 };
 
 

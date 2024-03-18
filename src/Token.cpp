@@ -4,6 +4,9 @@
 
 #include "Token.h"
 
+
+using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+
 namespace lox {
 
 // check the difference between assignment method and initialization list way
@@ -13,7 +16,7 @@ namespace lox {
 Token::Token(
     const TokenType& type,
     const std::string& lexeme,
-    std::variant<std::nullptr_t, std::string, double, bool> literal,
+    const Object& literal,
     const int& line)
     : type(type),
       lexeme(std::move(lexeme)),
@@ -21,8 +24,24 @@ Token::Token(
       line(line) {}
 
 
-const std::string Token::to_string() const {
+const std::string& Token::to_string() const {
   return type + " " + lexeme + " " + std::get<std::string>(literal);
 }
+
+
+const TokenType& Token::tokentype() const {
+  return type;
+}
+
+
+const std::string& Token::getLexeme() const {
+  return lexeme;
+}
+
+
+const int& Token::getLine() const {
+  return line;
+}
+
 
 }  // namespace lox

@@ -9,11 +9,10 @@ namespace lox {
 
 class Lox {
  private:
- public:
-  // public not private
   static bool hadError;
   static bool hadRuntimeError;
 
+ public:
   static void runFile(const std::string& path);
   static void runPrompt();
   static void run(const std::string& source);
@@ -26,8 +25,6 @@ class Lox {
   static void runtimeError(const RuntimeError& error);
 };
 
-// bool Lox::hadError = false;
-// bool Lox::hadRuntimeError = false;
 
 }  // namespace lox
 

@@ -2,10 +2,14 @@
 #define SCANNER_H
 
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 #include "Token.h"
 #include "TokenType.h"
+
+
+using Object = std::variant<std::nullptr_t, std::string, double, bool>;
 
 
 namespace lox {
@@ -42,9 +46,7 @@ class Scanner {
   bool isAtEnd();
   char advance();
   void addToken(const TokenType& type);
-  void addToken(
-      const TokenType& type,
-      const std::variant<std::nullptr_t, std::string, double, bool>& literal);
+  void addToken(const TokenType& type, const Object& literal);
 };
 
 }  // namespace lox

@@ -15,9 +15,6 @@ namespace lox {
 
 namespace parser {
 
-inline std::vector<Token> tokens;
-inline int current = 0;
-
 
 class ParseError : public std::runtime_error {
  public:
@@ -31,6 +28,10 @@ class ParseError : public std::runtime_error {
 
 template <class T>
 class Parser {
+ private:
+  std::vector<Token> tokens;
+  int current = 0;
+
  public:
   Parser(const std::vector<Token>& tokens);
 

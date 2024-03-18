@@ -20,18 +20,18 @@ namespace lox {
 template <class T>
 class LoxFunction : public LoxCallable {
  private:
-  const lox::stmt::Stmt<T>::Function& declaration;
-  const Environment::Environment& closure;
-  const bool isInitializer;
+  lox::stmt::Stmt<T>::Function declaration;
+  Environment closure;
+  bool isInitializer;
 
  public:
   LoxFunction(
       const lox::stmt::Stmt<T>::Function& declaration,
-      const Environment::Environment& closure,
+      const Environment& closure,
       bool isInitializer);
 
-  LoxFunction bind(const LoxInstance& instance);
-  const std::string to_string() const;
+  LoxFunction<T> bind(const LoxInstance<T>& instance);
+  const std::string& to_string() const;
   int arity();
   Object call(
       const Interpreter<T>& interpreter,

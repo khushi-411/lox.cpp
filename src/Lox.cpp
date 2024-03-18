@@ -6,9 +6,12 @@
 #include <sstream>
 #include <vector>
 
+//#include "ASTPrinter.h"
 #include "Expr.h"
+//#include "Interpreter.h"
 #include "Lox.h"
-#include "Parser.h"
+//#include "Parser.h"
+//#include "Resolver.h"
 #include "RuntimeError.h"
 #include "Scanner.h"
 #include "Token.h"
@@ -30,7 +33,12 @@ void Lox::runFile(const std::string& path) {
     std::cerr << "Exception: " << e.what() << std::endl;
     return;
   }
+
   if (hadError) {
+    std::exit(1);
+  }
+
+  if (hadRuntimeError) {
     std::exit(1);
   }
 }
@@ -42,13 +50,15 @@ void Lox::runPrompt() {
   std::string input;
   std::cin >> input;
   std::ifstream file(input);
+
   for (;;) {
     std::cout << "> ";
     std::string line;
     std::getline(file, line);
     // https://stackoverflow.com/questions/462165
-    if (line.empty())
+    if (line.empty()) {
       break;
+    }
     run(line);
     // reseting the flag
     hadError = false;
@@ -57,7 +67,6 @@ void Lox::runPrompt() {
 
 
 void Lox::run(const std::string& source) {
-  // chatgpt
   Scanner scanner(source);
   std::vector<Token> tokens = scanner.scanTokens();
   for (Token token : tokens) {
@@ -65,16 +74,25 @@ void Lox::run(const std::string& source) {
     std::cout << token;
   }
 
-  //    Parser::Parser parser;
-  //    parser(tokens);
-  //    Expr::Expr expression = parser.parse();
+  //  Parser::Parser parser;
+  //  parser(tokens);
+  //  Expr::Expr expression = parser.parse();
 
   // To ensure code has error and we have to return the program
   if (hadError) {
     return;
   }
 
-  //    std::cout << ASTPrinter().print(expression);
+  //  Resolver::Resolver resolver;
+  //  resolver(interpreter);
+  //  resolver.resolve(statements);
+
+  if (hadError) {
+    return;
+  }
+
+  //  std::cout << ASTPrinter().print(expression);
+  //  interpreter.interpret(statements);
 }
 
 
@@ -90,6 +108,7 @@ static void main(int argc, char** argv) {
     } else {
       Lox::runPrompt();
     }
+
   } catch (const std::exception& e) {
     // TODO: check std::nested_exception, std::throw_with_nested,
     // std::invalid_argument
@@ -97,6 +116,7 @@ static void main(int argc, char** argv) {
     std::cerr << "Exception: " << e.what() << std::endl;
     std::exit(1);
   }
+
   return;
 }
 
@@ -116,16 +136,16 @@ void Lox::report(
 
 
 void Lox::error(const Token& token, const std::string& message) {
-  if (token.type == TokenType::_EOF) {
-    report(token.line, " at end", message);
+  if (token.tokentype() == TokenType::_EOF) {
+    report(token.getLine(), " at end", message);
   } else {
-    report(token.line, " at '" + token.lexeme + "'", message);
+    report(token.getLine(), " at '" + token.getLexeme() + "'", message);
   }
 }
 
 
 void Lox::runtimeError(const RuntimeError& error) {
-  std::cerr << error.what() << "[" << error.token.line << "]";
+  std::cerr << error.what() << "[" << error.getToken().getLine() << "]";
   hadRuntimeError = true;
   std::exit(1);
 }

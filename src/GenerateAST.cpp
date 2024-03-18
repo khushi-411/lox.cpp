@@ -6,6 +6,7 @@
 
 #include "Expr.h"
 #include "GenerateAST.h"
+#include "Stmt.h"
 
 
 // pretty printer
@@ -153,8 +154,8 @@ void main(int argc, char** argv) {
 
     std::vector<std::string> stmt_types;
     stmt_types.push_back("Block       : std::vector<Stmt> statements");
-    // stmt_types.push_back("Class       : Token name, Expr::Variable
-    // superclass, std::vector<Stmt::Function> methods");
+    stmt_types.push_back(
+        "Class       : Token name, Expr::Variable superclass, std::vector<Stmt::Function> methods");
     stmt_types.push_back("Expression  : Expr expression");
     stmt_types.push_back(
         "Function    : Token name, std::vector<Token> params, std::vector<Stmt> body");

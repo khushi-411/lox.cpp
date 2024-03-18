@@ -7,24 +7,31 @@
 
 #include "TokenType.h"
 
+
+using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+
 namespace lox {
 
 class Token {
- public:
+ private:
   // https://stackoverflow.com/questions/4971286
-  // TODO: const or its alternative
-  const TokenType type;
-  const std::string lexeme;
+  TokenType type;
+  std::string lexeme;
   // https://stackoverflow.com/questions/4233123
-  const std::variant<std::nullptr_t, std::string, double, bool> literal;
-  const int line;
+  Object literal;
+  int line;
 
+ public:
   Token(
       const TokenType& type,
       const std::string& lexeme,
-      decltype(literal) literal,
+      const decltype(literal)& literal,  // TODO: decltype type deduction
       const int& line);
-  const std::string to_string() const;  // TODO
+
+  const std::string& to_string() const;
+  const TokenType& tokentype() const;
+  const std::string& getLexeme() const;
+  const int& getLine() const;
 };
 
 

@@ -1,9 +1,12 @@
 #include <string>
+#include <variant>
 #include <vector>
 
 #include "Expr.h"
 #include "Token.h"
 
+
+using Object = std::variant<std::nullptr_t, std::string, double, bool>;
 
 namespace lox {
 
@@ -82,9 +85,7 @@ T lox::expr::Grouping<T>::accept(const lox::expr::Visitor<T>& visitor) {
 // literal
 
 template <class T>
-lox::expr::Literal<T>::Literal(
-    const std::variant<std::nullptr_t, std::string, double, bool>& value)
-    : value(value) {}
+lox::expr::Literal<T>::Literal(const Object& value) : value(value) {}
 
 
 template <class T>

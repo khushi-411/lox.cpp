@@ -1,5 +1,6 @@
 #include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 #include "Interpreter.h"
@@ -23,7 +24,8 @@ LoxClass<T>::LoxClass(
     : superclass(superclass), name(name), methods(methods) {}
 
 
-LoxFunction<T>::LoxFunction findMethod(const std::string& name) {
+template <class T>
+LoxFunction<T> LoxClass<T>::findMethod(const std::string& name) {
   auto it = methods.find(name);
   if (it != methods.end()) {
     return superclass.findMethod(name);
@@ -32,13 +34,14 @@ LoxFunction<T>::LoxFunction findMethod(const std::string& name) {
 }
 
 
-const std::string to_string() const {
+template <class T>
+const std::string& LoxClass<T>::to_string() const {
   return name;
 }
 
 
 template <class T>
-Object call(
+Object LoxClass<T>::call(
     const Interpreter<T>& interpreter,
     const std::vector<Object>& arguments) {
   LoxInstance<T> instance = new LoxInstance(*this);
@@ -53,7 +56,7 @@ Object call(
 
 
 template <class T>
-int arity() {
+int LoxClass<T>::arity() {
   LoxFunction<T> initializer = LoxClass<T>::findMethod("init");
 
   if (initializer == nullptr) {
@@ -61,6 +64,12 @@ int arity() {
   }
 
   return initializer.arity();
+}
+
+
+template <class T>
+const std::string& LoxClass<T>::getName() const {
+  return name;
 }
 
 }  // namespace lox

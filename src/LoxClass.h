@@ -3,6 +3,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 #include "Interpreter.h"
@@ -19,22 +20,24 @@ namespace lox {
 template <class T>
 class LoxClass : public LoxCallable {
  private:
-  const std::string& name;
-  const LoxClass<T>& superclass;
-  const std::unordered_map<std::string, LoxFunction<T>>& methods;
+  std::string name;
+  LoxClass<T> superclass;
+  std::unordered_map<std::string, lox::LoxFunction<T>> methods;
 
  public:
   LoxClass(
       const std::string& name,
       const LoxClass<T>& superclass,
-      const std::unordered_map<std::string, LoxFunction<T>>& methods);
+      const std::unordered_map<std::string, lox::LoxFunction<T>>& methods);
 
-  LoxFunction<T> findMethod(const std::string& name);
-  const std::string to_string() const;
+  lox::LoxFunction<T> findMethod(const std::string& name);
+  const std::string& to_string() const;
   Object call(
-      const Interpreter<T>& interpreter,
+      const lox::Interpreter<T>& interpreter,
       const std::vector<Object>& arguments);
   int arity();
+
+  const std::string& getName() const;
 };
 
 

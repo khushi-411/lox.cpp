@@ -33,8 +33,9 @@ void Interpreter<T>::visitBlockStmt(const lox::stmt::Stmt<T>::Block& _stmt) {
 
 // class stmt
 
-template <class T>
-void Interpreter<T>::visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt) {}
+// template <class T>
+// void Interpreter<T>::visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt)
+// {}
 
 
 // expression stmt

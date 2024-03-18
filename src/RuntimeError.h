@@ -9,9 +9,13 @@
 namespace lox {
 
 class RuntimeError : public std::runtime_error {
+ private:
+  Token token;
+
  public:
-  const Token token;
   RuntimeError(const Token& token, const std::string& message);
+
+  const Token& getToken() const;
 };
 
 }  // namespace lox

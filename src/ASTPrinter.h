@@ -29,7 +29,7 @@ class ASTPrinter : public lox::expr::Expr<T>::Visitor<std::string>,
   std::string visitVariableExpr(const lox::expr::Expr<T>::Variable& _expr);
 
   std::string visitBlockStmt(const lox::stmt::Stmt<T>::Block& _stmt);
-  // std::string visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt);
+  std::string visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt);
   std::string visitExpressionStmt(const lox::stmt::Stmt<T>::Expression& _stmt);
   std::string visitFunctionStmt(const lox::stmt::Stmt<T>::Function& _stmt);
   std::string visitIfStmt(const lox::stmt::Stmt<T>::If& _stmt);

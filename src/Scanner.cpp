@@ -2,11 +2,15 @@
 #include <cstddef>
 #include <iostream>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 #include "Lox.h"
 #include "Scanner.h"
 #include "TokenType.h"
+
+
+using Object = std::variant<std::nullptr_t, std::string, double, bool>;
 
 namespace lox {
 
@@ -261,9 +265,7 @@ void Scanner::addToken(const TokenType& type) {
 }
 
 
-void Scanner::addToken(
-    const TokenType& type,
-    const std::variant<std::nullptr_t, std::string, double, bool>& literal) {
+void Scanner::addToken(const TokenType& type, const Object& literal) {
   std::string text = source.substr(start, current);
   tokens.push_back(Token(type, text, literal, line));
 }

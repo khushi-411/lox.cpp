@@ -2,6 +2,7 @@
 #define GENERATEAST_H
 
 #include <string>
+#include <vector>
 
 
 namespace lox {

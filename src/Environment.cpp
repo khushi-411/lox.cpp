@@ -20,21 +20,23 @@ Environment::Environment(const Environment& enclosing)
 
 
 Object Environment::get(const Token& name) {
-  if (values.find(name.lexeme) != values.end()) {
-    return values.find(name.lexeme)->second;
+  auto it = values.find(name.getLexeme());
+  if (it != values.end()) {
+    return it->second;
   }
 
   if (enclosing != nullptr) {
     return Environment::get(name);  // TODO
   }
 
-  throw RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
+  throw RuntimeError(name, "Undefined variable '" + name.getLexeme() + "'.");
 }
 
 
 void Environment::assign(const Token& name, const Object& value) {
-  if (values.find(name.lexeme) != values.end()) {
-    values[name.lexeme] = value;
+  auto it = values.find(name.getLexeme());
+  if (it != values.end()) {
+    values[name.getLexeme()] = value;
     return;
   }
 
@@ -43,7 +45,7 @@ void Environment::assign(const Token& name, const Object& value) {
     return;
   }
 
-  throw RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
+  throw RuntimeError(name, "Undefined variable '" + name.getLexeme() + "'.");
 }
 
 
@@ -72,7 +74,7 @@ void Environment::assignAt(
     const int& distance,
     const Token& name,
     const Object& value) {
-  ancestor(distance).values[name.lexeme] = value;
+  ancestor(distance).values[name.getLexeme()] = value;
 }
 
 

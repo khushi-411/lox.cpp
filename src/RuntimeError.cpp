@@ -14,4 +14,9 @@ namespace lox {
 RuntimeError::RuntimeError(const Token& token, const std::string& message)
     : super(message), token(token) {}
 
+
+const Token& RuntimeError::getToken() const {
+  return token;
+}
+
 }  // namespace lox

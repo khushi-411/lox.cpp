@@ -19,22 +19,6 @@ T lox::stmt::Block<T>::accept(const Visitor<T>& visitor) {
 }
 
 
-// class
-/*
-template <class T>
-lox::stmt::Class<T>::Class(
-    const Token& name,
-    const lox::expr::Variable<T>& superclass,
-    const std::vector<lox::stmt::Function<T>>& methods)
-    : name(name), superclass(superclass), methods(methods) {}
-
-
-template <class T>
-T lox::stmt::Class<T>::accept(const Visitor<T>& visitor) {
-  return visitor.visitorClassStmt(*this);
-}
-*/
-
 // expression
 
 template <class T>
@@ -61,6 +45,22 @@ lox::stmt::Function<T>::Function(
 template <class T>
 T lox::stmt::Function<T>::accept(const Visitor<T>& visitor) {
   return visitor.visitFunctionStmt(*this);
+}
+
+
+// class
+
+template <class T>
+lox::stmt::Class<T>::Class(
+    const Token& name,
+    const lox::expr::Variable<T>& superclass,
+    const std::vector<lox::stmt::Function<T>>& methods)
+    : name(name), superclass(superclass), methods(methods) {}
+
+
+template <class T>
+T lox::stmt::Class<T>::accept(const Visitor<T>& visitor) {
+  return visitor.visitorClassStmt(*this);
 }
 
 

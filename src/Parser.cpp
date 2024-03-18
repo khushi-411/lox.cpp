@@ -12,18 +12,15 @@ namespace lox {
 // input: sequence of tokens
 
 template <class T>
-lox::parser::Parser<T>::Parser(const std::vector<Token>& tokens) {
-  // don't use constructor initialization, because tokens
-  // is not a member of parser class
-  this->tokens = tokens;
-}
+lox::parser::Parser<T>::Parser(const std::vector<Token>& tokens)
+    : tokens(tokens) {}
 
 
 template <class T>
 std::vector<lox::stmt::Stmt<T>> lox::parser::Parser<T>::parseStmt() {
   std::vector<lox::stmt::Stmt<T>> statements;
 
-  while (!isAtEnd()) {
+  while (!lox::parser::Parser<T>::isAtEnd()) {
     statements.push_back(lox::parser::Parser<T>::statement());
   }
   return statements;
@@ -124,10 +121,11 @@ lox::stmt::Stmt<T> lox::parser::Parser<T>::ifStatement() {
   lox::parser::Parser<T>::consume(
       TokenType::LEFT_PAREN, "Expect '(' after 'if'.");
   lox::expr::Expr<T> condition = lox::parser::Parser<T>::expression();
+
   lox::parser::Parser<T>::consume(
       TokenType::RIGHT_PAREN, "Expect ')' after if condition.");
-
   lox::stmt::Stmt<T> thenBranch = lox::parser::Parser<T>::statement();
+
   lox::stmt::Stmt<T> elseBranch = nullptr;
 
   if (lox::parser::Parser<T>::match(TokenType::ELSE)) {
@@ -335,12 +333,14 @@ lox::expr::Expr<T> lox::parser::Parser<T>::expression() {
 template <class T>
 lox::expr::Expr<T> lox::parser::Parser<T>::equality() {
   lox::expr::Expr<T> expr = lox::parser::Parser<T>::comparison();
+
   while (lox::parser::Parser<T>::match(
       TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL)) {
     Token op = lox::parser::Parser<T>::previous();
     lox::expr::Expr<T> right = lox::parser::Parser<T>::comparison();
     expr = lox::expr::Expr<T>::Binary(expr, op, right);
   }
+
   return expr;
 }
 

@@ -1,9 +1,11 @@
 #include <string>
+#include <variant>
 
 #include "LoxClass.h"
 #include "LoxFunction.h"
 #include "LoxInstance.h"
 #include "RuntimeError.h"
+#include "Token.h"
 
 
 using Object = std::variant<std::nullptr_t, std::string, double, bool>;
@@ -11,32 +13,42 @@ using Object = std::variant<std::nullptr_t, std::string, double, bool>;
 
 namespace lox {
 
-LocInstance::LoxInstance(const LoxClass::LoxClass& klass) : klass(klass);
+template <class T>
+LoxInstance<T>::LoxInstance(const lox::LoxClass<T>& klass) : klass(klass) {}
 
 
-Object get(const Token& name) {
-  if (fields.find(name.lexeme) != fields.end()) {
-    return fields[name.lexeme];
+template <class T>
+Object LoxInstance<T>::get(const Token& name) {
+  if (fields.find(name.getLexeme()) != fields.end()) {
+    return fields[name.getLexeme()];
   }
 
-  LoxFunction::LoxFunction method =  // TODO
+  LoxFunction<T> method = klass.findMethod(name.getLexeme());
 
-      if (method != nullptr) {
-    return;  // TODO
-
-    throw new RuntimeError::RuntimeError(
-        name, "Undefined property '" + name.lexeme + "'.");
+  if (method != nullptr) {
+    return method.bind(*this);
   }
 
+  throw new RuntimeError::RuntimeError(
+      name, "Undefined property '" + name.getLexeme() + "'.");
+}
 
-  void set(const Token& name, const Object& value) {
-    fields[name.lexeme] = value;
-  }
+
+template <class T>
+void LoxInstance<T>::set(const Token& name, const Object& value) {
+  fields[name.getLexeme()] = value;
+}
 
 
-  const std::string LoxInstance::to_string() const {
-    return klass.name + " instance";
-  }
+template <class T>
+const std::string& LoxInstance<T>::to_string() const {
+  return klass.getName() + " instance";
+}
 
+
+template <class T>
+const lox::LoxClass<T>& LoxInstance<T>::getKlass() const {
+  return klass;
+}
 
 }  // namespace lox

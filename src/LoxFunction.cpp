@@ -20,7 +20,7 @@ namespace lox {
 template <class T>
 LoxFunction<T>::LoxFunction(
     const lox::stmt::Stmt<T>::Function& declaration,
-    const Environment::Environment& closure,
+    const Environment& closure,
     const bool& isInitializer)
     : isInitializer(isInitializer),
       closure(closure),
@@ -28,37 +28,40 @@ LoxFunction<T>::LoxFunction(
 
 
 template <class T>
-LoxFunction<T>::LoxFunction bind(const LoxInstance<T> instance) {
-  Environment::Environment environment = new Environment(closure);
+LoxFunction<T> LoxFunction<T>::bind(const LoxInstance<T>& instance) {
+  Environment environment = new Environment(closure);
   environment.define("this", instance);
   return new LoxFunction<T>::LoxFunction(
       declaration, environment, isInitializer);
 }
 
 
-const std::string to_strint() const {
-  return "<fn " + declaration.name.lexeme + ">";
+template <class T>
+const std::string& LoxFunction<T>::to_string() const {
+  return "<fn " + declaration.name.getLexeme() + ">";
 }
 
 
-int arity() {
+template <class T>
+int LoxFunction<T>::arity() {
   return declaration.params.size();
 }
 
 
 template <class T>
-Object call(
+Object LoxFunction<T>::call(
     const Interpreter<T>& interpreter,
     const std::vector<Object>& arguments) {
-  Environment::Environment = new Environment(closure);
+  Environment = new Environment(closure);
 
   for (int i = 0; i < declaration.params.size(); i++) {
-    environment.define(declaration.params[i].lexeme, arguments[i]);  // TODO
+    environment.define(
+        declaration.params[i].getLexeme(), arguments[i]);  // TODO
   }
 
   try {
     interpreter.executeBlock(declaration.body, environment);
-  } catch (Return::Return returnValue) {
+  } catch (Return& returnValue) {
     if (isInitializer) {
       return closure.getAt(0, "this");
     }
