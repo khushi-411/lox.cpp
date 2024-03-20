@@ -2,6 +2,7 @@
 #define LOXCALLABLE_H
 
 #include <string>
+#include <variant>
 #include <vector>
 
 #include "Interpreter.h"
@@ -10,7 +11,7 @@
 using Object = std::variant<std::nullptr_t, std::string, double, bool>;
 
 
-namespace Lox {
+namespace lox {
 
 template <class T>
 class LoxCallable {
@@ -22,6 +23,6 @@ class LoxCallable {
 };
 
 
-}  // namespace Lox
+}  // namespace lox
 
 #endif

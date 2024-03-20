@@ -7,9 +7,9 @@
 #include "Expr.h"
 #include "Interpreter.h"
 #include "Lox.h"
-//#include "LoxClass.h"
-//#include "LoxFunction.h"
-//#include "LoxInstance.h"
+#include "LoxClass.h"
+#include "LoxFunction.h"
+#include "LoxInstance.h"
 #include "Return.h"
 #include "RuntimeError.h"
 #include "Stmt.h"
@@ -34,9 +34,44 @@ void Interpreter<T>::visitBlockStmt(const lox::stmt::Stmt<T>::Block& _stmt) {
 
 // class stmt
 
-// template <class T>
-// void Interpreter<T>::visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt)
-// {}
+template <class T>
+void Interpreter<T>::visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt) {
+  Object superclass = nullptr;
+
+  if (_stmt.superclass != nullptr) {
+    superclass = lox::Interpreter<T>::evaluate(_stmt.superclass);
+    if (!(instanceof <LoxClass<T>>(superclass))) {
+      throw new RuntimeError(
+          _stmt.superclass.name, "Superclass must be a class.");
+    }
+  }
+
+  environment.define(_stmt.name.getLexeme(), nullptr);
+
+  if (_stmt.superclass != nullptr) {
+    environment = new Environment(environment);
+    environment.define("super", superclass);
+  }
+
+  std::unordered_map<std::string, LoxFunction<T>> methods;
+
+  for (typename lox::stmt::Stmt<T>::Function method : _stmt.methods) {
+    LoxFunction<T> function = new LoxFunction(
+        method, environment, method.name.getLexeme().equals("init"));
+    methods[method.name.getLexeme()] = function;
+  }
+
+  LoxClass<T> klass =
+      new LoxClass(_stmt.name.getLexeme(), (LoxClass<T>)superclass, methods);
+
+  if (std::holds_alternative<Object>(superclass)) {
+    environment = environment.enclosing;
+  }
+
+  environment.assign(_stmt.name, klass);
+
+  return;
+}
 
 
 // expression stmt
@@ -50,16 +85,15 @@ void Interpreter<T>::visitExpressionStmt(
 
 
 // function stmt
-/*
+
 template <class T>
 void Interpreter<T>::visitFunctionStmt(
     const lox::stmt::Stmt<T>::Function& _stmt) {
-  LoxFunction::LoxFunction function =
-      new LoxFunction::LoxFunction(_stmt, environment, false);
+  LoxFunction<T> function = new LoxFunction(_stmt, environment, false);
   environment.define(_stmt.name.getLexeme(), function);
   return;
 }
-*/
+
 
 // if stmt
 
@@ -264,7 +298,29 @@ Object Interpreter<T>::visitBinaryExpr(
 // call expr
 
 template <class T>
-Object Interpreter<T>::visitCallExpr(const lox::expr::Expr<T>::Call& _expr) {}
+Object Interpreter<T>::visitCallExpr(const lox::expr::Expr<T>::Call& _expr) {
+  Object callee = lox::Interpreter<T>::evaluate(_expr.callee);
+
+  std::vector<Object> arguments;
+  for (lox::expr::Expr<T> argument : _expr.arguments) {
+    arguments.push_back(lox::Interpreter<T>::evaluate(argument));
+  }
+
+  if (! instanceof <LoxCallable<T>>(callee)) {
+    throw new RuntimeError(_expr.paren, "Can only call functions and classes.");
+  }
+
+  LoxCallable<T> function = (LoxCallable<T>)callee;
+
+  if (arguments.size() != function.arity()) {
+    throw RuntimeError(
+        _expr.paren,
+        "Expected " + function.arity() + " arguments but got " +
+            arguments.size() + ".");
+  }
+
+  return function.call(this, arguments);
+}
 
 
 // get expr
@@ -273,8 +329,9 @@ template <class T>
 Object Interpreter<T>::visitGetExpr(const lox::expr::Expr<T>::Get& _expr) {
   Object object = lox::Interpreter<T>::evaluate(_expr.object);
 
-  // if () {
-  // }
+  if (instanceof <LoxInstance<T>>(object)) {
+    return ((LoxInstance<T>)object).get(_expr.name);
+  }
 
   throw new RuntimeError(_expr.name, "Only instances have properties.");
 }
@@ -320,27 +377,42 @@ Object Interpreter<T>::visitLogicalExpr(
 
 
 // set expr
-/*
+
 template <class T>
 Object Interpreter<T>::visitSetExpr(const lox::expr::Expr<T>::Set& _expr) {
   Object object = lox::Interpreter<T>::evaluate(_expr.object);
 
-  if (!(instanceof<LoxInstance<T>>(object))) {
-    throw new RuntimeError(
-        _expr.name, "Only instances have fields.");
+  if (!(instanceof <LoxInstance<T>>(object))) {
+    throw new RuntimeError(_expr.name, "Only instances have fields.");
   }
 
   Object value = lox::Interpreter<T>::evaluate(_expr.value);
-  ((LoxInstance<T>)object).set(_expr.name, value);  // TODO
+  ((LoxInstance<T>)object).set(_expr.name, value);
 
   return value;
 }
-*/
+
 
 // super expr
 
 template <class T>
-Object Interpreter<T>::visitSuperExpr(const lox::expr::Expr<T>::Super& _expr) {}
+Object Interpreter<T>::visitSuperExpr(const lox::expr::Expr<T>::Super& _expr) {
+  int distance = locals.get(_expr);
+
+  LoxClass<T> superclass = (LoxClass<T>)environment.getAt(distance, "super");
+
+  LoxInstance<T> object =
+      (LoxInstance<T>)environment.getAt(distance - 1, "this");
+
+  LoxFunction<T> method = superclass.findMethod(_expr.method.getLexeme);
+
+  if (method == nullptr) {
+    throw new RuntimeError(
+        _expr.method, "Undefined property '" + _expr.method.getLexeme() + "'.");
+  }
+
+  return method.bind(object);
+}
 
 
 // this expr

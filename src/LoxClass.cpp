@@ -39,7 +39,7 @@ LoxFunction<T> LoxClass<T>::findMethod(const std::string& name) {
 
 
 template <class T>
-const std::string& LoxClass<T>::to_string() const {
+std::string LoxClass<T>::to_string() {
   return name;
 }
 
@@ -72,7 +72,7 @@ int LoxClass<T>::arity() {
 
 
 template <class T>
-const std::string& LoxClass<T>::getName() const {
+const std::string& LoxClass<T>::getName() {
   return name;
 }
 

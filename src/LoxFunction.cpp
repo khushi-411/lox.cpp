@@ -19,7 +19,7 @@ namespace lox {
 
 template <class T>
 LoxFunction<T>::LoxFunction(
-    const lox::stmt::Function<T>& declaration,
+    const lox::stmt::Stmt<T>::Function& declaration,
     const Environment& closure,
     const bool& isInitializer)
     : isInitializer(isInitializer),
@@ -31,8 +31,7 @@ template <class T>
 LoxFunction<T> LoxFunction<T>::bind(const LoxInstance<T>& instance) {
   Environment environment = new Environment(closure);
   environment.define("this", instance);
-  return new LoxFunction<T>::LoxFunction(
-      declaration, environment, isInitializer);
+  return LoxFunction<T>(declaration, environment, isInitializer);
 }
 
 
@@ -52,7 +51,7 @@ template <class T>
 Object LoxFunction<T>::call(
     const Interpreter<T>& interpreter,
     const std::vector<Object>& arguments) {
-  Environment = new Environment(closure);
+  Environment environment = new Environment(closure);
 
   for (int i = 0; i < declaration.params.size(); i++) {
     environment.define(

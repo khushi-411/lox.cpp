@@ -14,7 +14,7 @@ using Object = std::variant<std::nullptr_t, std::string, double, bool>;
 namespace lox {
 
 template <class T>
-LoxInstance<T>::LoxInstance(const lox::LoxClass<T>& klass) : klass(klass) {}
+LoxInstance<T>::LoxInstance(const auto& klass) : klass(klass) {}
 
 
 template <class T>
@@ -29,7 +29,7 @@ Object LoxInstance<T>::get(const Token& name) {
     return method.bind(*this);
   }
 
-  throw new RuntimeError::RuntimeError(
+  throw new RuntimeError(
       name, "Undefined property '" + name.getLexeme() + "'.");
 }
 
@@ -47,7 +47,7 @@ const std::string& LoxInstance<T>::to_string() const {
 
 
 template <class T>
-const lox::LoxClass<T>& LoxInstance<T>::getKlass() const {
+const Object& LoxInstance<T>::getKlass() const {
   return klass;
 }
 
