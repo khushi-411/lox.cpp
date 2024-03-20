@@ -15,8 +15,10 @@ namespace Lox {
 template <class T>
 class LoxCallable {
  public:
-  int arity();
-  Object call(lox::Interpreter<T> interpreter, std::vector<Object> arguments);
+  virtual int arity() = 0;
+  virtual Object call(
+      const lox::Interpreter<T>& interpreter,
+      const std::vector<Object>& arguments) = 0;
 };
 
 

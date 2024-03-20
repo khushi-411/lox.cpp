@@ -7,7 +7,9 @@
 #include "Expr.h"
 #include "Interpreter.h"
 #include "Lox.h"
-#include "LoxFunction.h"
+//#include "LoxClass.h"
+//#include "LoxFunction.h"
+//#include "LoxInstance.h"
 #include "Return.h"
 #include "RuntimeError.h"
 #include "Stmt.h"
@@ -24,10 +26,9 @@ namespace lox {
 
 template <class T>
 void Interpreter<T>::visitBlockStmt(const lox::stmt::Stmt<T>::Block& _stmt) {
-  // TODO
   lox::Interpreter<T>::executeBlock(
-      _stmt.statements, new Environment::Environment(environment));
-  return nullptr;
+      _stmt.statements, new Environment(environment));
+  return;
 }
 
 
@@ -49,16 +50,16 @@ void Interpreter<T>::visitExpressionStmt(
 
 
 // function stmt
-
+/*
 template <class T>
 void Interpreter<T>::visitFunctionStmt(
     const lox::stmt::Stmt<T>::Function& _stmt) {
   LoxFunction::LoxFunction function =
       new LoxFunction::LoxFunction(_stmt, environment, false);
-  environment.define(_stmt.name.lexeme, function);
-  return nullptr;
+  environment.define(_stmt.name.getLexeme(), function);
+  return;
 }
-
+*/
 
 // if stmt
 
@@ -72,7 +73,7 @@ void Interpreter<T>::visitIfStmt(const lox::stmt::Stmt<T>::If& _stmt) {
     lox::Interpreter<T>::execute(_stmt.elseBranch);
   }
 
-  return nullptr;
+  return;
 }
 
 
@@ -96,7 +97,7 @@ void Interpreter<T>::visitReturnStmt(const lox::stmt::Stmt<T>::Return& _stmt) {
     value = lox::Interpreter<T>::evaluate(_stmt.value);
   }
 
-  throw new Return::Return(value);
+  throw new Return(value);
 }
 
 
@@ -111,7 +112,7 @@ void Interpreter<T>::visitVarStmt(const lox::stmt::Stmt<T>::Var& _stmt) {
   }
 
   environment.define(_stmt.name.lexeme, value);
-  return nullptr;
+  return;
 }
 
 
@@ -124,7 +125,7 @@ void Interpreter<T>::visitWhileStmt(const lox::stmt::Stmt<T>::While& _stmt) {
     lox::Interpreter<T>::execute(_stmt.body);
   }
 
-  return nullptr;
+  return;
 }
 
 
@@ -161,19 +162,20 @@ void Interpreter<T>::execute(const lox::stmt::Stmt<T>& _stmt) {
 
 // execute block
 
+template <class T>
 void executeBlock(
-    const std::vector < lox::stmt::Stmt<T> & statements,
-    const Environment::Environment& environment) {
-  Environment::Environment previous = this->environment;
+    const std::vector<lox::stmt::Stmt<T>>& statements,
+    const Environment& environment) {
+  Environment previous = environment;
 
   try {
-    this->environment = environment;
+    environment = environment;
 
     for (lox::stmt::Stmt<T> statement : statements) {
       lox::Interpreter<T>::execute(statement);
     }
-  } catch {
-    this->environment = previous;
+  } catch (...) {
+    environment = previous;
   }
 }
 
@@ -186,7 +188,7 @@ Object Interpreter<T>::visitAssignExpr(
   Object value = lox::Interpreter<T>::evaluate(_expr.value);
   int distance = locals[_expr];
 
-  if (distance != nullptr) {
+  if (distance != NULL) {
     environment.assignAt(distance, _expr.name, value);
   } else {
     globals.assign(_expr.name, value);
@@ -271,11 +273,10 @@ template <class T>
 Object Interpreter<T>::visitGetExpr(const lox::expr::Expr<T>::Get& _expr) {
   Object object = lox::Interpreter<T>::evaluate(_expr.object);
 
-  if () {
-  }
+  // if () {
+  // }
 
-  throw new RuntimeError::RuntimeError(
-      _expr.name, "Only instances have properties.");
+  throw new RuntimeError(_expr.name, "Only instances have properties.");
 }
 
 
@@ -319,22 +320,22 @@ Object Interpreter<T>::visitLogicalExpr(
 
 
 // set expr
-
+/*
 template <class T>
 Object Interpreter<T>::visitSetExpr(const lox::expr::Expr<T>::Set& _expr) {
   Object object = lox::Interpreter<T>::evaluate(_expr.object);
 
-  if (!()) {
-    throw new RuntimeError::RuntimeError(
+  if (!(instanceof<LoxInstance<T>>(object))) {
+    throw new RuntimeError(
         _expr.name, "Only instances have fields.");
   }
 
   Object value = lox::Interpreter<T>::evaluate(_expr.value);
-  ((LoxInstance)object).set(_expr.name, value);  // TODO
+  ((LoxInstance<T>)object).set(_expr.name, value);  // TODO
 
   return value;
 }
-
+*/
 
 // super expr
 
@@ -375,19 +376,22 @@ Object Interpreter<T>::visitUnaryExpr(const lox::expr::Expr<T>::Unary& _expr) {
 template <class T>
 Object Interpreter<T>::visitVariableExpr(
     const lox::expr::Expr<T>::Variable& _expr) {
-  return lookUpVariable(_expr.name, _expr);
+  return Interpreter<T>::lookUpVariable(_expr.name, _expr);
 }
 
 
 // resolving and binding look-up-variable
 
-Object lookUpVariable(const Token& name, lox::expr::Expr<T> _expr) {
-  int distance = locals[_expr];  // TODO
+template <class T>
+Object Interpreter<T>::lookUpVariable(
+    const Token& name,
+    const lox::expr::Expr<T>& _expr) {
+  int distance = locals.find(_expr);
 
-  if (distance != nullptr) {
-    return environment.getAt(distance, name.lexeme);
+  if (distance != NULL) {
+    return environment.getAt(distance, name.getLexeme());
   } else {
-    return globals[name];
+    return globals.get(name);
   }
 }
 
@@ -486,7 +490,7 @@ void Interpreter<T>::interpret(const lox::expr::Expr<T>& expression) {
 template <class T>
 std::string Interpreter<T>::stringify(const std::string& object) {
   if (object.empty()) {
-    return NULL;
+    return nullptr;
   }
 
   if (std::is_same<decltype(object), double>::value) {

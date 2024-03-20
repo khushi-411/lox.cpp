@@ -19,7 +19,7 @@ namespace lox {
 
 template <class T>
 LoxFunction<T>::LoxFunction(
-    const lox::stmt::Stmt<T>::Function& declaration,
+    const lox::stmt::Function<T>& declaration,
     const Environment& closure,
     const bool& isInitializer)
     : isInitializer(isInitializer),

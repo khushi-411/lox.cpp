@@ -2,6 +2,7 @@
 #define INTERPRETER_H
 
 #include <string.h>
+#include <unordered_map>
 #include <vector>
 
 #include "Environment.h"
@@ -16,9 +17,14 @@ namespace lox {
 template <class T>
 class Interpreter : public lox::expr::Expr<T>::Visitor<Object>,
                     public lox::stmt::Stmt<T>::Visitor<void> {
+ private:
+  Environment globals = new Environment();
+  Environment environment = globals;
+  std::unordered_map<lox::expr::Expr<T>, int> locals;
+
  public:
   void visitBlockStmt(const lox::stmt::Stmt<T>::Block& _stmt);
-  // void visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt);
+  void visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt);
   void visitExpressionStmt(const lox::stmt::Stmt<T>::Expression& _stmt);
   void visitFunctionStmt(const lox::stmt::Stmt<T>::Function& _stmt);
   void visitIfStmt(const lox::stmt::Stmt<T>::If& _stmt);
@@ -34,6 +40,7 @@ class Interpreter : public lox::expr::Expr<T>::Visitor<Object>,
   void executeBlock(
       const std::vector<lox::stmt::Stmt<T>>& statements,
       const Environment& environment);
+  Object lookUpVariable(const Token& name, const lox::expr::Expr<T>& _expr);
 
   Object visitAssignExpr(const lox::expr::Expr<T>::Assign& _expr);
   Object visitBinaryExpr(const lox::expr::Expr<T>::Binary& _expr);

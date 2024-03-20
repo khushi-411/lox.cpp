@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "Interpreter.h"
-#include "LoxCallable.h"
 #include "LoxClass.h"
 #include "LoxFunction.h"
 #include "LoxInstance.h"
@@ -19,7 +18,7 @@ namespace lox {
 template <class T>
 LoxClass<T>::LoxClass(
     const std::string& name,
-    const LoxClass<T>& superclass,
+    LoxClass<T>* superclass,
     const std::unordered_map<std::string, LoxFunction<T>>& methods)
     : superclass(superclass), name(name), methods(methods) {}
 
@@ -27,7 +26,12 @@ LoxClass<T>::LoxClass(
 template <class T>
 LoxFunction<T> LoxClass<T>::findMethod(const std::string& name) {
   auto it = methods.find(name);
+
   if (it != methods.end()) {
+    return methods[name];
+  }
+
+  if (superclass != nullptr) {
     return superclass.findMethod(name);
   }
   return nullptr;
@@ -44,7 +48,7 @@ template <class T>
 Object LoxClass<T>::call(
     const Interpreter<T>& interpreter,
     const std::vector<Object>& arguments) {
-  LoxInstance<T> instance = new LoxInstance(*this);
+  LoxInstance<T>* instance = new LoxInstance<T>(*this);
   LoxFunction<T> initializer = LoxClass<T>::findMethod("init");
 
   if (initializer != nullptr) {

@@ -18,15 +18,15 @@ using Object = std::variant<std::nullptr_t, std::string, double, bool>;
 namespace lox {
 
 template <class T>
-class LoxFunction : public LoxCallable {
+class LoxFunction : public LoxCallable<T> {
  private:
-  lox::stmt::Stmt<T>::Function declaration;
+  lox::stmt::Function<T> declaration;
   Environment closure;
   bool isInitializer;
 
  public:
   LoxFunction(
-      const lox::stmt::Stmt<T>::Function& declaration,
+      const lox::stmt::Function<T>& declaration,
       const Environment& closure,
       bool isInitializer);
 

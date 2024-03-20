@@ -18,16 +18,16 @@ namespace lox {
 
 
 template <class T>
-class LoxClass : public LoxCallable {
+class LoxClass : public lox::LoxCallable<T> {
  private:
   std::string name;
-  LoxClass<T> superclass;
+  LoxClass<T>* superclass;
   std::unordered_map<std::string, lox::LoxFunction<T>> methods;
 
  public:
   LoxClass(
       const std::string& name,
-      const LoxClass<T>& superclass,
+      LoxClass<T>* superclass,
       const std::unordered_map<std::string, lox::LoxFunction<T>>& methods);
 
   lox::LoxFunction<T> findMethod(const std::string& name);

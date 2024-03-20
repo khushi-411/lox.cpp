@@ -1,22 +1,26 @@
+#include <deque>
+#include <stack>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 #include "Expr.h"
 #include "Interpreter.h"
+#include "Lox.h"
 #include "Resolver.h"
 #include "Stmt.h"
 
 
 namespace lox {
 
-Resolver::Resolver(const lox::Interpreter<T>::&interpreter)
+template <class T>
+Resolver<T>::Resolver(const lox::Interpreter<T>& interpreter)
     : interpreter(interpreter) {}
 
 
 template <class T>
 void lox::Resolver<T>::resolve(
-    const std::vector < lox::stmt::Stmt<T> & statements) {
+    const std::vector<lox::stmt::Stmt<T>>& statements) {
   for (lox::stmt::Stmt<T> statement : statements) {
     lox::Resolver<T>::resolve(statement);
   }
@@ -30,7 +34,7 @@ void lox::Resolver<T>::visitBlockStmt(const lox::stmt::Stmt<T>::Block& _stmt) {
   lox::Resolver<T>::beginScope();
   lox::Resolver<T>::resolve(_stmt.statements);
   lox::Resolver<T>::endScope();
-  return nullptr;
+  return;
 }
 
 
@@ -39,13 +43,13 @@ void lox::Resolver<T>::visitBlockStmt(const lox::stmt::Stmt<T>::Block& _stmt) {
 template <class T>
 void lox::Resolver<T>::visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt) {
   ClassType enclosingClass = currentClass;
-  currentClass = ClassType::CLASS;
+  currentClass = ClassType::_CLASS;
 
   lox::Resolver<T>::declare(_stmt.name);
   lox::Resolver<T>::define(_stmt.name);
 
   if (_stmt.superclass != nullptr &&
-      (_stmt.name.lexeme == _stmt.superclass.name.lexeme)) {
+      (_stmt.name.getLexeme() == _stmt.superclass.name.getLexeme())) {
     Lox::error(_stmt.superclass.name, "A class can't inherit from itself.");
   }
 
@@ -56,16 +60,16 @@ void lox::Resolver<T>::visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt) {
 
   if (_stmt.superclass != nullptr) {
     lox::Resolver<T>::beginScope();
-    scopes.peek()["super"] = true;
+    scopes.top()["super"] = true;
   }
 
   lox::Resolver<T>::beginScope();
-  scopes.peek()["this"] = true;
+  scopes.top()["this"] = true;
 
-  for (lox::stmt::Stmt<T>::Function method : _stmt.methods) {
+  for (typename lox::stmt::Stmt<T>::Function method : _stmt.methods) {
     FunctionType declaration = FunctionType::METHOD;
 
-    if (method.name.lexeme == "init") {
+    if (method.name.getLexeme() == "init") {
       declaration = FunctionType::INITIALIZER;
     }
     lox::Resolver<T>::resolveFunction(method, declaration);
@@ -78,7 +82,7 @@ void lox::Resolver<T>::visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt) {
   }
 
   currentClass = enclosingClass;
-  return nullptr;
+  return;
 }
 
 
@@ -88,7 +92,7 @@ template <class T>
 void lox::Resolver<T>::visitExpressionStmt(
     const lox::stmt::Stmt<T>::Expression& _stmt) {
   lox::Resolver<T>::resolve(_stmt.expression);
-  return nullptr;
+  return;
 }
 
 
@@ -101,7 +105,7 @@ void lox::Resolver<T>::visitFunctionStmt(
   lox::Resolver<T>::define(_stmt.name);
 
   lox::Resolver<T>::resolveFunction(_stmt, FunctionType::FUNCTION);
-  return nullptr;
+  return;
 }
 
 
@@ -116,7 +120,7 @@ void lox::Resolver<T>::visitIfStmt(const lox::stmt::Stmt<T>::If& _stmt) {
     lox::Resolver<T>::resolve(_stmt.elseBranch);
   }
 
-  return nullptr;
+  return;
 }
 
 
@@ -125,7 +129,7 @@ void lox::Resolver<T>::visitIfStmt(const lox::stmt::Stmt<T>::If& _stmt) {
 template <class T>
 void lox::Resolver<T>::visitPrintStmt(const lox::stmt::Stmt<T>::Print& _stmt) {
   lox::Resolver<T>::resolve(_stmt.expression);
-  return nullptr;
+  return;
 }
 
 
@@ -145,7 +149,7 @@ void lox::Resolver<T>::visitReturnStmt(
     lox::Resolver<T>::resolve(_stmt.value);
   }
 
-  return nullptr;
+  return;
 }
 
 
@@ -160,7 +164,7 @@ void lox::Resolver<T>::visitVarStmt(const lox::stmt::Stmt<T>::Var& _stmt) {
   }
 
   lox::Resolver<T>::define(_stmt.name);
-  return nullptr;
+  return;
 }
 
 
@@ -170,7 +174,7 @@ template <class T>
 void lox::Resolver<T>::visitWhileStmt(const lox::stmt::Stmt<T>::While& _stmt) {
   lox::Resolver<T>::resolve(_stmt.condition);
   lox::Resolver<T>::resolver(_stmt.body);
-  return nullptr;
+  return;
 }
 
 
@@ -181,7 +185,7 @@ void lox::Resolver<T>::visitAssignExpr(
     const lox::expr::Expr<T>::Assign& _expr) {
   lox::Resolver<T>::resolve(_expr.value);
   lox::Resolver<T>::resolveLocal(_expr, _expr.name);
-  return nullptr;
+  return;
 }
 
 
@@ -192,7 +196,7 @@ void lox::Resolver<T>::visitBinaryExpr(
     const lox::expr::Expr<T>::Binary& _expr) {
   lox::Resolver<T>::resolve(_expr.left);
   lox::Resolver<T>::resolve(_expr.right);
-  return nullptr;
+  return;
 }
 
 
@@ -206,7 +210,7 @@ void lox::Resolver<T>::visitCallExpr(const lox::expr::Expr<T>::Call& _expr) {
     lox::Resolver<T>::resolve(argument);
   }
 
-  return nullptr;
+  return;
 }
 
 
@@ -215,7 +219,7 @@ void lox::Resolver<T>::visitCallExpr(const lox::expr::Expr<T>::Call& _expr) {
 template <class T>
 void lox::Resolver<T>::visitGetExpr(const lox::expr::Expr<T>::Get& _expr) {
   lox::Resolver<T>::resolve(_expr.object);
-  return nullptr;
+  return;
 }
 
 
@@ -225,7 +229,7 @@ template <class T>
 void lox::Resolver<T>::visitGroupingExpr(
     const lox::expr::Expr<T>::Grouping& _expr) {
   lox::Resolver<T>::resolve(_expr.expression);
-  return nullptr;
+  return;
 }
 
 
@@ -234,7 +238,7 @@ void lox::Resolver<T>::visitGroupingExpr(
 template <class T>
 void lox::Resolver<T>::visitLiteralExpr(
     const lox::expr::Expr<T>::Literal& _expr) {
-  return nullptr;
+  return;
 }
 
 
@@ -245,7 +249,7 @@ void lox::Resolver<T>::visitLogicalExpr(
     const lox::expr::Expr<T>::Logical& _expr) {
   lox::Resolver<T>::resolve(_expr.left);
   lox::Resolver<T>::resolve(_expr.right);
-  return nullptr;
+  return;
 }
 
 
@@ -255,7 +259,7 @@ template <class T>
 void lox::Resolver<T>::visitSetExpr(const lox::expr::Expr<T>::Set& _expr) {
   lox::Resolver<T>::resolve(_expr.value);
   lox::Resolver<T>::resolve(_expr.object);
-  return nullptr;
+  return;
 }
 
 
@@ -263,7 +267,7 @@ void lox::Resolver<T>::visitSetExpr(const lox::expr::Expr<T>::Set& _expr) {
 
 template <class T>
 void lox::Resolver<T>::visitSuperExpr(const lox::expr::Expr<T>::Super& _expr) {
-  if (currentClass == ClassType::NONE) {
+  if (currentClass == ClassType::_NONE) {
     Lox::error(_expr.keyword, "Can't use 'super' outside of a class.");
 
   } else if (currentClass != ClassType::SUBCLASS) {
@@ -272,7 +276,7 @@ void lox::Resolver<T>::visitSuperExpr(const lox::expr::Expr<T>::Super& _expr) {
   }
 
   lox::Resolver<T>::resolveLocal(_expr, _expr.keyword);
-  return nullptr;
+  return;
 }
 
 
@@ -280,13 +284,13 @@ void lox::Resolver<T>::visitSuperExpr(const lox::expr::Expr<T>::Super& _expr) {
 
 template <class T>
 void lox::Resolver<T>::visitThisExpr(const lox::expr::Expr<T>::This& _expr) {
-  if (currentClass == ClassType::NONE) {
+  if (currentClass == ClassType::_NONE) {
     Lox::error(_expr.keyword, "Can't use 'this' outside of a class.");
-    return nullptr;
+    return;
   }
 
   lox::Resolver<T>::resolverLocal(_expr, _expr.keyword);
-  return nullptr;
+  return;
 }
 
 
@@ -295,7 +299,7 @@ void lox::Resolver<T>::visitThisExpr(const lox::expr::Expr<T>::This& _expr) {
 template <class T>
 void lox::Resolver<T>::visitUnaryExpr(const lox::expr::Expr<T>::Unary& _expr) {
   lox::Resolver<T>::resolve(_expr.right);
-  return nullptr;
+  return;
 }
 
 
@@ -304,12 +308,12 @@ void lox::Resolver<T>::visitUnaryExpr(const lox::expr::Expr<T>::Unary& _expr) {
 template <class T>
 void lox::Resolver<T>::visitVariableExpr(
     const lox::expr::Expr<T>::Variable& _expr) {
-  if (!scopes.empty() && scopes.peek()[_expr.name.lexeme] == false) {  // TODO
+  if (!scopes.empty() && scopes.top()[_expr.name.getLexeme()] == false) {
     Lox::error(_expr.name, "Can't read local variable in its own initializer.");
   }
 
   lox::Resolver<T>::resolveLocal(_expr, _expr.name);
-  return nullptr;
+  return;
 }
 
 
@@ -332,7 +336,7 @@ void lox::Resolver<T>::resolve(const lox::expr::Expr<T>& _expr) {
 template <class T>
 void lox::Resolver<T>::resolveFunction(
     const lox::stmt::Stmt<T>::Function& function,
-    const Resolver<T>::FunctionTypes& type) {
+    const lox::FunctionType& type) {
   FunctionType enclosingFunction = currentFunction;
   currentFunction = type;
 
@@ -352,18 +356,21 @@ void lox::Resolver<T>::resolveFunction(
 
 // to create new block scope
 
+template <class T>
 void lox::Resolver<T>::beginScope() {
-  scopes.push(new std::unordered_map<std::string, bool>);
+  scopes.push(std::unordered_map<std::string, bool>());
 }
 
 
 // exiting from stack
 
+template <class T>
 void lox::Resolver<T>::endScope() {
   scopes.pop();
 }
 
 
+template <class T>
 void lox::Resolver<T>::declare(const Token& name) {
   if (scopes.empty()) {
     return;
@@ -371,19 +378,20 @@ void lox::Resolver<T>::declare(const Token& name) {
 
   std::unordered_map<std::string, bool> scope = scopes.top();
 
-  if (scope[name.lexeme]) {
+  if (scope[name.getLexeme()]) {
     Lox::error(name, "Already a variable with this name in this scope.");
   }
 
-  scope[name.lexeme] = false;
+  scope[name.getLexeme()] = false;
 }
 
 
+template <class T>
 void lox::Resolver<T>::define(const Token& name) {
   if (scopes.empty()) {
     return;
   }
-  scopes.top()[name.lexeme] = true;
+  scopes.top()[name.getLexeme()] = true;
 }
 
 
@@ -392,8 +400,9 @@ void lox::Resolver<T>::resolveLocal(
     const lox::expr::Expr<T>& _expr,
     const Token& name) {
   for (int i = scopes.size() - 1; i >= 0; i--) {
-    auto it = scopes[i].find(name.lexeme);
-    if (it != scopes[i].end()) {  // TODO
+    auto& scope = scopes.top();
+    auto it = scope.find(name.getLexeme());
+    if (it != scope.end()) {
       Interpreter<T>::interpreter.resolve(_expr, scopes.size() - 1 - i);
       return;
     }

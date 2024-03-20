@@ -6,10 +6,19 @@
 #include <variant>
 
 
-namespace Lox {
+using Object = std::variant<std::nullptr_t, std::string, double, bool>;
 
-class Return;
 
-}  // namespace Lox
+namespace lox {
+
+class Return : public std::runtime_error {
+ private:
+  Object value;
+
+ public:
+  Return(const Object& value);
+};
+
+}  // namespace lox
 
 #endif
