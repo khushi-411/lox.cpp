@@ -25,3 +25,4 @@ jobs:
         run: |
           set -e
           find . \( -name "*.cpp" -o -name "*.h" \) -print | xargs clang-format --style=file --verbose
+          git diff --exit-code || (echo "Code style issues found. Please run clang-format on your code" && false)
