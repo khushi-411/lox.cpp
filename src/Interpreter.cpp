@@ -173,7 +173,7 @@ void Interpreter<T>::interpret(
       Interpreter<T>::execute(statement);
     }
   } catch (RuntimeError error) {
-    Lox::runtimeError(error);
+    Lox<T>::runtimeError(error);
   }
 }
 
@@ -552,7 +552,7 @@ void Interpreter<T>::interpret(const lox::expr::Expr<T>& expression) {
     std::string value = Interpreter<T>::evaluate(expression);
     std::cout << Interpreter<T>::stringify(value);
   } catch (RuntimeError error) {
-    Lox::runtimeError(error);
+    Lox<T>::runtimeError(error);
   }
 }
 

@@ -50,7 +50,7 @@ void lox::Resolver<T>::visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt) {
 
   if (_stmt.superclass != nullptr &&
       (_stmt.name.getLexeme() == _stmt.superclass.name.getLexeme())) {
-    Lox::error(_stmt.superclass.name, "A class can't inherit from itself.");
+    Lox<T>::error(_stmt.superclass.name, "A class can't inherit from itself.");
   }
 
   if (_stmt.superclass != nullptr) {
@@ -139,12 +139,12 @@ template <class T>
 void lox::Resolver<T>::visitReturnStmt(
     const lox::stmt::Stmt<T>::Return& _stmt) {
   if (currentFunction == FunctionType::NONE) {
-    Lox::error(_stmt.keyword, "Can't return from top-level code.");
+    Lox<T>::error(_stmt.keyword, "Can't return from top-level code.");
   }
 
   if (_stmt.value != nullptr) {
     if (currentFunction == FunctionType::INITIALIZER) {
-      Lox::error(_stmt.keyword, "Can't return a value from an initializer.");
+      Lox<T>::error(_stmt.keyword, "Can't return a value from an initializer.");
     }
     lox::Resolver<T>::resolve(_stmt.value);
   }
@@ -268,10 +268,10 @@ void lox::Resolver<T>::visitSetExpr(const lox::expr::Expr<T>::Set& _expr) {
 template <class T>
 void lox::Resolver<T>::visitSuperExpr(const lox::expr::Expr<T>::Super& _expr) {
   if (currentClass == ClassType::_NONE) {
-    Lox::error(_expr.keyword, "Can't use 'super' outside of a class.");
+    Lox<T>::error(_expr.keyword, "Can't use 'super' outside of a class.");
 
   } else if (currentClass != ClassType::SUBCLASS) {
-    Lox::error(
+    Lox<T>::error(
         _expr.keyword, "Can't use 'super' in a class with no superclass.");
   }
 
@@ -285,7 +285,7 @@ void lox::Resolver<T>::visitSuperExpr(const lox::expr::Expr<T>::Super& _expr) {
 template <class T>
 void lox::Resolver<T>::visitThisExpr(const lox::expr::Expr<T>::This& _expr) {
   if (currentClass == ClassType::_NONE) {
-    Lox::error(_expr.keyword, "Can't use 'this' outside of a class.");
+    Lox<T>::error(_expr.keyword, "Can't use 'this' outside of a class.");
     return;
   }
 
@@ -309,7 +309,8 @@ template <class T>
 void lox::Resolver<T>::visitVariableExpr(
     const lox::expr::Expr<T>::Variable& _expr) {
   if (!scopes.empty() && scopes.top()[_expr.name.getLexeme()] == false) {
-    Lox::error(_expr.name, "Can't read local variable in its own initializer.");
+    Lox<T>::error(
+        _expr.name, "Can't read local variable in its own initializer.");
   }
 
   lox::Resolver<T>::resolveLocal(_expr, _expr.name);
@@ -379,7 +380,7 @@ void lox::Resolver<T>::declare(const Token& name) {
   std::unordered_map<std::string, bool> scope = scopes.top();
 
   if (scope[name.getLexeme()]) {
-    Lox::error(name, "Already a variable with this name in this scope.");
+    Lox<T>::error(name, "Already a variable with this name in this scope.");
   }
 
   scope[name.getLexeme()] = false;

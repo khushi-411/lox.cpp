@@ -6,12 +6,12 @@
 #include <sstream>
 #include <vector>
 
-//#include "ASTPrinter.h"
+#include "ASTPrinter.h"
 #include "Expr.h"
-//#include "Interpreter.h"
+#include "Interpreter.h"
 #include "Lox.h"
-//#include "Parser.h"
-//#include "Resolver.h"
+#include "Parser.h"
+#include "Resolver.h"
 #include "RuntimeError.h"
 #include "Scanner.h"
 #include "Token.h"
@@ -21,7 +21,8 @@ namespace lox {
 
 // static because we were getting:
 // error: cannot call member function 'void lox::Lox::runFile()' without object
-void Lox::runFile(const std::string& path) {
+template <class T>
+void Lox<T>::runFile(const std::string& path) {
   try {
     // https://stackoverflow.com/questions/38032800
     std::fstream bytes{path.c_str(), std::ios::binary};
@@ -46,7 +47,8 @@ void Lox::runFile(const std::string& path) {
 
 // error: cannot declare member function 'static void lox::Lox::runPrompt()' to
 // have static linkage [-fpermissive] same errors for runFile, run
-void Lox::runPrompt() {
+template <class T>
+void Lox<T>::runPrompt() {
   std::string input;
   std::cin >> input;
   std::ifstream file(input);
@@ -66,7 +68,8 @@ void Lox::runPrompt() {
 }
 
 
-void Lox::run(const std::string& source) {
+template <class T>
+void Lox<T>::run(const std::string& source) {
   Scanner scanner(source);
   std::vector<Token> tokens = scanner.scanTokens();
   for (Token token : tokens) {
@@ -74,29 +77,31 @@ void Lox::run(const std::string& source) {
     std::cout << token;
   }
 
-  //  Parser::Parser parser;
-  //  parser(tokens);
-  //  Expr::Expr expression = parser.parse();
+  lox::parser::Parser<T> parser;
+  parser(tokens);
+  // lox::expr::Expr<T> expression = parser.parse();
+  lox::stmt::Stmt<T> statements = parser.parse();
 
   // To ensure code has error and we have to return the program
   if (hadError) {
     return;
   }
 
-  //  Resolver::Resolver resolver;
-  //  resolver(interpreter);
-  //  resolver.resolve(statements);
+  lox::Resolver<T> resolver;
+  resolver(interpreter);
+  resolver.resolve(statements);
 
   if (hadError) {
     return;
   }
 
-  //  std::cout << ASTPrinter().print(expression);
-  //  interpreter.interpret(statements);
+  // std::cout << ASTPrinter().print(expression);
+  interpreter.interpret(statements);
 }
 
 
 // https://stackoverflow.com/questions/24288855
+template <class T>
 static void main(int argc, char** argv) {
   try {
     // https://stackoverflow.com/questions/18649547
@@ -104,9 +109,9 @@ static void main(int argc, char** argv) {
       std::cout << "Usage: " << argv[0] << std::endl;
       std::exit(1);
     } else if (strlen(argv[0]) == 1) {
-      Lox::runFile(argv[0]);
+      Lox<T>::runFile(argv[0]);
     } else {
-      Lox::runPrompt();
+      Lox<T>::runPrompt();
     }
 
   } catch (const std::exception& e) {
@@ -121,12 +126,14 @@ static void main(int argc, char** argv) {
 }
 
 
-void Lox::error(const int& line, const std::string& message) {
+template <class T>
+void Lox<T>::error(const int& line, const std::string& message) {
   report(line, "", message);
 }
 
 
-void Lox::report(
+template <class T>
+void Lox<T>::report(
     const int& line,
     const std::string& where,
     const std::string& message) {
@@ -135,7 +142,8 @@ void Lox::report(
 }
 
 
-void Lox::error(const Token& token, const std::string& message) {
+template <class T>
+void Lox<T>::error(const Token& token, const std::string& message) {
   if (token.tokentype() == TokenType::_EOF) {
     report(token.getLine(), " at end", message);
   } else {
@@ -144,7 +152,8 @@ void Lox::error(const Token& token, const std::string& message) {
 }
 
 
-void Lox::runtimeError(const RuntimeError& error) {
+template <class T>
+void Lox<T>::runtimeError(const RuntimeError& error) {
   std::cerr << error.what() << "[" << error.getToken().getLine() << "]";
   hadRuntimeError = true;
   std::exit(1);
