@@ -40,7 +40,8 @@ std::string ASTPrinter<T>::visitAssignExpr(
 template <class T>
 std::string ASTPrinter<T>::visitBinaryExpr(
     const lox::expr::Expr<T>::Binary& _expr) {
-  return ASTPrinter<T>::parenthesize(_expr.op.lexeme, _expr.left, _expr.right);
+  return ASTPrinter<T>::parenthesize(
+      _expr.op.getLexeme(), _expr.left, _expr.right);
 }
 
 
@@ -310,7 +311,7 @@ void transform(
       lox::stmt::Stmt<T> _stmt = static_cast<lox::stmt::Stmt<T>>(part);
       builder.push_back(_stmt.accept());
       // } else if (instanceof<Token>(part)) {
-      //    builder.push_back(static_cast<Token>(part).lexeme);
+      //    builder.push_back(static_cast<Token>(part).getLexeme());
       //} else if (std::holds_alternative<std::vector<std::string>>(part)) {
       //   const auto& _part = std::get<std::vector<std::string>>(part);
       //   transform(builder, _part);

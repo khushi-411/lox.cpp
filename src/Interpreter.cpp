@@ -145,7 +145,7 @@ void Interpreter<T>::visitVarStmt(const lox::stmt::Stmt<T>::Var& _stmt) {
     value = lox::Interpreter<T>::evaluate(_stmt.initializer);
   }
 
-  environment.define(_stmt.name.lexeme, value);
+  environment.define(_stmt.name.getLexeme(), value);
   return;
 }
 
