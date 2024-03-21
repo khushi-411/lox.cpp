@@ -31,7 +31,7 @@ std::string ASTPrinter<T>::print(const lox::stmt::Stmt<T>& _stmt) {
 template <class T>
 std::string ASTPrinter<T>::visitAssignExpr(
     const lox::expr::Expr<T>::Assign& _expr) {
-  return parenthesize2("=", _expr.name.lexeme, _expr.value);
+  return parenthesize2("=", _expr.name.getLexeme(), _expr.value);
 }
 
 
@@ -40,7 +40,8 @@ std::string ASTPrinter<T>::visitAssignExpr(
 template <class T>
 std::string ASTPrinter<T>::visitBinaryExpr(
     const lox::expr::Expr<T>::Binary& _expr) {
-  return ASTPrinter<T>::parenthesize(_expr.op.lexeme, _expr.left, _expr.right);
+  return ASTPrinter<T>::parenthesize(
+      _expr.op.getLexeme(), _expr.left, _expr.right);
 }
 
 
@@ -57,7 +58,7 @@ std::string ASTPrinter<T>::visitCallExpr(
 
 template <class T>
 std::string ASTPrinter<T>::visitGetExpr(const lox::expr::Expr<T>::Get& _expr) {
-  return parenthesize2(".", _expr.object, _expr.name.lexeme);
+  return parenthesize2(".", _expr.object, _expr.name.getLexeme());
 }
 
 
@@ -87,7 +88,7 @@ std::string ASTPrinter<T>::visitLiteralExpr(
 template <class T>
 std::string ASTPrinter<T>::visitLogicalExpr(
     const lox::expr::Expr<T>::Logical& _expr) {
-  return parenthesize(_expr.op.lexeme, _expr.left, _expr.right);
+  return parenthesize(_expr.op.getLexeme(), _expr.left, _expr.right);
 }
 
 
@@ -95,7 +96,7 @@ std::string ASTPrinter<T>::visitLogicalExpr(
 
 template <class T>
 std::string ASTPrinter<T>::visitSetExpr(const lox::expr::Expr<T>::Set& _expr) {
-  return parenthesize2("=", _expr.object, _expr.name.lexeme, _expr.value);
+  return parenthesize2("=", _expr.object, _expr.name.getLexeme(), _expr.value);
 }
 
 
@@ -122,7 +123,7 @@ std::string ASTPrinter<T>::visitThisExpr(
 template <class T>
 std::string ASTPrinter<T>::visitUnaryExpr(
     const lox::expr::Expr<T>::Unary& _expr) {
-  return ASTPrinter<T>::parenthesize(_expr.op.lexeme, _expr.right);
+  return ASTPrinter<T>::parenthesize(_expr.op.getLexeme(), _expr.right);
 }
 
 
@@ -131,7 +132,7 @@ std::string ASTPrinter<T>::visitUnaryExpr(
 template <class T>
 std::string ASTPrinter<T>::visitVariableExpr(
     const lox::expr::Expr<T>::Variable& _expr) {
-  return _expr.name.lexeme;
+  return _expr.name.getLexeme();
 }
 
 
@@ -155,25 +156,25 @@ std::string ASTPrinter<T>::visitBlockStmt(
 
 // class stmt
 
-/*
+
 template <class T>
-std::string ASTPrinter<T>::visitClassStmt(const lox::stmt::Stmt<T>::Class&
-_stmt) { std::vector<std::string> builder; builder.push_back("class " +
-_stmt.name.lexeme);
+std::string ASTPrinter<T>::visitClassStmt(
+    const lox::stmt::Stmt<T>::Class& _stmt) {
+  std::vector<std::string> builder;
+  builder.push_back("class " + _stmt.name.getLexeme());
 
   if (_stmt.superclass != NULL) {
-      builder.push_back(" < " + print(_stmt.superclass));
+    builder.push_back(" < " + print(_stmt.superclass));
   }
 
-  for (lox::stmt::Stmt<T>::Function<T> method : _stmt.methods) {
-      builder.push_back(" " + print(method));
+  for (typename lox::stmt::Stmt<T>::Function<T> method : _stmt.methods) {
+    builder.push_back(" " + print(method));
   }
 
   builder.push_back(")");
   std::string _builder(builder.begin(), builder.end());
   return _builder;
 }
-*/
 
 
 // expression stmt
@@ -191,13 +192,13 @@ template <class T>
 std::string ASTPrinter<T>::visitFunctionStmt(
     const lox::stmt::Stmt<T>::Function& _stmt) {
   std::vector<std::string> builder;
-  builder.push_back("fun( " + _stmt.name.lexeme + "(");
+  builder.push_back("fun( " + _stmt.name.getLexeme() + "(");
 
   for (Token param : _stmt.params) {
     if (param != _stmt.params[0]) {
       builder.push_back(" ");
     }
-    builder.push_back(param.lexeme);
+    builder.push_back(param.getLexeme());
   }
 
   builder.push_back(")");
@@ -294,9 +295,11 @@ bool instanceof (const T* ptr) {
 
 template <class T>
 void transform(
-    std::vector<std::string> builder,
+    std::vector<std::string>& builder,
     const std::variant<std::nullptr_t, std::string, double, bool>& parts) {
-  for (std::variant<std::nullptr_t, std::string, double, bool> part : parts) {
+  for (const std::variant<std::nullptr_t, std::string, double, bool>& part :
+       parts) {
+    // for (
     builder.push_back(" ");
     // https://stackoverflow.com/questions/500493
     if (instanceof <lox::expr::Expr<T>>(part)) {
@@ -307,12 +310,11 @@ void transform(
     } else if (instanceof <lox::stmt::Stmt<T>>(part)) {
       lox::stmt::Stmt<T> _stmt = static_cast<lox::stmt::Stmt<T>>(part);
       builder.push_back(_stmt.accept());
-      //} else if (instanceof<Token>(part)) {
-      //  builder.push_back(static_cast<Token>(part).lexeme);
-      //} else if (instanceof<std::vector<std::string>>(part)) {
-      //  std::vector<std::string> _part =
-      //  static_cast<std::vector<std::string>>(part); transform(builder,
-      //  _part);
+      // } else if (instanceof<Token>(part)) {
+      //    builder.push_back(static_cast<Token>(part).getLexeme());
+      //} else if (std::holds_alternative<std::vector<std::string>>(part)) {
+      //   const auto& _part = std::get<std::vector<std::string>>(part);
+      //   transform(builder, _part);
     } else {
       // https://stackoverflow.com/questions/23799174
       std::string _str = std::get<std::string>(part);

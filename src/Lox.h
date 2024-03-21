@@ -1,16 +1,19 @@
 #ifndef LOX_H
 #define LOX_H
 
+#include "Interpreter.h"
 #include "RuntimeError.h"
 #include "Token.h"
 
 
 namespace lox {
 
+template <class T>
 class Lox {
  private:
   static bool hadError;
   static bool hadRuntimeError;
+  static Interpreter<T> interpreter = new Interpreter();
 
  public:
   static void runFile(const std::string& path);

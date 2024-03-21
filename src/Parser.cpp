@@ -616,8 +616,9 @@ Token lox::parser::Parser<T>::consume(
 }
 
 
+template <class T>
 lox::parser::ParseError error(const Token& token, const std::string& message) {
-  Lox::error(token, message);
+  Lox<T>::error(token, message);
   return lox::parser::ParseError(token, message);
 }
 

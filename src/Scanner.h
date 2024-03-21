@@ -21,6 +21,7 @@ inline int line = 1;
 
 // https://stackoverflow.com/questions/42056160
 
+template <class T>
 class Scanner {
  private:
   std::unordered_map<std::string, TokenType> keywords;
