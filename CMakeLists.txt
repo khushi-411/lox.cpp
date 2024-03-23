@@ -26,11 +26,15 @@ list(APPEND LOXCPP_SRCS
     ${LOXCPP_SRCS_DIR}/Scanner.cpp
     ${LOXCPP_SRCS_DIR}/Stmt.cpp
     ${LOXCPP_SRCS_DIR}/Token.cpp
-    ${LOXCPP_SRCS_DIR}/main.cpp
 )
+
+set(LOXCPP_MAIN_SRC "${LOXCPP_SRCS_DIR}/main.cpp")
 
 add_library(${PROJECT_NAME} SHARED ${LOXCPP_SRCS})
 
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wno-unused-function)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${LOXCPP_SRCS_DIR})
+
+add_executable(main ${LOXCPP_MAIN_SRC})
+target_link_libraries(main ${PROJECT_NAME})
