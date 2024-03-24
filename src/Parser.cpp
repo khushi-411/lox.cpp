@@ -50,7 +50,7 @@ lox::stmt::Stmt<T> lox::parser::Parser<T>::statement() {
   }
 
   if (lox::parser::Parser<T>::match(TokenType::LEFT_BRACE)) {
-    return lox::stmt::Stmt<T>::Block(lox::parser::Parser<T>::block());
+    return lox::stmt::Block<T>(lox::parser::Parser<T>::block());
   }
 
   return lox::parser::Parser<T>::expressionStatement();
@@ -95,19 +95,19 @@ lox::stmt::Stmt<T> lox::parser::Parser<T>::forStatement() {
 
   if (increment != nullptr) {
     std::vector<lox::stmt::Stmt<T>> _stmt;
-    _stmt.push_back(lox::stmt::Stmt<T>::Expression(increment));
-    body = lox::stmt::Stmt<T>::Block(_stmt);
+    _stmt.push_back(lox::stmt::Expression<T>(increment));
+    body = lox::stmt::Block<T>(_stmt);
   }
 
   if (condition == nullptr) {
-    condition = lox::expr::Expr<T>::Literal(true);
+    condition = lox::expr::Literal<T>(true);
   }
 
-  body = lox::stmt::Stmt<T>::While(condition, body);
+  body = lox::stmt::While<T>(condition, body);
 
   if (initializer != nullptr) {
     std::vector<lox::stmt::Stmt<T>> _stmt = body;
-    body = lox::stmt::Stmt<T>::Block(_stmt);
+    body = lox::stmt::Block<T>(_stmt);
   }
 
   return body;
@@ -132,7 +132,7 @@ lox::stmt::Stmt<T> lox::parser::Parser<T>::ifStatement() {
     elseBranch = lox::parser::Parser<T>::statement();
   }
 
-  return lox::stmt::Stmt<T>::If(condition, thenBranch, elseBranch);
+  return lox::stmt::If<T>(condition, thenBranch, elseBranch);
 }
 
 
@@ -143,7 +143,7 @@ lox::stmt::Stmt<T> lox::parser::Parser<T>::printStatement() {
   lox::expr::Expr<T> value = lox::parser::Parser<T>::expression();
   lox::parser::Parser<T>::consume(
       TokenType::SEMICOLON, "Expect ';' after value.");
-  return new lox::stmt::Stmt<T>::Print(value);
+  return new lox::stmt::Print<T>(value);
 }
 
 
@@ -161,7 +161,7 @@ lox::stmt::Stmt<T> lox::parser::Parser<T>::returnStatement() {
   lox::parser::Parser<T>::consume(
       TokenType::SEMICOLON, "Expect ';' after return value.");
 
-  return lox::stmt::Stmt<T>::Return(keyword, value);
+  return lox::stmt::Return<T>(keyword, value);
 }
 
 
@@ -180,7 +180,7 @@ lox::stmt::Stmt<T> lox::parser::Parser<T>::varDeclaration() {
   lox::parser::Parser<T>::consume(
       TokenType::SEMICOLON, "Expect ';' after variable declaration.");
 
-  return lox::stmt::Stmt<T>::Var(name, initializer);
+  return lox::stmt::Var<T>(name, initializer);
 }
 
 
@@ -196,7 +196,7 @@ lox::stmt::Stmt<T> lox::parser::Parser<T>::whileStatement() {
       TokenType::RIGHT_PAREN, "Expect ')' after condition.");
   lox::stmt::Stmt<T> body = lox::parser::Parser<T>::statement();
 
-  return lox::stmt::Stmt<T>::While(condition, body);
+  return lox::stmt::While<T>(condition, body);
 }
 
 
@@ -207,12 +207,12 @@ lox::stmt::Stmt<T> lox::parser::Parser<T>::expressionStatement() {
   lox::expr::Expr<T> _expr = lox::parser::Parser<T>::expression();
   lox::parser::Parser<T>::consume(
       TokenType::SEMICOLON, "Expect ';' after expression.");
-  return new lox::stmt::Stmt<T>::Expression(_expr);
+  return new lox::stmt::Expression<T>(_expr);
 }
 
 
 template <class T>
-lox::stmt::Stmt<T>::Function function(const std::string& kind) {
+lox::stmt::Function<T> function(const std::string& kind) {
   Token name = lox::parser::Parser<T>::consume(
       TokenType::IDENTIFIER, "Expect " + kind + " name.");
 
@@ -239,7 +239,7 @@ lox::stmt::Stmt<T>::Function function(const std::string& kind) {
       TokenType::LEFT_BRACE, "Expect '{' before " + kind + " body.");
   std::vector<lox::stmt::Stmt<T>> body = lox::parser::Parser<T>::block();
 
-  return lox::stmt::Stmt<T>::Function(name, parameters, body);
+  return lox::stmt::Function<T>(name, parameters, body);
 }
 
 template <class T>
@@ -290,8 +290,7 @@ lox::stmt::Stmt<T> classDeclaration() {
   if (lox::parser::Parser<T>::match(TokenType::LESS)) {
     lox::parser::Parser<T>::consume(
         TokenType::IDENTIFIER, "Expect superclass name.");
-    superclass =
-        lox::expr::Expr<T>::Variable(lox::parser::Parser<T>::previous());
+    superclass = lox::expr::Variable<T>(lox::parser::Parser<T>::previous());
   }
 
   lox::parser::Parser<T>::consume(
@@ -306,7 +305,7 @@ lox::stmt::Stmt<T> classDeclaration() {
   lox::parser::Parser<T>::consume(
       TokenType::RIGHT_BRACE, "Expect '}' after class body.");
 
-  return lox::stmt::Stmt<T>::Class(name, superclass, methods);
+  return lox::stmt::Class<T>(name, superclass, methods);
 }
 
 
@@ -338,7 +337,7 @@ lox::expr::Expr<T> lox::parser::Parser<T>::equality() {
       TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL)) {
     Token op = lox::parser::Parser<T>::previous();
     lox::expr::Expr<T> right = lox::parser::Parser<T>::comparison();
-    expr = lox::expr::Expr<T>::Binary(expr, op, right);
+    expr = lox::expr::Binary<T>(expr, op, right);
   }
 
   return expr;
@@ -359,14 +358,14 @@ lox::expr::Expr<T> lox::parser::Parser<T>::assignment() {
     Token equals = lox::parser::Parser<T>::previous();
     lox::expr::Expr<T> value = lox::parser::Parser<T>::assignment();
 
-    if (_expr<lox::expr::Expr<T>::Variable>(_expr)) {
+    if (instanceof <lox::expr::Variable<T>>(_expr)) {
       Token name = (reinterpret_cast<lox::expr::Variable<T>>(_expr)).name;
-      return lox::expr::Expr<T>::Assign(name, value);
+      return lox::expr::Assign<T>(name, value);
 
-    } else if (_expr<lox::expr::Expr<T>::Get>(_expr)) {
+    } else if (instanceof <lox::expr::Get<T>>(_expr)) {
       lox::expr::Get<T> get =
           reinterpret_cast<lox::expr::Get<T>>(_expr);  // TODO
-      return lox::expr::Expr<T>::Set(get.object, get.name, value);
+      return lox::expr::Set<T>(get.object, get.name, value);
     }
 
     lox::parser::Parser<T>::error(equals, "Invalid assignment target.");
@@ -383,7 +382,7 @@ lox::expr::Expr<T> lox::parser::Parser<T>::_or() {
   while (lox::parser::Parser<T>::match(TokenType::OR)) {
     Token op = lox::parser::Parser<T>::previous();
     lox::expr::Expr<T> right = lox::parser::Parser<T>::_and();
-    _expr = lox::expr::Expr<T>::Logical(_expr, op, right);  // TODO: new?
+    _expr = lox::expr::Logical<T>(_expr, op, right);  // TODO: new?
   }
 
   return _expr;
@@ -397,7 +396,7 @@ lox::expr::Expr<T> lox::parser::Parser<T>::_and() {
   while (lox::parser::Parser<T>::match(TokenType::AND)) {
     Token op = lox::parser::Parser<T>::previous();
     lox::expr::Expr<T> right = lox::parser::Parser<T>::equality();
-    _expr = lox::expr::Expr<T>::Logical(_expr, op, right);
+    _expr = lox::expr::Logical<T>(_expr, op, right);
   }
 
   return _expr;
@@ -463,7 +462,7 @@ lox::expr::Expr<T> lox::parser::Parser<T>::comparison() {
       TokenType::LESS_EQUAL)) {
     Token op = lox::parser::Parser<T>::previous();
     lox::expr::Expr<T> right = lox::parser::Parser<T>::term();
-    expr = lox::expr::Expr<T>::Binary(expr, op, right);
+    expr = lox::expr::Binary<T>(expr, op, right);
   }
 
   return expr;
@@ -477,7 +476,7 @@ lox::expr::Expr<T> lox::parser::Parser<T>::term() {
   while (lox::parser::Parser<T>::match(TokenType::MINUS, TokenType::PLUS)) {
     Token op = lox::parser::Parser<T>::previous();
     lox::expr::Expr<T> right = lox::parser::Parser<T>::factor();
-    expr = lox::expr::Expr<T>::Binary(expr, op, right);
+    expr = lox::expr::Binary<T>(expr, op, right);
   }
 
   return expr;
@@ -491,7 +490,7 @@ lox::expr::Expr<T> lox::parser::Parser<T>::factor() {
   while (lox::parser::Parser<T>::match(TokenType::SLASH, TokenType::STAR)) {
     Token op = lox::parser::Parser<T>::previous();
     lox::expr::Expr<T> right = lox::parser::Parser<T>::unary();
-    expr = lox::expr::Expr<T>::Binary(expr, op, right);
+    expr = lox::expr::Binary<T>(expr, op, right);
   }
 
   return expr;
@@ -503,7 +502,7 @@ lox::expr::Expr<T> lox::parser::Parser<T>::unary() {
   if (lox::parser::Parser<T>::match(TokenType::BANG, TokenType::MINUS)) {
     Token op = lox::parser::Parser<T>::previous();
     lox::expr::Expr<T> right = lox::parser::Parser<T>::unary();
-    return lox::expr::Expr<T>::Unary(op, right);
+    return lox::expr::Unary<T>(op, right);
   }
 
   // return lox::parser::Parser<T>::primary();
@@ -531,7 +530,7 @@ lox::expr::Expr<T> lox::parser::Parser<T>::finishCall(
   Token paren = lox::parser::Parser<T>::consume(
       TokenType::RIGHT_PAREN, "Expect ')' after arguments.");
 
-  return lox::expr::Expr<T>::Call(callee, paren, arguments);
+  return lox::expr::Call<T>(callee, paren, arguments);
 }
 
 
@@ -546,7 +545,7 @@ lox::expr::Expr<T> lox::parser::Parser<T>::call() {
     } else if (lox::parser::Parser<T>::match(TokenType::DOT)) {
       Token name = lox::parser::Parser<T>::consume(
           TokenType::IDENTIFIER, "Expect property name after '.'.");
-      _expr = lox::expr::Expr<T>::Get(_expr, name);
+      _expr = lox::expr::Get<T>(_expr, name);
     } else {
       break;
     }
@@ -558,20 +557,19 @@ lox::expr::Expr<T> lox::parser::Parser<T>::call() {
 template <class T>
 lox::expr::Expr<T> lox::parser::Parser<T>::primary() {
   if (lox::parser::Parser<T>::match(TokenType::FALSE)) {
-    return lox::expr::Expr<T>::Literal(false);
+    return lox::expr::Literal<T>(false);
   }
 
   if (lox::parser::Parser<T>::match(TokenType::TRUE)) {
-    return lox::expr::Expr<T>::Literal(true);
+    return lox::expr::Literal<T>(true);
   }
 
   if (lox::parser::Parser<T>::match(TokenType::NIL)) {
-    return lox::expr::Expr<T>::Literal(NULL);
+    return lox::expr::Literal<T>(NULL);
   }
 
   if (lox::parser::Parser<T>::match(TokenType::NUMBER, TokenType::STRING)) {
-    return lox::expr::Expr<T>::Literal(
-        lox::parser::Parser<T>::previous().literal());
+    return lox::expr::Literal<T>(lox::parser::Parser<T>::previous().literal());
   }
 
   if (lox::parser::Parser<T>::match(TokenType::SUPER)) {
@@ -580,22 +578,22 @@ lox::expr::Expr<T> lox::parser::Parser<T>::primary() {
         TokenType::DOT, "Expect '.' after 'super'.");
     Token method = lox::parser::Parser<T>::consume(
         TokenType::IDENTIFIER, "Expect superclass method name.");
-    return new lox::expr::Expr<T>::Super(keyword, method);
+    return new lox::expr::Super<T>(keyword, method);
   }
 
   if (lox::parser::Parser<T>::match(TokenType::THIS)) {
-    return new lox::expr::Expr<T>::This(lox::parser::Parser<T>::pervious());
+    return new lox::expr::This<T>(lox::parser::Parser<T>::pervious());
   }
 
   if (lox::parser::Parser<T>::match(TokenType::IDENTIFIER)) {
-    return new lox::expr::Expr<T>::Variable(lox::parser::Parser<T>::pervious());
+    return new lox::expr::Variable<T>(lox::parser::Parser<T>::pervious());
   }
 
   if (lox::parser::Parser<T>::match(TokenType::LEFT_PAREN)) {
     lox::expr::Expr<T> expr = lox::parser::Parser<T>::expression();
     lox::parser::Parser<T>::consume(
         TokenType::RIGHT_PAREN, "Expect ')' after expression.");
-    return lox::expr::Expr<T>::Grouping(expr);
+    return lox::expr::Grouping<T>(expr);
   }
 
   throw lox::parser::Parser<T>::error(

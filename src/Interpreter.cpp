@@ -55,7 +55,7 @@ void Interpreter<T>::visitClassStmt(const lox::stmt::Class<T>& _stmt) {
 
   std::unordered_map<std::string, LoxFunction<T>> methods;
 
-  for (typename lox::stmt::Stmt<T>::Function method : _stmt.methods) {
+  for (lox::stmt::Function<T> method : _stmt.methods) {
     LoxFunction<T> function = new LoxFunction(
         method, environment, method.name.getLexeme().equals("init"));
     methods[method.name.getLexeme()] = function;
