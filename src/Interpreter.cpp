@@ -25,7 +25,7 @@ namespace lox {
 // block stmt
 
 template <class T>
-void Interpreter<T>::visitBlockStmt(const lox::stmt::Stmt<T>::Block& _stmt) {
+void Interpreter<T>::visitBlockStmt(const lox::stmt::Block<T>& _stmt) {
   lox::Interpreter<T>::executeBlock(
       _stmt.statements, new Environment(environment));
   return;
@@ -35,7 +35,7 @@ void Interpreter<T>::visitBlockStmt(const lox::stmt::Stmt<T>::Block& _stmt) {
 // class stmt
 
 template <class T>
-void Interpreter<T>::visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt) {
+void Interpreter<T>::visitClassStmt(const lox::stmt::Class<T>& _stmt) {
   Object superclass = nullptr;
 
   if (_stmt.superclass != nullptr) {
@@ -55,7 +55,7 @@ void Interpreter<T>::visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt) {
 
   std::unordered_map<std::string, LoxFunction<T>> methods;
 
-  for (typename lox::stmt::Stmt<T>::Function method : _stmt.methods) {
+  for (lox::stmt::Function<T> method : _stmt.methods) {
     LoxFunction<T> function = new LoxFunction(
         method, environment, method.name.getLexeme().equals("init"));
     methods[method.name.getLexeme()] = function;
@@ -78,7 +78,7 @@ void Interpreter<T>::visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt) {
 
 template <class T>
 void Interpreter<T>::visitExpressionStmt(
-    const lox::stmt::Stmt<T>::Expression& _stmt) {
+    const lox::stmt::Expression<T>& _stmt) {
   Interpreter<T>::evaluate(_stmt.expression);
   return;
 }
@@ -87,8 +87,7 @@ void Interpreter<T>::visitExpressionStmt(
 // function stmt
 
 template <class T>
-void Interpreter<T>::visitFunctionStmt(
-    const lox::stmt::Stmt<T>::Function& _stmt) {
+void Interpreter<T>::visitFunctionStmt(const lox::stmt::Function<T>& _stmt) {
   LoxFunction<T> function = new LoxFunction(_stmt, environment, false);
   environment.define(_stmt.name.getLexeme(), function);
   return;
@@ -98,7 +97,7 @@ void Interpreter<T>::visitFunctionStmt(
 // if stmt
 
 template <class T>
-void Interpreter<T>::visitIfStmt(const lox::stmt::Stmt<T>::If& _stmt) {
+void Interpreter<T>::visitIfStmt(const lox::stmt::If<T>& _stmt) {
   if (lox::Interpreter<T>::isTruthy(
           lox::Interpreter<T>::evaluate(_stmt.condition))) {
     lox::Interpreter<T>::execute(_stmt.thenBranch);
@@ -114,7 +113,7 @@ void Interpreter<T>::visitIfStmt(const lox::stmt::Stmt<T>::If& _stmt) {
 // print stmt
 
 template <class T>
-void Interpreter<T>::visitPrintStmt(const lox::stmt::Stmt<T>::Print& _stmt) {
+void Interpreter<T>::visitPrintStmt(const lox::stmt::Print<T>& _stmt) {
   Object value = evaluate(_stmt.expression);
   std::cout << stringify(value);
   return;
@@ -124,7 +123,7 @@ void Interpreter<T>::visitPrintStmt(const lox::stmt::Stmt<T>::Print& _stmt) {
 // return stmt
 
 template <class T>
-void Interpreter<T>::visitReturnStmt(const lox::stmt::Stmt<T>::Return& _stmt) {
+void Interpreter<T>::visitReturnStmt(const lox::stmt::Return<T>& _stmt) {
   Object value = nullptr;
 
   if (_stmt.value != nullptr) {
@@ -138,7 +137,7 @@ void Interpreter<T>::visitReturnStmt(const lox::stmt::Stmt<T>::Return& _stmt) {
 // var stmt
 
 template <class T>
-void Interpreter<T>::visitVarStmt(const lox::stmt::Stmt<T>::Var& _stmt) {
+void Interpreter<T>::visitVarStmt(const lox::stmt::Var<T>& _stmt) {
   Object value = nullptr;
 
   if (_stmt.initializer != nullptr) {
@@ -153,7 +152,7 @@ void Interpreter<T>::visitVarStmt(const lox::stmt::Stmt<T>::Var& _stmt) {
 // while stmt
 
 template <class T>
-void Interpreter<T>::visitWhileStmt(const lox::stmt::Stmt<T>::While& _stmt) {
+void Interpreter<T>::visitWhileStmt(const lox::stmt::While<T>& _stmt) {
   while (lox::Interpreter<T>::isTruthy(
       lox::Interpreter<T>::evaluate(_stmt.condition))) {
     lox::Interpreter<T>::execute(_stmt.body);
@@ -217,8 +216,7 @@ void executeBlock(
 // assign expr
 
 template <class T>
-Object Interpreter<T>::visitAssignExpr(
-    const lox::expr::Expr<T>::Assign& _expr) {
+Object Interpreter<T>::visitAssignExpr(const lox::expr::Assign<T>& _expr) {
   Object value = lox::Interpreter<T>::evaluate(_expr.value);
   int distance = locals[_expr];
 
@@ -235,8 +233,7 @@ Object Interpreter<T>::visitAssignExpr(
 // binary expr
 
 template <class T>
-Object Interpreter<T>::visitBinaryExpr(
-    const lox::expr::Expr<T>::Binary& _expr) {
+Object Interpreter<T>::visitBinaryExpr(const lox::expr::Binary<T>& _expr) {
   std::string left = Interpreter<T>::evaluate(_expr.left);
   std::string right = Interpreter<T>::evaluate(_expr.right);
 
@@ -298,7 +295,7 @@ Object Interpreter<T>::visitBinaryExpr(
 // call expr
 
 template <class T>
-Object Interpreter<T>::visitCallExpr(const lox::expr::Expr<T>::Call& _expr) {
+Object Interpreter<T>::visitCallExpr(const lox::expr::Call<T>& _expr) {
   Object callee = lox::Interpreter<T>::evaluate(_expr.callee);
 
   std::vector<Object> arguments;
@@ -326,7 +323,7 @@ Object Interpreter<T>::visitCallExpr(const lox::expr::Expr<T>::Call& _expr) {
 // get expr
 
 template <class T>
-Object Interpreter<T>::visitGetExpr(const lox::expr::Expr<T>::Get& _expr) {
+Object Interpreter<T>::visitGetExpr(const lox::expr::Get<T>& _expr) {
   Object object = lox::Interpreter<T>::evaluate(_expr.object);
 
   if (instanceof <LoxInstance<T>>(object)) {
@@ -340,8 +337,7 @@ Object Interpreter<T>::visitGetExpr(const lox::expr::Expr<T>::Get& _expr) {
 // grouping expr
 
 template <class T>
-Object Interpreter<T>::visitGroupingExpr(
-    const lox::expr::Expr<T>::Grouping& _expr) {
+Object Interpreter<T>::visitGroupingExpr(const lox::expr::Grouping<T>& _expr) {
   return Interpreter<T>::evaluate(_expr.expression);
 }
 
@@ -349,8 +345,7 @@ Object Interpreter<T>::visitGroupingExpr(
 // literal expr
 
 template <class T>
-Object Interpreter<T>::visitLiteralExpr(
-    const lox::expr::Expr<T>::Literal& _expr) {
+Object Interpreter<T>::visitLiteralExpr(const lox::expr::Literal<T>& _expr) {
   return _expr.value;
 }
 
@@ -358,8 +353,7 @@ Object Interpreter<T>::visitLiteralExpr(
 // logical expr
 
 template <class T>
-Object Interpreter<T>::visitLogicalExpr(
-    const lox::expr::Expr<T>::Logical& _expr) {
+Object Interpreter<T>::visitLogicalExpr(const lox::expr::Logical<T>& _expr) {
   Object left = lox::Interpreter<T>::evaluate(_expr.left);
 
   if (_expr.op.type == TokenType::OR) {
@@ -379,7 +373,7 @@ Object Interpreter<T>::visitLogicalExpr(
 // set expr
 
 template <class T>
-Object Interpreter<T>::visitSetExpr(const lox::expr::Expr<T>::Set& _expr) {
+Object Interpreter<T>::visitSetExpr(const lox::expr::Set<T>& _expr) {
   Object object = lox::Interpreter<T>::evaluate(_expr.object);
 
   if (!(instanceof <LoxInstance<T>>(object))) {
@@ -396,7 +390,7 @@ Object Interpreter<T>::visitSetExpr(const lox::expr::Expr<T>::Set& _expr) {
 // super expr
 
 template <class T>
-Object Interpreter<T>::visitSuperExpr(const lox::expr::Expr<T>::Super& _expr) {
+Object Interpreter<T>::visitSuperExpr(const lox::expr::Super<T>& _expr) {
   int distance = locals.get(_expr);
 
   LoxClass<T> superclass = (LoxClass<T>)environment.getAt(distance, "super");
@@ -418,7 +412,7 @@ Object Interpreter<T>::visitSuperExpr(const lox::expr::Expr<T>::Super& _expr) {
 // this expr
 
 template <class T>
-Object Interpreter<T>::visitThisExpr(const lox::expr::Expr<T>::This& _expr) {
+Object Interpreter<T>::visitThisExpr(const lox::expr::This<T>& _expr) {
   return lookUpVaraible(_expr.keyword, _expr);
 }
 
@@ -426,7 +420,7 @@ Object Interpreter<T>::visitThisExpr(const lox::expr::Expr<T>::This& _expr) {
 // unary expr
 
 template <class T>
-Object Interpreter<T>::visitUnaryExpr(const lox::expr::Expr<T>::Unary& _expr) {
+Object Interpreter<T>::visitUnaryExpr(const lox::expr::Unary<T>& _expr) {
   std::string right = Interpreter<T>::evaluate(_expr.right);
 
   switch (_expr.op.type) {
@@ -446,8 +440,7 @@ Object Interpreter<T>::visitUnaryExpr(const lox::expr::Expr<T>::Unary& _expr) {
 // variable expr
 
 template <class T>
-Object Interpreter<T>::visitVariableExpr(
-    const lox::expr::Expr<T>::Variable& _expr) {
+Object Interpreter<T>::visitVariableExpr(const lox::expr::Variable<T>& _expr) {
   return Interpreter<T>::lookUpVariable(_expr.name, _expr);
 }
 

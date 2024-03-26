@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <exception>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -19,6 +20,7 @@
 
 namespace lox {
 
+
 // static because we were getting:
 // error: cannot call member function 'void lox::Lox::runFile()' without object
 template <class T>
@@ -35,11 +37,11 @@ void Lox<T>::runFile(const std::string& path) {
     return;
   }
 
-  if (hadError) {
+  if (lox::Lox<T>::hadError) {
     std::exit(1);
   }
 
-  if (hadRuntimeError) {
+  if (lox::Lox<T>::hadRuntimeError) {
     std::exit(1);
   }
 }
@@ -63,7 +65,7 @@ void Lox<T>::runPrompt() {
     }
     run(line);
     // reseting the flag
-    hadError = false;
+    lox::Lox<T>::hadError = false;
   }
 }
 
@@ -83,7 +85,7 @@ void Lox<T>::run(const std::string& source) {
   lox::stmt::Stmt<T> statements = parser.parse();
 
   // To ensure code has error and we have to return the program
-  if (hadError) {
+  if (lox::Lox<T>::hadError) {
     return;
   }
 
@@ -91,38 +93,12 @@ void Lox<T>::run(const std::string& source) {
   resolver(interpreter);
   resolver.resolve(statements);
 
-  if (hadError) {
+  if (lox::Lox<T>::hadError) {
     return;
   }
 
   // std::cout << ASTPrinter().print(expression);
   interpreter.interpret(statements);
-}
-
-
-// https://stackoverflow.com/questions/24288855
-template <class T>
-static void main(int argc, char** argv) {
-  try {
-    // https://stackoverflow.com/questions/18649547
-    if (strlen(argv[0]) > 1) {
-      std::cout << "Usage: " << argv[0] << std::endl;
-      std::exit(1);
-    } else if (strlen(argv[0]) == 1) {
-      Lox<T>::runFile(argv[0]);
-    } else {
-      Lox<T>::runPrompt();
-    }
-
-  } catch (const std::exception& e) {
-    // TODO: check std::nested_exception, std::throw_with_nested,
-    // std::invalid_argument
-    // https://stackoverflow.com/questions/8480640/how-to-throw-a-c-exception
-    std::cerr << "Exception: " << e.what() << std::endl;
-    std::exit(1);
-  }
-
-  return;
 }
 
 
@@ -138,7 +114,7 @@ void Lox<T>::report(
     const std::string& where,
     const std::string& message) {
   std::cout << "[line " << line << "] Error" << where << ": " << message;
-  hadError = true;
+  lox::Lox<T>::hadError = true;
 }
 
 
@@ -155,7 +131,7 @@ void Lox<T>::error(const Token& token, const std::string& message) {
 template <class T>
 void Lox<T>::runtimeError(const RuntimeError& error) {
   std::cerr << error.what() << "[" << error.getToken().getLine() << "]";
-  hadRuntimeError = true;
+  lox::Lox<T>::hadRuntimeError = true;
   std::exit(1);
 }
 

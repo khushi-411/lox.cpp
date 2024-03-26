@@ -29,8 +29,8 @@ enum ClassType {
 
 
 template <class T>
-class Resolver : public lox::expr::Expr<T>::Visitor<void>,
-                 public lox::stmt::Stmt<T>::Visitor<void> {
+class Resolver : public lox::expr::Visitor<void>,
+                 public lox::stmt::Visitor<void> {
  private:
   lox::Interpreter<T> interpreter;
   std::stack<std::unordered_map<std::string, bool>> scopes;
@@ -41,33 +41,33 @@ class Resolver : public lox::expr::Expr<T>::Visitor<void>,
   Resolver(const lox::Interpreter<T>& interpreter);
   void resolve(const std::vector<lox::stmt::Stmt<T>>& statements);
 
-  void visitBlockStmt(const lox::stmt::Stmt<T>::Block& _stmt);
-  void visitClassStmt(const lox::stmt::Stmt<T>::Class& _stmt);
-  void visitExpressionStmt(const lox::stmt::Stmt<T>::Expression& _stmt);
-  void visitFunctionStmt(const lox::stmt::Stmt<T>::Function& _stmt);
-  void visitIfStmt(const lox::stmt::Stmt<T>::If& _stmt);
-  void visitPrintStmt(const lox::stmt::Stmt<T>::Print& _stmt);
-  void visitReturnStmt(const lox::stmt::Stmt<T>::Return& _stmt);
-  void visitVarStmt(const lox::stmt::Stmt<T>::Var& _stmt);
-  void visitWhileStmt(const lox::stmt::Stmt<T>::While& _stmt);
+  void visitBlockStmt(const lox::stmt::Block<T>& _stmt);
+  void visitClassStmt(const lox::stmt::Class<T>& _stmt);
+  void visitExpressionStmt(const lox::stmt::Expression<T>& _stmt);
+  void visitFunctionStmt(const lox::stmt::Function<T>& _stmt);
+  void visitIfStmt(const lox::stmt::If<T>& _stmt);
+  void visitPrintStmt(const lox::stmt::Print<T>& _stmt);
+  void visitReturnStmt(const lox::stmt::Return<T>& _stmt);
+  void visitVarStmt(const lox::stmt::Var<T>& _stmt);
+  void visitWhileStmt(const lox::stmt::While<T>& _stmt);
 
-  void visitAssignExpr(const lox::expr::Expr<T>::Assign& _expr);
-  void visitBinaryExpr(const lox::expr::Expr<T>::Binary& _expr);
-  void visitCallExpr(const lox::expr::Expr<T>::Call& _expr);
-  void visitGetExpr(const lox::expr::Expr<T>::Get& _expr);
-  void visitGroupingExpr(const lox::expr::Expr<T>::Grouping& _expr);
-  void visitLiteralExpr(const lox::expr::Expr<T>::Literal& _expr);
-  void visitLogicalExpr(const lox::expr::Expr<T>::Logical& _expr);
-  void visitSetExpr(const lox::expr::Expr<T>::Set& _expr);
-  void visitSuperExpr(const lox::expr::Expr<T>::Super& _expr);
-  void visitThisExpr(const lox::expr::Expr<T>::This& _expr);
-  void visitUnaryExpr(const lox::expr::Expr<T>::Unary& _expr);
-  void visitVariableExpr(const lox::expr::Expr<T>::Variable& _expr);
+  void visitAssignExpr(const lox::expr::Assign<T>& _expr);
+  void visitBinaryExpr(const lox::expr::Binary<T>& _expr);
+  void visitCallExpr(const lox::expr::Call<T>& _expr);
+  void visitGetExpr(const lox::expr::Get<T>& _expr);
+  void visitGroupingExpr(const lox::expr::Grouping<T>& _expr);
+  void visitLiteralExpr(const lox::expr::Literal<T>& _expr);
+  void visitLogicalExpr(const lox::expr::Logical<T>& _expr);
+  void visitSetExpr(const lox::expr::Set<T>& _expr);
+  void visitSuperExpr(const lox::expr::Super<T>& _expr);
+  void visitThisExpr(const lox::expr::This<T>& _expr);
+  void visitUnaryExpr(const lox::expr::Unary<T>& _expr);
+  void visitVariableExpr(const lox::expr::Variable<T>& _expr);
 
   void resolve(const lox::stmt::Stmt<T>& _stmt);
   void resolve(const lox::expr::Expr<T>& _expr);
   void resolveFunction(
-      const lox::stmt::Stmt<T>::Function& function,
+      const lox::stmt::Function<T>& function,
       const FunctionType& type);
   void beginScope();
   void endScope();
