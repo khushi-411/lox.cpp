@@ -1,6 +1,10 @@
 #ifndef LOX_H
 #define LOX_H
 
+#include <functional>
+#include <iostream>
+#include <string>
+
 #include "Interpreter.h"
 #include "RuntimeError.h"
 #include "Token.h"
@@ -11,13 +15,13 @@ namespace lox {
 template <class T>
 class Lox {
  private:
-  static bool hadError;
-  static bool hadRuntimeError;
-  static Interpreter<T> interpreter;
+  bool hadError = false;
+  bool hadRuntimeError = false;
+  Interpreter<T> interpreter;
 
  public:
   void runFile(const std::string& path);
-  void runPrompt();
+  void runPrompt(void);
   void run(const std::string& source);
   void error(const int& line, const std::string& message);
   void report(
@@ -30,18 +34,6 @@ class Lox {
 
 
 }  // namespace lox
-
-
-template <class T>
-bool lox::Lox<T>::hadError = false;
-
-
-template <class T>
-bool lox::Lox<T>::hadRuntimeError = false;
-
-
-template <class T>
-lox::Interpreter<T> lox::Lox<T>::interpreter;
 
 
 #endif

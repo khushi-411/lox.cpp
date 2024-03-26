@@ -11,15 +11,16 @@ typedef double T;
 
 
 int main(int argc, char** argv) {
+  lox::Lox<T> _lox;
   try {
     // https://stackoverflow.com/questions/18649547
-    if (strlen(argv[0]) > 1) {
-      std::cout << "Usage: " << argv[0] << std::endl;
+    if (argc > 2) {
+      std::cout << "Usage: " << argv[0] << " [script]\n";
       std::exit(1);
-    } else if (strlen(argv[0]) == 1) {
-      lox::Lox<T>::runFile(argv[0]);
+    } else if (argc == 2) {
+      _lox.runFile(argv[1]);
     } else {
-      lox::Lox<T>::runPrompt();
+      _lox.runPrompt();
     }
 
   } catch (const std::exception& e) {

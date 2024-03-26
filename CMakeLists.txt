@@ -15,7 +15,6 @@ list(APPEND LOXCPP_SRCS
     ${LOXCPP_SRCS_DIR}/Expr.cpp
     ${LOXCPP_SRCS_DIR}/GenerateAST.cpp
     ${LOXCPP_SRCS_DIR}/Interpreter.cpp
-    ${LOXCPP_SRCS_DIR}/Lox.cpp
     ${LOXCPP_SRCS_DIR}/LoxClass.cpp
     ${LOXCPP_SRCS_DIR}/LoxFunction.cpp
     ${LOXCPP_SRCS_DIR}/LoxInstance.cpp
@@ -28,7 +27,11 @@ list(APPEND LOXCPP_SRCS
     ${LOXCPP_SRCS_DIR}/Token.cpp
 )
 
-set(LOXCPP_MAIN_SRC "${LOXCPP_SRCS_DIR}/main.cpp")
+set(LOXCPP_MAIN_SRC)
+list(APPEND LOXCPP_MAIN_SRC
+    ${LOXCPP_SRCS_DIR}/Lox.cpp
+    ${LOXCPP_SRCS_DIR}/main.cpp
+)
 
 add_library(${PROJECT_NAME} SHARED ${LOXCPP_SRCS})
 
