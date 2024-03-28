@@ -13,7 +13,7 @@
 using Object = std::variant<std::nullptr_t, std::string, double, bool>;
 
 namespace lox {
-
+/*
 // TODO: use auto instead of bool datatype?
 // TODO: maybe use static inline function during declaration?
 // TODO: use std::unique_ptr, std::shared_ptr etc
@@ -288,6 +288,6 @@ void Scanner<T>::addToken(const TokenType& type, const Object& literal) {
   std::string text = source.substr(start, current);
   tokens.push_back(Token(type, text, literal, line));
 }
-
+*/
 
 }  // namespace lox

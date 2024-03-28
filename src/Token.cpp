@@ -39,6 +39,11 @@ const std::string& Token::getLexeme() const {
 }
 
 
+const Object& Token::getLiteral() const {
+  return literal;
+}
+
+
 const int& Token::getLine() const {
   return line;
 }

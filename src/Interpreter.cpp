@@ -21,6 +21,8 @@ using Object = std::variant<std::nullptr_t, std::string, double, bool>;
 
 namespace lox {
 
+template <class T>
+Interpreter<T>::Interpreter() : globals(), environment(&globals) {}
 
 // block stmt
 

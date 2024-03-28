@@ -18,11 +18,13 @@ template <class T>
 class Interpreter : public lox::expr::Visitor<Object>,
                     public lox::stmt::Visitor<void> {
  private:
-  Environment globals = new Environment();
-  Environment environment = globals;
+  Environment globals;  // = new Environment();
+  Environment environment;  // = globals;
   std::unordered_map<lox::expr::Expr<T>, int> locals;
 
  public:
+  Interpreter();
+
   void visitBlockStmt(const lox::stmt::Block<T>& _stmt);
   void visitClassStmt(const lox::stmt::Class<T>& _stmt);
   void visitExpressionStmt(const lox::stmt::Expression<T>& _stmt);
