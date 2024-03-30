@@ -27,7 +27,7 @@ class Lox {
  private:
   bool hadError = false;
   bool hadRuntimeError = false;
-  // Interpreter<T> interpreter;
+  Interpreter<T> interpreter;
 
  public:
   void runFile(const std::string& path) {
@@ -81,7 +81,7 @@ class Lox {
 
     lox::parser::Parser<T> parser(tokens);
     lox::expr::Expr<T> expression = parser.parse();
-    // lox::stmt::Stmt<T> statements = parser.parse();
+    // std::vector<lox::stmt::Stmt<T>> statements = parser.parse();
 
     // To ensure code has error and we have to return the program
     if (hadError) {
@@ -101,7 +101,7 @@ class Lox {
   }
 
 
-  void error(const int& line, const std::string& message) {
+  void error(int line, const std::string& message) {
     report(line, "", message);
   }
 

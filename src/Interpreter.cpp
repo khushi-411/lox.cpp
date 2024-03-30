@@ -21,27 +21,27 @@ using Object = std::variant<std::nullptr_t, std::string, double, bool>;
 
 namespace lox {
 
-template <class T>
-Interpreter<T>::Interpreter() : globals(), environment(&globals) {}
+// template <class T>
+// Interpreter<T>::Interpreter() : globals(), environment(&globals) {}
 
 // block stmt
 
 template <class T>
 void Interpreter<T>::visitBlockStmt(const lox::stmt::Block<T>& _stmt) {
   lox::Interpreter<T>::executeBlock(
-      _stmt.statements, new Environment(environment));
+      _stmt.getStatements(), Environment(environment));
   return;
 }
 
 
 // class stmt
-
+/*
 template <class T>
 void Interpreter<T>::visitClassStmt(const lox::stmt::Class<T>& _stmt) {
   Object superclass = nullptr;
 
-  if (_stmt.superclass != nullptr) {
-    superclass = lox::Interpreter<T>::evaluate(_stmt.superclass);
+  if (_stmt.getSuperclass() != nullptr) {
+    superclass = lox::Interpreter<T>::evaluate(_stmt.getSuperclass());
     if (!(instanceof <LoxClass<T>>(superclass))) {
       throw new RuntimeError(
           _stmt.superclass.name, "Superclass must be a class.");
@@ -51,7 +51,7 @@ void Interpreter<T>::visitClassStmt(const lox::stmt::Class<T>& _stmt) {
   environment.define(_stmt.name.getLexeme(), nullptr);
 
   if (_stmt.superclass != nullptr) {
-    environment = new Environment(environment);
+    environment = Environment(environment);
     environment.define("super", superclass);
   }
 
@@ -75,17 +75,17 @@ void Interpreter<T>::visitClassStmt(const lox::stmt::Class<T>& _stmt) {
   return;
 }
 
-
+*/
 // expression stmt
 
 template <class T>
 void Interpreter<T>::visitExpressionStmt(
     const lox::stmt::Expression<T>& _stmt) {
-  Interpreter<T>::evaluate(_stmt.expression);
+  Interpreter<T>::evaluate(_stmt.getExpression());
   return;
 }
 
-
+/*
 // function stmt
 
 template <class T>
@@ -94,24 +94,24 @@ void Interpreter<T>::visitFunctionStmt(const lox::stmt::Function<T>& _stmt) {
   environment.define(_stmt.name.getLexeme(), function);
   return;
 }
-
+*/
 
 // if stmt
 
 template <class T>
 void Interpreter<T>::visitIfStmt(const lox::stmt::If<T>& _stmt) {
   if (lox::Interpreter<T>::isTruthy(
-          lox::Interpreter<T>::evaluate(_stmt.condition))) {
-    lox::Interpreter<T>::execute(_stmt.thenBranch);
+          lox::Interpreter<T>::evaluate(_stmt.getCondition()))) {
+    lox::Interpreter<T>::execute(_stmt.getThenBranch());
 
-  } else if (_stmt.elseBranch != nullptr) {
-    lox::Interpreter<T>::execute(_stmt.elseBranch);
+  } else if (_stmt.getElseBranch() != nullptr) {
+    lox::Interpreter<T>::execute(_stmt.getElseBranch());
   }
 
   return;
 }
 
-
+/*
 // print stmt
 
 template <class T>
@@ -162,7 +162,7 @@ void Interpreter<T>::visitWhileStmt(const lox::stmt::While<T>& _stmt) {
 
   return;
 }
-
+*/
 
 // interpret
 
@@ -174,17 +174,17 @@ void Interpreter<T>::interpret(
       Interpreter<T>::execute(statement);
     }
   } catch (RuntimeError error) {
-    Lox<T>::runtimeError(error);
+    //Lox<T>::runtimeError(error);
   }
 }
 
 
 // evaluate
 
-template <class T>
-void Interpreter<T>::evaluate(const lox::stmt::Stmt<T>& _stmt) {
-  return _stmt.accept(*this);
-}
+//template <class T>
+//void Interpreter<T>::evaluate(const lox::stmt::Stmt<T>& _stmt) {
+//  return _stmt.accept(*this);
+//}
 
 
 // execute
@@ -214,7 +214,7 @@ void executeBlock(
   }
 }
 
-
+/*
 // assign expr
 
 template <class T>
@@ -236,19 +236,19 @@ Object Interpreter<T>::visitAssignExpr(const lox::expr::Assign<T>& _expr) {
 
 template <class T>
 Object Interpreter<T>::visitBinaryExpr(const lox::expr::Binary<T>& _expr) {
-  std::string left = Interpreter<T>::evaluate(_expr.left);
-  std::string right = Interpreter<T>::evaluate(_expr.right);
+  std::string left = Interpreter<T>::evaluate(_expr.getLeft());
+  std::string right = Interpreter<T>::evaluate(_expr.getRight());
 
-  switch (_expr.op.type) {
+  switch (_expr.getOp().tokentype()) {
     case TokenType::MINUS:
-      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
-      return (double)left - (double)right;
+      Interpreter<T>::checkNumberOperands(_expr.getOp(), left, right);
+      return std::stod(left) - std::stod(right);
 
     case TokenType::PLUS:
-      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
+      Interpreter<T>::checkNumberOperands(_expr.getOp(), left, right);
       if ((std::is_same<decltype(left), double>::value) &&
           (std::is_same<decltype(right), double>::value)) {
-        return (double)left + (double)right;
+        return std::stod(left) + std::stod(right);
       }
       if ((std::is_same<decltype(left), std::string>::value) &&
           (std::is_same<decltype(right), std::string>::value)) {
@@ -257,37 +257,37 @@ Object Interpreter<T>::visitBinaryExpr(const lox::expr::Binary<T>& _expr) {
       break;
 
     case TokenType::GREATER:
-      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
+      Interpreter<T>::checkNumberOperands(_expr.getOp(), left, right);
 
-      return (double)left > (double)right;
+      return std::stod(left) > std::stod(right);
 
     case TokenType::GREATER_EQUAL:
-      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
-      return (double)left >= (double)right;
+      Interpreter<T>::checkNumberOperands(_expr.getOp(), left, right);
+      return std::stod(left) >= std::stod(right);
 
     case TokenType::LESS:
-      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
-      return (double)left < (double)right;
+      Interpreter<T>::checkNumberOperands(_expr.getOp(), left, right);
+      return std::stod(left) < std::stod(right);
 
     case TokenType::LESS_EQUAL:
-      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
-      return (double)left <= (double)right;
+      Interpreter<T>::checkNumberOperands(_expr.getOp(), left, right);
+      return std::stod(left) <= std::stod(right);
 
     case TokenType::BANG_EQUAL:
-      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
+      Interpreter<T>::checkNumberOperands(_expr.getOp(), left, right);
       return !Interpreter<T>::isEqual(left, right);
 
     case TokenType::EQUAL_EQUAL:
-      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
+      Interpreter<T>::checkNumberOperands(_expr.getOp(), left, right);
       return !Interpreter<T>::isEqual(left, right);
 
     case TokenType::SLASH:
-      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
-      return (double)left / (double)right;
+      Interpreter<T>::checkNumberOperands(_expr.getOp(), left, right);
+      return std::stod(left) / std::stod(right);
 
     case TokenType::STAR:
-      Interpreter<T>::checkNumberOperands(_expr.op, left, right);
-      return (double)left * (double)right;
+      Interpreter<T>::checkNumberOperands(_expr.getOp(), left, right);
+      return std::stod(left) * std::stod(right);
   }
 
   return nullptr;
@@ -358,7 +358,7 @@ template <class T>
 Object Interpreter<T>::visitLogicalExpr(const lox::expr::Logical<T>& _expr) {
   Object left = lox::Interpreter<T>::evaluate(_expr.left);
 
-  if (_expr.op.type == TokenType::OR) {
+  if (_expr.getOp().type == TokenType::OR) {
     if (lox::Interpreter<T>::isTruthy(left)) {
       return left;
     }
@@ -415,7 +415,7 @@ Object Interpreter<T>::visitSuperExpr(const lox::expr::Super<T>& _expr) {
 
 template <class T>
 Object Interpreter<T>::visitThisExpr(const lox::expr::This<T>& _expr) {
-  return lookUpVaraible(_expr.keyword, _expr);
+  return lookUpVariable(_expr.keyword, _expr);
 }
 
 
@@ -423,16 +423,16 @@ Object Interpreter<T>::visitThisExpr(const lox::expr::This<T>& _expr) {
 
 template <class T>
 Object Interpreter<T>::visitUnaryExpr(const lox::expr::Unary<T>& _expr) {
-  std::string right = Interpreter<T>::evaluate(_expr.right);
+  std::string right = Interpreter<T>::evaluate(_expr.getRight());
 
-  switch (_expr.op.type) {
+  switch (_expr.getOp().tokentype()) {
     case TokenType::BANG:
-      Interpreter<T>::checkNumberOperands(_expr.op, right);
-      return !Interpreter<T>::isTruthy(right);
+      Interpreter<T>::checkNumberOperands(_expr.getOp(), getRight());
+      return !Interpreter<T>::isTruthy(getRight());
 
     case TokenType::MINUS:
-      Interpreter<T>::checkNumberOperands(_expr.op, right);
-      return -(double)right;
+      Interpreter<T>::checkNumberOperands(_expr.getOp(), getRight());
+      return -std::stod(getRight());
   }
 
   return nullptr;
@@ -462,7 +462,7 @@ Object Interpreter<T>::lookUpVariable(
   }
 }
 
-
+*/
 // helper function
 
 
@@ -503,7 +503,10 @@ bool Interpreter<T>::isTruthy(const std::string& object) {
   }
 
   if (std::is_same<decltype(object), bool>::value) {
-    return bool(object);
+    // https://stackoverflow.com/questions/2165921
+    bool b;
+    std::istringstream(object) >> std::boolalpha >> b;
+    return b;
   }
 
   return true;
@@ -544,10 +547,26 @@ bool Interpreter<T>::isEqual(const std::string& a, const std::string& b) {
 template <class T>
 void Interpreter<T>::interpret(const lox::expr::Expr<T>& expression) {
   try {
-    std::string value = Interpreter<T>::evaluate(expression);
+    Object result = Interpreter<T>::evaluate(expression);
+    std::string value;
+
+    if (std::holds_alternative<std::nullptr_t>(result)) {
+        value = "nullptr";
+
+    } else if (std::holds_alternative<std::string>(result)) {
+      value = std::get<std::string>(result);
+
+    } else if (std::holds_alternative<double>(result)) {
+      value = std::to_string(std::get<double>(result));
+
+    } else if (std::holds_alternative<bool>(result)) {
+        value = std::get<bool>(result) ? "true" : "false";
+    }
     std::cout << Interpreter<T>::stringify(value);
+
   } catch (RuntimeError error) {
-    Lox<T>::runtimeError(error);
+    //Lox<T> _lox;
+    //_lox.runtimeError(error);
   }
 }
 
@@ -573,3 +592,6 @@ std::string Interpreter<T>::stringify(const std::string& object) {
 
 
 }  // namespace lox
+
+
+template class lox::Interpreter<double>;

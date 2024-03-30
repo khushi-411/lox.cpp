@@ -16,7 +16,12 @@ namespace expr {
 
 // https://en.cppreference.com/w/cpp/language/template_specialization
 template <class T>
-class Expr {};
+class Expr {
+ public:
+  friend bool operator==(const Expr<T>& _x, const Expr<T>& _y) {
+    return _x == _y;
+  }
+};
 
 template <class T>
 class Visitor;
@@ -32,7 +37,7 @@ class Assign : public Expr<T> {
  public:
   Assign(const Token& name, const Expr<T>& value);
 
-  T accept(const Visitor<T>& visitor);
+  const T accept(const Visitor<T>& visitor) const;
 };
 
 
@@ -46,7 +51,19 @@ class Binary : public Expr<T> {
  public:
   Binary(const Expr<T>& left, const Token& op, const Expr<T>& right);
 
-  T accept(const Visitor<T>& visitor);
+  const T accept(const Visitor<T>& visitor) const;
+
+  const Expr<T> getLeft() const {
+    return left;
+  }
+
+  const Token& getOp() const {
+    return op;
+  }
+
+  const Expr<T> getRight() const {
+    return right;
+  }
 };
 
 
@@ -63,7 +80,7 @@ class Call : public Expr<T> {
       const Token& paren,
       const std::vector<Expr<T>>& arguments);
 
-  T accept(const Visitor<T>& visitor);
+  const T accept(const Visitor<T>& visitor) const;
 };
 
 
@@ -76,7 +93,7 @@ class Get : public Expr<T> {
  public:
   Get(const Expr<T>& object, const Token& name);
 
-  T accept(const Visitor<T>& visitor);
+  const T accept(const Visitor<T>& visitor) const;
 };
 
 
@@ -88,7 +105,7 @@ class Grouping : public Expr<T> {
  public:
   Grouping(const Expr<T>& expression);
 
-  T accept(const Visitor<T>& visitor);
+  const T accept(const Visitor<T>& visitor) const;
 };
 
 
@@ -100,7 +117,7 @@ class Literal : public Expr<T> {
  public:
   Literal(const Object& value);
 
-  T accept(const Visitor<T>& visitor);
+  const T accept(const Visitor<T>& visitor) const;
 };
 
 
@@ -114,7 +131,11 @@ class Logical : public Expr<T> {
  public:
   Logical(const Expr<T>& left, const Token& op, const Expr<T>& right);
 
-  T accept(const Visitor<T>& visitor);
+  const T accept(const Visitor<T>& visitor) const;
+
+  const Token& getOp() const {
+    return op;
+  }
 };
 
 
@@ -128,7 +149,7 @@ class Set : public Expr<T> {
  public:
   Set(const Expr<T>& object, const Token& name, const Expr<T>& value);
 
-  T accept(const Visitor<T>& visitor);
+  const T accept(const Visitor<T>& visitor) const;
 };
 
 
@@ -141,7 +162,7 @@ class Super : public Expr<T> {
  public:
   Super(const Token& keyword, const Token& method);
 
-  T accept(const Visitor<T>& visitor);
+  const T accept(const Visitor<T>& visitor) const;
 };
 
 
@@ -153,7 +174,7 @@ class This : public Expr<T> {
  public:
   This(const Token& keyword);
 
-  T accept(const Visitor<T>& visitor);
+  const T accept(const Visitor<T>& visitor) const;
 };
 
 
@@ -166,7 +187,15 @@ class Unary : public Expr<T> {
  public:
   Unary(const Token& op, const Expr<T>& right);
 
-  T accept(const Visitor<T>& visitor);
+  const T accept(const Visitor<T>& visitor) const;
+
+  const Token& getOp() const {
+    return op;
+  }
+
+  const Expr<T> getRight() const {
+    return right;
+  }
 };
 
 
@@ -178,25 +207,25 @@ class Variable : public Expr<T> {
  public:
   Variable(const Token& name);
 
-  T accept(const Visitor<T>& visitor);
+  const T accept(const Visitor<T>& visitor) const;
 };
 
 
 template <class T>
 class Visitor : public Expr<T> {
  public:
-  virtual T visitAssignExpr(const Assign<T>& expr) = 0;  // TODO
-  virtual T visitBinaryExpr(const Binary<T>& expr) = 0;
-  virtual T visitCallExpr(const Call<T>& expr) = 0;
-  virtual T visitGetExpr(const Get<T>& expr) = 0;
-  virtual T visitGroupingExpr(const Grouping<T>& expr) = 0;
-  virtual T visitLiteralExpr(const Literal<T>& expr) = 0;
-  virtual T visitLogicalExpr(const Logical<T>& expr) = 0;
-  virtual T visitSetExpr(const Set<T>& expr) = 0;
-  virtual T visitSuperExpr(const Super<T>& expr) = 0;
-  virtual T visitThisExpr(const This<T>& expr) = 0;
-  virtual T visitUnaryExpr(const Unary<T>& expr) = 0;
-  virtual T visitVariableExpr(const Variable<T>& expr) = 0;
+  virtual T visitAssignExpr(const Assign<T>& expr) const = 0;
+  virtual T visitBinaryExpr(const Binary<T>& expr) const = 0;
+  virtual T visitCallExpr(const Call<T>& expr) const = 0;
+  virtual T visitGetExpr(const Get<T>& expr) const = 0;
+  virtual T visitGroupingExpr(const Grouping<T>& expr) const = 0;
+  virtual T visitLiteralExpr(const Literal<T>& expr) const = 0;
+  virtual T visitLogicalExpr(const Logical<T>& expr) const = 0;
+  virtual T visitSetExpr(const Set<T>& expr) const = 0;
+  virtual T visitSuperExpr(const Super<T>& expr) const = 0;
+  virtual T visitThisExpr(const This<T>& expr) const = 0;
+  virtual T visitUnaryExpr(const Unary<T>& expr) const = 0;
+  virtual T visitVariableExpr(const Variable<T>& expr) const = 0;
 };
 
 

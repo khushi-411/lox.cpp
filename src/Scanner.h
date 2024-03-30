@@ -52,6 +52,7 @@ class Scanner {
 };
 
 
+// https://stackoverflow.com/questions/19918369
 template <class T>
 Scanner<T>::Scanner(const std::string& source) : source(source) {}
 

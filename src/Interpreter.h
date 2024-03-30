@@ -23,7 +23,7 @@ class Interpreter : public lox::expr::Visitor<Object>,
   std::unordered_map<lox::expr::Expr<T>, int> locals;
 
  public:
-  Interpreter();
+  //  Interpreter();
 
   void visitBlockStmt(const lox::stmt::Block<T>& _stmt);
   void visitClassStmt(const lox::stmt::Class<T>& _stmt);
