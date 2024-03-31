@@ -73,9 +73,9 @@ void Interpreter<T>::visitClassStmt(const lox::stmt::Class<T>& _stmt) {
   environment.assign(_stmt.name, klass);
 
   return;
-}
+}*/
 
-*/
+
 // expression stmt
 
 template <class T>
@@ -100,39 +100,69 @@ void Interpreter<T>::visitFunctionStmt(const lox::stmt::Function<T>& _stmt) {
 
 template <class T>
 void Interpreter<T>::visitIfStmt(const lox::stmt::If<T>& _stmt) {
-  if (lox::Interpreter<T>::isTruthy(
-          lox::Interpreter<T>::evaluate(_stmt.getCondition()))) {
+  Object value = lox::Interpreter<T>::evaluate(_stmt.getCondition());
+  std::string result;
+
+  if (std::holds_alternative<std::nullptr_t>(value)) {
+    result = "nullptr";
+
+  } else if (std::holds_alternative<std::string>(value)) {
+    result = std::get<std::string>(value);
+
+  } else if (std::holds_alternative<double>(value)) {
+    result = std::to_string(std::get<double>(value));
+
+  } else if (std::holds_alternative<bool>(value)) {
+    result = std::get<bool>(value) ? "true" : "false";
+  }
+
+  if (lox::Interpreter<T>::isTruthy(result)) {
     lox::Interpreter<T>::execute(_stmt.getThenBranch());
 
-  } else if (_stmt.getElseBranch() != nullptr) {
+  } else {  // if (_stmt.getElseBranch() != nullptr) { // TODO
     lox::Interpreter<T>::execute(_stmt.getElseBranch());
   }
 
   return;
 }
 
-/*
+
 // print stmt
 
 template <class T>
 void Interpreter<T>::visitPrintStmt(const lox::stmt::Print<T>& _stmt) {
-  Object value = evaluate(_stmt.expression);
-  std::cout << stringify(value);
+  Object value = evaluate(_stmt.getExpression());
+  std::string result;
+
+  if (std::holds_alternative<std::nullptr_t>(value)) {
+    result = "nullptr";
+
+  } else if (std::holds_alternative<std::string>(value)) {
+    result = std::get<std::string>(value);
+
+  } else if (std::holds_alternative<double>(value)) {
+    result = std::to_string(std::get<double>(value));
+
+  } else if (std::holds_alternative<bool>(value)) {
+    result = std::get<bool>(value) ? "true" : "false";
+  }
+
+  std::cout << stringify(result);
   return;
 }
 
 
 // return stmt
-
+/*
 template <class T>
 void Interpreter<T>::visitReturnStmt(const lox::stmt::Return<T>& _stmt) {
   Object value = nullptr;
 
-  if (_stmt.value != nullptr) {
-    value = lox::Interpreter<T>::evaluate(_stmt.value);
+  if (_stmt.getValue() != nullptr) {
+    value = lox::Interpreter<T>::evaluate(_stmt.getValue());
   }
 
-  throw new Return(value);
+  throw Return(getValue());
 }
 
 
@@ -149,20 +179,35 @@ void Interpreter<T>::visitVarStmt(const lox::stmt::Var<T>& _stmt) {
   environment.define(_stmt.name.getLexeme(), value);
   return;
 }
-
+*/
 
 // while stmt
 
 template <class T>
 void Interpreter<T>::visitWhileStmt(const lox::stmt::While<T>& _stmt) {
-  while (lox::Interpreter<T>::isTruthy(
-      lox::Interpreter<T>::evaluate(_stmt.condition))) {
-    lox::Interpreter<T>::execute(_stmt.body);
+  Object value = lox::Interpreter<T>::evaluate(_stmt.getCondition());
+  std::string result;
+
+  if (std::holds_alternative<std::nullptr_t>(value)) {
+    result = "nullptr";
+
+  } else if (std::holds_alternative<std::string>(value)) {
+    result = std::get<std::string>(value);
+
+  } else if (std::holds_alternative<double>(value)) {
+    result = std::to_string(std::get<double>(value));
+
+  } else if (std::holds_alternative<bool>(value)) {
+    result = std::get<bool>(value) ? "true" : "false";
+  }
+
+  while (lox::Interpreter<T>::isTruthy(result)) {
+    lox::Interpreter<T>::execute(_stmt.getBody());
   }
 
   return;
 }
-*/
+
 
 // interpret
 
@@ -170,21 +215,21 @@ template <class T>
 void Interpreter<T>::interpret(
     const std::vector<lox::stmt::Stmt<T>>& statements) {
   try {
-    for (lox::stmt::Stmt<T> statement : statements) {
+    for (const auto& statement : statements) {
       Interpreter<T>::execute(statement);
     }
   } catch (RuntimeError error) {
-    //Lox<T>::runtimeError(error);
+    // Lox<T>::runtimeError(error);
   }
 }
 
 
 // evaluate
 
-//template <class T>
-//void Interpreter<T>::evaluate(const lox::stmt::Stmt<T>& _stmt) {
-//  return _stmt.accept(*this);
-//}
+// template <class T>
+// void Interpreter<T>::evaluate(const lox::stmt::Stmt<T>& _stmt) {
+//   return _stmt.accept(*this);
+// }
 
 
 // execute
@@ -206,7 +251,7 @@ void executeBlock(
   try {
     environment = environment;
 
-    for (lox::stmt::Stmt<T> statement : statements) {
+    for (const lox::stmt::Stmt<T>& statement : statements) {
       lox::Interpreter<T>::execute(statement);
     }
   } catch (...) {
@@ -551,7 +596,7 @@ void Interpreter<T>::interpret(const lox::expr::Expr<T>& expression) {
     std::string value;
 
     if (std::holds_alternative<std::nullptr_t>(result)) {
-        value = "nullptr";
+      value = "nullptr";
 
     } else if (std::holds_alternative<std::string>(result)) {
       value = std::get<std::string>(result);
@@ -560,12 +605,12 @@ void Interpreter<T>::interpret(const lox::expr::Expr<T>& expression) {
       value = std::to_string(std::get<double>(result));
 
     } else if (std::holds_alternative<bool>(result)) {
-        value = std::get<bool>(result) ? "true" : "false";
+      value = std::get<bool>(result) ? "true" : "false";
     }
     std::cout << Interpreter<T>::stringify(value);
 
   } catch (RuntimeError error) {
-    //Lox<T> _lox;
+    // Lox<T> _lox;
     //_lox.runtimeError(error);
   }
 }

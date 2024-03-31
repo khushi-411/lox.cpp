@@ -23,7 +23,7 @@ class Interpreter : public lox::expr::Visitor<Object>,
   std::unordered_map<lox::expr::Expr<T>, int> locals;
 
  public:
-  //  Interpreter();
+  // Interpreter();
 
   void visitBlockStmt(const lox::stmt::Block<T>& _stmt);
   void visitClassStmt(const lox::stmt::Class<T>& _stmt);
@@ -37,7 +37,7 @@ class Interpreter : public lox::expr::Visitor<Object>,
 
   void interpret(const std::vector<lox::stmt::Stmt<T>>& statements);
   void execute(const lox::stmt::Stmt<T>& _stmt);
-  void evaluate(const lox::stmt::Stmt<T>& _stmt);
+  // void evaluate(const lox::stmt::Stmt<T>& _stmt);
   void resolve(const lox::expr::Expr<T>& _expr, const int& depth);
   void executeBlock(
       const std::vector<lox::stmt::Stmt<T>>& statements,

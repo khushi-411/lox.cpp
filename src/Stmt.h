@@ -17,47 +17,47 @@ class Visitor;
 
 template <class T>
 class Stmt {
-    public:
-        virtual T accept(const Visitor<T>& visitor) = 0;
+ public:
+  virtual void accept(const Visitor<void>& visitor) const = 0;
 };
 
 
-//template <class T>
-//class Visitor;
+// template <class T>
+// class Visitor;
 
 
 template <typename T>
 class Block : public Stmt<T> {
  private:
-  const std::vector<Stmt<T>> statements;
+  const std::vector<Stmt<T>>& statements;
 
  public:
   Block(const std::vector<Stmt<T>>& statements);
 
   const T accept(const Visitor<T>& visitor) const;
-  const std::vector<Stmt<T>> getStatements() const;
+  const std::vector<Stmt<T>>& getStatements() const;
 };
 
 
 template <class T>
 class Expression : public Stmt<T> {
  private:
-  const lox::expr::Expr<T> expression;
+  const lox::expr::Expr<T>& expression;
 
  public:
   Expression(const lox::expr::Expr<T>& expression);
 
   const T accept(const Visitor<T>& visitor) const;
-  const lox::expr::Expr<T> getExpression() const;
+  const lox::expr::Expr<T>& getExpression() const;
 };
 
 
 template <class T>
 class Function : public Stmt<T> {
  private:
-  const Token name;
-  const std::vector<Token> params;
-  const std::vector<Stmt<T>> body;
+  const Token& name;
+  const std::vector<Token>& params;
+  const std::vector<Stmt<T>>& body;
 
  public:
   Function(
@@ -72,9 +72,9 @@ class Function : public Stmt<T> {
 template <typename T>
 class Class : public Stmt<T> {
  private:
-  const Token name;
-  const lox::expr::Variable<T> superclass;
-  const std::vector<lox::stmt::Function<T>> methods;
+  const Token& name;
+  const lox::expr::Variable<T>& superclass;
+  const std::vector<lox::stmt::Function<T>>& methods;
 
  public:
   Class(
@@ -85,7 +85,7 @@ class Class : public Stmt<T> {
   const T accept(const Visitor<T>& visitor) const;
 
   const Token& getName() const;
-  const lox::expr::Variable<T> getSuperclass() const;
+  const lox::expr::Variable<T>& getSuperclass() const;
   const std::vector<lox::stmt::Function<T>>& getMethods() const;
 };
 
@@ -93,7 +93,7 @@ class Class : public Stmt<T> {
 template <class T>
 class If : public Stmt<T> {
  private:
-  const lox::expr::Expr<T> condition;
+  const lox::expr::Expr<T>& condition;
   const Stmt<T>* thenBranch;
   const Stmt<T>* elseBranch;
 
@@ -113,33 +113,38 @@ class If : public Stmt<T> {
 template <class T>
 class Print : public Stmt<T> {
  private:
-  const lox::expr::Expr<T> expression;
+  const lox::expr::Expr<T>& expression;
 
  public:
   Print(const lox::expr::Expr<T>& expression);
 
   const T accept(const Visitor<T>& visitor) const;
+
+  const lox::expr::Expr<T>& getExpression() const;
 };
 
 
 template <class T>
 class Return : public Stmt<T> {
  private:
-  const Token keyword;
-  const lox::expr::Expr<T> value;
+  const Token& keyword;
+  const lox::expr::Expr<T>& value;
 
  public:
   Return(const Token& keyword, const lox::expr::Expr<T>& value);
 
   const T accept(const Visitor<T>& visitor) const;
+
+  const Token& getKeyword() const;
+  const lox::expr::Expr<T>& getValue() const;
 };
 
 
 template <class T>
 class Var : public Stmt<T> {
  private:
-  const Token name;
-  const lox::expr::Expr<T> initializer;
+  const Token& name;
+  const lox::expr::Expr<T>& initializer;
 
  public:
   Var(const Token& name, const lox::expr::Expr<T>& initializer);
@@ -151,18 +156,21 @@ class Var : public Stmt<T> {
 template <class T>
 class While : public Stmt<T> {
  private:
-  const lox::expr::Expr<T> condition;
-  const Stmt<T> body;
+  const lox::expr::Expr<T>& condition;
+  const Stmt<T>& body;
 
  public:
   While(const lox::expr::Expr<T>& condition, const Stmt<T>& body);
 
   const T accept(const Visitor<T>& visitor) const;
+
+  const lox::expr::Expr<T>& getCondition() const;
+  const Stmt<T>& getBody() const;
 };
 
 
-template <class T>
-T accept(const Visitor<T>& visitor);
+// template <class T>
+// T accept(const Visitor<T>& visitor);
 
 
 template <class T>

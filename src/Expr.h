@@ -14,6 +14,11 @@ namespace lox {
 
 namespace expr {
 
+
+template <class T>
+class Visitor;
+
+
 // https://en.cppreference.com/w/cpp/language/template_specialization
 template <class T>
 class Expr {
@@ -21,18 +26,20 @@ class Expr {
   friend bool operator==(const Expr<T>& _x, const Expr<T>& _y) {
     return _x == _y;
   }
+
+  virtual Object accept(const Visitor<Object>& visitor) const = 0;
 };
 
-template <class T>
-class Visitor;
+// template <class T>
+// class Visitor;
 
 
 // TODO: template specialization
 template <class T>
 class Assign : public Expr<T> {
  private:
-  const Token name;
-  const Expr<T> value;
+  const Token& name;
+  const Expr<T>& value;
 
  public:
   Assign(const Token& name, const Expr<T>& value);
@@ -44,16 +51,16 @@ class Assign : public Expr<T> {
 template <class T>
 class Binary : public Expr<T> {
  private:
-  const Expr<T> left;
-  const Token op;
-  const Expr<T> right;
+  const Expr<T>& left;
+  const Token& op;
+  const Expr<T>& right;
 
  public:
   Binary(const Expr<T>& left, const Token& op, const Expr<T>& right);
 
   const T accept(const Visitor<T>& visitor) const;
 
-  const Expr<T> getLeft() const {
+  const Expr<T>& getLeft() const {
     return left;
   }
 
@@ -61,7 +68,7 @@ class Binary : public Expr<T> {
     return op;
   }
 
-  const Expr<T> getRight() const {
+  const Expr<T>& getRight() const {
     return right;
   }
 };
@@ -70,9 +77,9 @@ class Binary : public Expr<T> {
 template <class T>
 class Call : public Expr<T> {
  private:
-  const Expr<T> callee;
-  const Token paren;
-  const std::vector<Expr<T>> arguments;
+  const Expr<T>& callee;
+  const Token& paren;
+  const std::vector<Expr<T>>& arguments;
 
  public:
   Call(
@@ -87,8 +94,8 @@ class Call : public Expr<T> {
 template <class T>
 class Get : public Expr<T> {
  private:
-  const Expr<T> object;
-  const Token name;
+  const Expr<T>& object;
+  const Token& name;
 
  public:
   Get(const Expr<T>& object, const Token& name);
@@ -100,7 +107,7 @@ class Get : public Expr<T> {
 template <class T>
 class Grouping : public Expr<T> {
  private:
-  const Expr<T> expression;
+  const Expr<T>& expression;
 
  public:
   Grouping(const Expr<T>& expression);
@@ -112,7 +119,7 @@ class Grouping : public Expr<T> {
 template <class T>
 class Literal : public Expr<T> {
  private:
-  const std::string value;
+  const std::string& value;
 
  public:
   Literal(const Object& value);
@@ -124,9 +131,9 @@ class Literal : public Expr<T> {
 template <class T>
 class Logical : public Expr<T> {
  private:
-  const Expr<T> left;
-  const Token op;
-  const Expr<T> right;
+  const Expr<T>& left;
+  const Token& op;
+  const Expr<T>& right;
 
  public:
   Logical(const Expr<T>& left, const Token& op, const Expr<T>& right);
@@ -142,9 +149,9 @@ class Logical : public Expr<T> {
 template <class T>
 class Set : public Expr<T> {
  private:
-  const Expr<T> object;
-  const Token name;
-  const Expr<T> value;
+  const Expr<T>& object;
+  const Token& name;
+  const Expr<T>& value;
 
  public:
   Set(const Expr<T>& object, const Token& name, const Expr<T>& value);
@@ -156,8 +163,8 @@ class Set : public Expr<T> {
 template <class T>
 class Super : public Expr<T> {
  private:
-  const Token keyword;
-  const Token method;
+  const Token& keyword;
+  const Token& method;
 
  public:
   Super(const Token& keyword, const Token& method);
@@ -169,7 +176,7 @@ class Super : public Expr<T> {
 template <class T>
 class This : public Expr<T> {
  private:
-  const Token keyword;
+  const Token& keyword;
 
  public:
   This(const Token& keyword);
@@ -181,8 +188,8 @@ class This : public Expr<T> {
 template <class T>
 class Unary : public Expr<T> {
  private:
-  const Token op;
-  const Expr<T> right;
+  const Token& op;
+  const Expr<T>& right;
 
  public:
   Unary(const Token& op, const Expr<T>& right);
@@ -193,7 +200,7 @@ class Unary : public Expr<T> {
     return op;
   }
 
-  const Expr<T> getRight() const {
+  const Expr<T>& getRight() const {
     return right;
   }
 };
@@ -202,7 +209,7 @@ class Unary : public Expr<T> {
 template <class T>
 class Variable : public Expr<T> {
  private:
-  const Token name;
+  const Token& name;
 
  public:
   Variable(const Token& name);
@@ -229,8 +236,8 @@ class Visitor : public Expr<T> {
 };
 
 
-template <typename T>
-T accept(const Visitor<T>& visitor);
+// template <typename T>
+// T accept(const Visitor<T>& visitor);
 
 
 }  // namespace expr
