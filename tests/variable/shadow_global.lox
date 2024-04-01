@@ -1,0 +1,7 @@
+var a = "global";
+{
+  var a = "shadow";
+  print a;
+}
+
+print a;
