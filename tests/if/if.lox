@@ -1,0 +1,9 @@
+if (true) print "good";
+if (false) print "bad";
+
+// block body
+if (true) { print "block"; }
+
+// assignment in if condition
+var a = false;
+if (a = true) print a;

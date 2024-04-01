@@ -1,0 +1,5 @@
+// error, as arg name already exists.
+
+fun foo(arg, arg) {
+  "body";
+}

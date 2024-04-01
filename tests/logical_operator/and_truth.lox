@@ -1,0 +1,10 @@
+print false and "bad";
+print nil and "bad";
+
+print true and "ok";
+
+// python prints 0, while lox prints 'ok'
+print 0 and "ok";
+
+// python prints '', while lox prints 'ok'
+print "" and "ok";
