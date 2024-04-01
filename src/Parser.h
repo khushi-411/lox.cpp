@@ -698,4 +698,6 @@ void Parser<T>::synchronize() {
 
 }  // namespace lox
 
+// template class lox::parser::Parser<double>;
+
 #endif

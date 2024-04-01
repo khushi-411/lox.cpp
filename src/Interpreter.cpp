@@ -482,13 +482,13 @@ Object Interpreter<T>::visitUnaryExpr(const lox::expr::Unary<T>& _expr) {
 
   return nullptr;
 }
-
+*/
 
 // variable expr
 
 template <class T>
 Object Interpreter<T>::visitVariableExpr(const lox::expr::Variable<T>& _expr) {
-  return Interpreter<T>::lookUpVariable(_expr.name, _expr);
+  return Interpreter<T>::lookUpVariable(_expr.getName(), _expr);
 }
 
 
@@ -498,7 +498,7 @@ template <class T>
 Object Interpreter<T>::lookUpVariable(
     const Token& name,
     const lox::expr::Expr<T>& _expr) {
-  int distance = locals.find(_expr);
+  int distance = locals[_expr];
 
   if (distance != NULL) {
     return environment.getAt(distance, name.getLexeme());
@@ -507,7 +507,7 @@ Object Interpreter<T>::lookUpVariable(
   }
 }
 
-*/
+
 // helper function
 
 
@@ -639,4 +639,4 @@ std::string Interpreter<T>::stringify(const std::string& object) {
 }  // namespace lox
 
 
-template class lox::Interpreter<double>;
+// template class lox::Interpreter<double>;

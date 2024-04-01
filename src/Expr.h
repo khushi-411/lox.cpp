@@ -27,7 +27,7 @@ class Expr {
     return _x == _y;
   }
 
-  virtual Object accept(const Visitor<Object>& visitor) const = 0;
+  //  virtual Object accept(const Visitor<Object>& visitor) const = 0;
 };
 
 // template <class T>
@@ -215,6 +215,10 @@ class Variable : public Expr<T> {
   Variable(const Token& name);
 
   const T accept(const Visitor<T>& visitor) const;
+
+  const Token& getName() const {
+    return name;
+  }
 };
 
 

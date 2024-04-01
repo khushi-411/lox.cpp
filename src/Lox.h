@@ -80,17 +80,16 @@ class Lox {
     }
 
     lox::parser::Parser<T> parser(tokens);
-    // lox::expr::Expr<T>* expression = parser.parse();
-    //  std::vector<lox::stmt::Stmt<T>> statements = parser.parse();
+    lox::expr::Expr<T> expression = parser.parse();
+    // std::vector<lox::stmt::Stmt<T>> statements = parser.parse();
 
     // To ensure code has error and we have to return the program
     if (hadError) {
       return;
     }
 
-    // lox::Resolver<T> resolver;
-    // resolver(interpreter);
-    // resolver.resolve(statements);
+    // lox::Resolver<T> resolver(interpreter);
+    //  resolver.resolve(statements);
 
     if (hadError) {
       return;
