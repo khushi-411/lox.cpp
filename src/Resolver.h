@@ -78,4 +78,6 @@ class Resolver : public lox::expr::Visitor<void>,
 
 }  // namespace lox
 
+// template class lox::Resolver<double>;
+
 #endif

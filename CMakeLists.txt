@@ -29,7 +29,6 @@ list(APPEND LOXCPP_SRCS
 
 set(LOXCPP_MAIN_SRC)
 list(APPEND LOXCPP_MAIN_SRC
-    ${LOXCPP_SRCS_DIR}/Lox.cpp
     ${LOXCPP_SRCS_DIR}/main.cpp
 )
 

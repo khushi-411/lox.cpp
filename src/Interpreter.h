@@ -18,11 +18,13 @@ template <class T>
 class Interpreter : public lox::expr::Visitor<Object>,
                     public lox::stmt::Visitor<void> {
  private:
-  Environment globals = new Environment();
-  Environment environment = globals;
+  Environment globals;  // = new Environment();
+  Environment environment;  // = globals;
   std::unordered_map<lox::expr::Expr<T>, int> locals;
 
  public:
+  // Interpreter();
+
   void visitBlockStmt(const lox::stmt::Block<T>& _stmt);
   void visitClassStmt(const lox::stmt::Class<T>& _stmt);
   void visitExpressionStmt(const lox::stmt::Expression<T>& _stmt);
@@ -35,7 +37,7 @@ class Interpreter : public lox::expr::Visitor<Object>,
 
   void interpret(const std::vector<lox::stmt::Stmt<T>>& statements);
   void execute(const lox::stmt::Stmt<T>& _stmt);
-  void evaluate(const lox::stmt::Stmt<T>& _stmt);
+  // void evaluate(const lox::stmt::Stmt<T>& _stmt);
   void resolve(const lox::expr::Expr<T>& _expr, const int& depth);
   void executeBlock(
       const std::vector<lox::stmt::Stmt<T>>& statements,

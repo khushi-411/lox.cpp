@@ -31,6 +31,7 @@ class Token {
   const std::string& to_string() const;
   const TokenType& tokentype() const;
   const std::string& getLexeme() const;
+  const Object& getLiteral() const;
   const int& getLine() const;
 };
 
