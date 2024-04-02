@@ -139,14 +139,14 @@ lox::stmt::Stmt<T> Parser<T>::forStatement() {
     initializer = Parser<T>::expressionStatement();
   }
 
-  lox::expr::Expr<T> condition = nullptr;
+  lox::expr::Expr<T> condition;  // = nullptr;
   if (!Parser<T>::match(TokenType::SEMICOLON)) {
     condition = Parser<T>::expression();
   }
 
   Parser<T>::consume(TokenType::SEMICOLON, "Expect ';' after loop condition.");
 
-  lox::expr::Expr<T> increment = nullptr;
+  lox::expr::Expr<T> increment;  // = nullptr;
   if (!Parser<T>::check(TokenType::RIGHT_PAREN)) {
     increment = Parser<T>::expression();
   }
@@ -202,7 +202,7 @@ template <class T>
 lox::stmt::Stmt<T> Parser<T>::printStatement() {
   lox::expr::Expr<T> value = Parser<T>::expression();
   Parser<T>::consume(TokenType::SEMICOLON, "Expect ';' after value.");
-  return new lox::stmt::Print<T>(value);
+  return lox::stmt::Print<T>(value);
 }
 
 
@@ -262,7 +262,7 @@ template <class T>
 lox::stmt::Stmt<T> Parser<T>::expressionStatement() {
   lox::expr::Expr<T> _expr = Parser<T>::expression();
   Parser<T>::consume(TokenType::SEMICOLON, "Expect ';' after expression.");
-  return new lox::stmt::Expression<T>(_expr);
+  return lox::stmt::Expression<T>(_expr);
 }
 
 

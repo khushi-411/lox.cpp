@@ -45,6 +45,14 @@ class Assign : public Expr<T> {
   Assign(const Token& name, const Expr<T>& value);
 
   const T accept(const Visitor<T>& visitor) const;
+
+  const Token& getName() const {
+    return name;
+  }
+
+  const Expr<T>& getValue() const {
+    return value;
+  }
 };
 
 
@@ -88,6 +96,18 @@ class Call : public Expr<T> {
       const std::vector<Expr<T>>& arguments);
 
   const T accept(const Visitor<T>& visitor) const;
+
+  const Expr<T>& getCallee() const {
+    return callee;
+  }
+
+  const Token& getParen() const {
+    return paren;
+  }
+
+  const std::vector<Expr<T>>& getArguments() const {
+    return arguments;
+  }
 };
 
 
@@ -101,6 +121,14 @@ class Get : public Expr<T> {
   Get(const Expr<T>& object, const Token& name);
 
   const T accept(const Visitor<T>& visitor) const;
+
+  const Expr<T>& getObject() const {
+    return object;
+  }
+
+  const Token& getName() const {
+    return name;
+  }
 };
 
 
@@ -113,6 +141,10 @@ class Grouping : public Expr<T> {
   Grouping(const Expr<T>& expression);
 
   const T accept(const Visitor<T>& visitor) const;
+
+  const Expr<T>& getExpression() const {
+    return expression;
+  }
 };
 
 
@@ -125,6 +157,10 @@ class Literal : public Expr<T> {
   Literal(const Object& value);
 
   const T accept(const Visitor<T>& visitor) const;
+
+  const std::string& getValue() const {
+    return value;
+  }
 };
 
 
@@ -140,8 +176,16 @@ class Logical : public Expr<T> {
 
   const T accept(const Visitor<T>& visitor) const;
 
+  const Expr<T>& getLeft() const {
+    return left;
+  }
+
   const Token& getOp() const {
     return op;
+  }
+
+  const Expr<T>& getRight() const {
+    return right;
   }
 };
 
@@ -157,6 +201,18 @@ class Set : public Expr<T> {
   Set(const Expr<T>& object, const Token& name, const Expr<T>& value);
 
   const T accept(const Visitor<T>& visitor) const;
+
+  const Expr<T>& getObject() const {
+    return object;
+  }
+
+  const Token& getName() const {
+    return name;
+  }
+
+  const Expr<T>& getValue() const {
+    return value;
+  }
 };
 
 
@@ -170,6 +226,14 @@ class Super : public Expr<T> {
   Super(const Token& keyword, const Token& method);
 
   const T accept(const Visitor<T>& visitor) const;
+
+  const Token& getKeyword() const {
+    return keyword;
+  }
+
+  const Token& getMethod() const {
+    return method;
+  }
 };
 
 
@@ -182,6 +246,10 @@ class This : public Expr<T> {
   This(const Token& keyword);
 
   const T accept(const Visitor<T>& visitor) const;
+
+  const Token& getKeyword() const {
+    return keyword;
+  }
 };
 
 

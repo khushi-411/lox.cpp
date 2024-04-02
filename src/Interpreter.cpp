@@ -35,7 +35,7 @@ void Interpreter<T>::visitBlockStmt(const lox::stmt::Block<T>& _stmt) {
 
 
 // class stmt
-/*
+
 template <class T>
 void Interpreter<T>::visitClassStmt(const lox::stmt::Class<T>& _stmt) {
   Object superclass = nullptr;
@@ -44,23 +44,23 @@ void Interpreter<T>::visitClassStmt(const lox::stmt::Class<T>& _stmt) {
     superclass = lox::Interpreter<T>::evaluate(_stmt.getSuperclass());
     if (!(instanceof <LoxClass<T>>(superclass))) {
       throw new RuntimeError(
-          _stmt.superclass.name, "Superclass must be a class.");
+          _stmt.getSuperclass().getName(), "Superclass must be a class.");
     }
   }
 
-  environment.define(_stmt.name.getLexeme(), nullptr);
+  environment.define(_stmt.getName().getLexeme(), nullptr);
 
-  if (_stmt.superclass != nullptr) {
+  if (_stmt.getSuperclass() != nullptr) {
     environment = Environment(environment);
     environment.define("super", superclass);
   }
 
   std::unordered_map<std::string, LoxFunction<T>> methods;
 
-  for (lox::stmt::Function<T> method : _stmt.methods) {
+  for (lox::stmt::Function<T> method : _stmt.getMethods()) {
     LoxFunction<T> function = new LoxFunction(
-        method, environment, method.name.getLexeme().equals("init"));
-    methods[method.name.getLexeme()] = function;
+        method, environment, method.getName().getLexeme().equals("init"));
+    methods[method.getName().getLexeme()] = function;
   }
 
   LoxClass<T> klass =
@@ -73,7 +73,7 @@ void Interpreter<T>::visitClassStmt(const lox::stmt::Class<T>& _stmt) {
   environment.assign(_stmt.name, klass);
 
   return;
-}*/
+}
 
 
 // expression stmt
@@ -85,7 +85,7 @@ void Interpreter<T>::visitExpressionStmt(
   return;
 }
 
-/*
+
 // function stmt
 
 template <class T>
@@ -94,7 +94,7 @@ void Interpreter<T>::visitFunctionStmt(const lox::stmt::Function<T>& _stmt) {
   environment.define(_stmt.name.getLexeme(), function);
   return;
 }
-*/
+
 
 // if stmt
 
@@ -153,7 +153,7 @@ void Interpreter<T>::visitPrintStmt(const lox::stmt::Print<T>& _stmt) {
 
 
 // return stmt
-/*
+
 template <class T>
 void Interpreter<T>::visitReturnStmt(const lox::stmt::Return<T>& _stmt) {
   Object value = nullptr;
@@ -162,7 +162,7 @@ void Interpreter<T>::visitReturnStmt(const lox::stmt::Return<T>& _stmt) {
     value = lox::Interpreter<T>::evaluate(_stmt.getValue());
   }
 
-  throw Return(getValue());
+  throw Return(lox::stmt::Return<T>::getValue());
 }
 
 
@@ -179,7 +179,7 @@ void Interpreter<T>::visitVarStmt(const lox::stmt::Var<T>& _stmt) {
   environment.define(_stmt.name.getLexeme(), value);
   return;
 }
-*/
+
 
 // while stmt
 
@@ -219,7 +219,8 @@ void Interpreter<T>::interpret(
       Interpreter<T>::execute(statement);
     }
   } catch (RuntimeError error) {
-    // Lox<T>::runtimeError(error);
+    Lox<T> _lox;
+    _lox.runtimeError(error);
   }
 }
 
@@ -259,18 +260,18 @@ void executeBlock(
   }
 }
 
-/*
+
 // assign expr
 
 template <class T>
 Object Interpreter<T>::visitAssignExpr(const lox::expr::Assign<T>& _expr) {
-  Object value = lox::Interpreter<T>::evaluate(_expr.value);
+  Object value = lox::Interpreter<T>::evaluate(_expr.getValue());
   int distance = locals[_expr];
 
   if (distance != NULL) {
-    environment.assignAt(distance, _expr.name, value);
+    environment.assignAt(distance, _expr.getName(), value);
   } else {
-    globals.assign(_expr.name, value);
+    globals.assign(_expr.getName(), value);
   }
 
   return value;
@@ -343,7 +344,7 @@ Object Interpreter<T>::visitBinaryExpr(const lox::expr::Binary<T>& _expr) {
 
 template <class T>
 Object Interpreter<T>::visitCallExpr(const lox::expr::Call<T>& _expr) {
-  Object callee = lox::Interpreter<T>::evaluate(_expr.callee);
+  Object callee = lox::Interpreter<T>::evaluate(_expr.getCallee());
 
   std::vector<Object> arguments;
   for (lox::expr::Expr<T> argument : _expr.arguments) {
@@ -385,7 +386,7 @@ Object Interpreter<T>::visitGetExpr(const lox::expr::Get<T>& _expr) {
 
 template <class T>
 Object Interpreter<T>::visitGroupingExpr(const lox::expr::Grouping<T>& _expr) {
-  return Interpreter<T>::evaluate(_expr.expression);
+  return Interpreter<T>::evaluate(_expr.getExpression());
 }
 
 
@@ -393,7 +394,7 @@ Object Interpreter<T>::visitGroupingExpr(const lox::expr::Grouping<T>& _expr) {
 
 template <class T>
 Object Interpreter<T>::visitLiteralExpr(const lox::expr::Literal<T>& _expr) {
-  return _expr.value;
+  return _expr.getValue();
 }
 
 
@@ -401,7 +402,7 @@ Object Interpreter<T>::visitLiteralExpr(const lox::expr::Literal<T>& _expr) {
 
 template <class T>
 Object Interpreter<T>::visitLogicalExpr(const lox::expr::Logical<T>& _expr) {
-  Object left = lox::Interpreter<T>::evaluate(_expr.left);
+  Object left = lox::Interpreter<T>::evaluate(_expr.getLeft());
 
   if (_expr.getOp().type == TokenType::OR) {
     if (lox::Interpreter<T>::isTruthy(left)) {
@@ -413,7 +414,7 @@ Object Interpreter<T>::visitLogicalExpr(const lox::expr::Logical<T>& _expr) {
     }
   }
 
-  return lox::Interpreter<T>::evaluate(_expr.right);
+  return lox::Interpreter<T>::evaluate(_expr.getRight());
 }
 
 
@@ -421,14 +422,14 @@ Object Interpreter<T>::visitLogicalExpr(const lox::expr::Logical<T>& _expr) {
 
 template <class T>
 Object Interpreter<T>::visitSetExpr(const lox::expr::Set<T>& _expr) {
-  Object object = lox::Interpreter<T>::evaluate(_expr.object);
+  Object object = lox::Interpreter<T>::evaluate(_expr.getObject());
 
   if (!(instanceof <LoxInstance<T>>(object))) {
-    throw new RuntimeError(_expr.name, "Only instances have fields.");
+    throw new RuntimeError(_expr.getName(), "Only instances have fields.");
   }
 
-  Object value = lox::Interpreter<T>::evaluate(_expr.value);
-  ((LoxInstance<T>)object).set(_expr.name, value);
+  Object value = lox::Interpreter<T>::evaluate(_expr.getValue());
+  ((LoxInstance<T>)object).set(_expr.getName(), value);
 
   return value;
 }
@@ -445,11 +446,12 @@ Object Interpreter<T>::visitSuperExpr(const lox::expr::Super<T>& _expr) {
   LoxInstance<T> object =
       (LoxInstance<T>)environment.getAt(distance - 1, "this");
 
-  LoxFunction<T> method = superclass.findMethod(_expr.method.getLexeme);
+  LoxFunction<T> method = superclass.findMethod(_expr.getMethod().getLexeme());
 
   if (method == nullptr) {
     throw new RuntimeError(
-        _expr.method, "Undefined property '" + _expr.method.getLexeme() + "'.");
+        _expr.getMethod(),
+        "Undefined property '" + _expr.getMethod().getLexeme() + "'.");
   }
 
   return method.bind(object);
@@ -460,7 +462,7 @@ Object Interpreter<T>::visitSuperExpr(const lox::expr::Super<T>& _expr) {
 
 template <class T>
 Object Interpreter<T>::visitThisExpr(const lox::expr::This<T>& _expr) {
-  return lookUpVariable(_expr.keyword, _expr);
+  return lookUpVariable(_expr.getKeyword(), _expr);
 }
 
 
@@ -472,17 +474,17 @@ Object Interpreter<T>::visitUnaryExpr(const lox::expr::Unary<T>& _expr) {
 
   switch (_expr.getOp().tokentype()) {
     case TokenType::BANG:
-      Interpreter<T>::checkNumberOperands(_expr.getOp(), getRight());
-      return !Interpreter<T>::isTruthy(getRight());
+      Interpreter<T>::checkNumberOperands(_expr.getOp(), right);
+      return !Interpreter<T>::isTruthy(right);
 
     case TokenType::MINUS:
-      Interpreter<T>::checkNumberOperands(_expr.getOp(), getRight());
-      return -std::stod(getRight());
+      Interpreter<T>::checkNumberOperands(_expr.getOp(), right);
+      return -std::stod(right);
   }
 
   return nullptr;
 }
-*/
+
 
 // variable expr
 
@@ -610,8 +612,8 @@ void Interpreter<T>::interpret(const lox::expr::Expr<T>& expression) {
     std::cout << Interpreter<T>::stringify(value);
 
   } catch (RuntimeError error) {
-    // Lox<T> _lox;
-    //_lox.runtimeError(error);
+    Lox<T> _lox;
+    _lox.runtimeError(error);
   }
 }
 

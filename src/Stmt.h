@@ -18,7 +18,11 @@ class Visitor;
 template <class T>
 class Stmt {
  public:
-  virtual void accept(const Visitor<void>& visitor) const = 0;
+  friend bool operator==(const Stmt<T>& _x, const Stmt<T>& _y) {
+    return _x == _y;
+  }
+
+  // virtual void accept(const Visitor<void>& visitor) const = 0;
 };
 
 
@@ -66,6 +70,10 @@ class Function : public Stmt<T> {
       const std::vector<Stmt<T>>& body);
 
   const T accept(const Visitor<T>& visitor) const;
+
+  const Token& getName() const;
+  const std::vector<Token>& getParams() const;
+  const std::vector<Stmt<T>>& getBody() const;
 };
 
 

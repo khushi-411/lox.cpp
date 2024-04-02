@@ -61,6 +61,24 @@ const T lox::stmt::Function<T>::accept(const Visitor<T>& visitor) const {
 }
 
 
+template <class T>
+const Token& lox::stmt::Function<T>::getName() const {
+  return name;
+}
+
+
+template <class T>
+const std::vector<Token>& lox::stmt::Function<T>::getParams() const {
+  return params;
+}
+
+
+template <class T>
+const std::vector<lox::stmt::Stmt<T>>& lox::stmt::Function<T>::getBody() const {
+  return body;
+}
+
+
 // class
 
 template <class T>
