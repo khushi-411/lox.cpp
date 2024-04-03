@@ -15,16 +15,14 @@ using Object = std::variant<std::nullptr_t, std::string, double, bool>;
 namespace lox {
 
 
-template <class T>
-LoxClass<T>::LoxClass(
+LoxClass::LoxClass(
     const std::string& name,
-    LoxClass<T>* superclass,
-    const std::unordered_map<std::string, LoxFunction<T>>& methods)
+    LoxClass* superclass,
+    const std::unordered_map<std::string, LoxFunction>& methods)
     : superclass(superclass), name(name), methods(methods) {}
 
 
-template <class T>
-LoxFunction<T> LoxClass<T>::findMethod(const std::string& name) {
+LoxFunction LoxClass::findMethod(const std::string& name) {
   auto it = methods.find(name);
 
   if (it != methods.end()) {
@@ -38,18 +36,16 @@ LoxFunction<T> LoxClass<T>::findMethod(const std::string& name) {
 }
 
 
-template <class T>
-std::string LoxClass<T>::to_string() {
+std::string LoxClass::to_string() {
   return name;
 }
 
 
-template <class T>
-Object LoxClass<T>::call(
-    const Interpreter<T>& interpreter,
+Object LoxClass::call(
+    const Interpreter& interpreter,
     const std::vector<Object>& arguments) {
-  LoxInstance<T>* instance = new LoxInstance<T>(*this);
-  LoxFunction<T> initializer = LoxClass<T>::findMethod("init");
+  LoxInstance* instance = new LoxInstance(*this);
+  LoxFunction initializer = LoxClass::findMethod("init");
 
   if (initializer != nullptr) {
     initializer.bind(instance).call(interpreter, arguments);
@@ -59,9 +55,8 @@ Object LoxClass<T>::call(
 }
 
 
-template <class T>
-int LoxClass<T>::arity() {
-  LoxFunction<T> initializer = LoxClass<T>::findMethod("init");
+int LoxClass::arity() {
+  LoxFunction initializer = LoxClass::findMethod("init");
 
   if (initializer == nullptr) {
     return 0;
@@ -71,8 +66,7 @@ int LoxClass<T>::arity() {
 }
 
 
-template <class T>
-const std::string& LoxClass<T>::getName() {
+const std::string& LoxClass::getName() {
   return name;
 }
 

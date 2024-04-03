@@ -13,73 +13,66 @@ namespace lox {
 
 // assign
 
-template <class T>
-lox::expr::Assign<T>::Assign(const Token& name, const lox::expr::Expr<T>& value)
+lox::expr::Assign::Assign(const Token& name, const lox::expr::Expr& value)
     : name(name), value(value) {}
 
 
 template <class T>
-const T lox::expr::Assign<T>::accept(
-    const lox::expr::Visitor<T>& visitor) const {
+const T lox::expr::Assign::accept(const lox::expr::Visitor<T>& visitor) const {
   return visitor.visitAssignExpr(*this);
 }
 
 
 // binary
 
-template <class T>
-lox::expr::Binary<T>::Binary(
-    const lox::expr::Expr<T>& left,
+lox::expr::Binary::Binary(
+    const lox::expr::Expr& left,
     const Token& op,
-    const lox::expr::Expr<T>& right)
+    const lox::expr::Expr& right)
     : left(left), op(op), right(right) {}
 
 
 template <class T>
-const T lox::expr::Binary<T>::accept(
-    const lox::expr::Visitor<T>& visitor) const {
+const T lox::expr::Binary::accept(const lox::expr::Visitor<T>& visitor) const {
   return visitor.visitBinaryExpr(*this);
 }
 
 
 // call
 
-template <class T>
-lox::expr::Call<T>::Call(
-    const lox::expr::Expr<T>& callee,
+lox::expr::Call::Call(
+    const lox::expr::Expr& callee,
     const Token& paren,
-    const std::vector<lox::expr::Expr<T>>& arguments)
+    const std::vector<lox::expr::Expr>& arguments)
     : callee(callee), paren(paren), arguments(arguments) {}
 
 
 template <class T>
-const T lox::expr::Call<T>::accept(const lox::expr::Visitor<T>& visitor) const {
+const T lox::expr::Call::accept(const lox::expr::Visitor<T>& visitor) const {
   return visitor.visitCallExpr(*this);
 }
 
 
 // get
 
-template <class T>
-lox::expr::Get<T>::Get(const lox::expr::Expr<T>& object, const Token& name)
+lox::expr::Get::Get(const lox::expr::Expr& object, const Token& name)
     : object(object), name(name) {}
 
 
 template <class T>
-const T lox::expr::Get<T>::accept(const lox::expr::Visitor<T>& visitor) const {
+const T lox::expr::Get::accept(const lox::expr::Visitor<T>& visitor) const {
   return visitor.visitGetExpr(*this);
 }
 
 
 // grouping
 
-template <class T>
-lox::expr::Grouping<T>::Grouping(const lox::expr::Expr<T>& expression)
+lox::expr::Grouping::Grouping(const lox::expr::Expr& expression)
     : expression(expression) {}
 
 
 template <class T>
-const T lox::expr::Grouping<T>::accept(
+const T lox::expr::Grouping::accept(
     const lox::expr::Visitor<T>& visitor) const {
   return visitor.visitGroupingExpr(*this);
 }
@@ -87,8 +80,7 @@ const T lox::expr::Grouping<T>::accept(
 
 // literal
 
-template <class T>
-lox::expr::Literal<T>::Literal(const Object& value)
+lox::expr::Literal::Literal(const Object& value)
     : value([&value]() {
         if (const auto* str = std::get_if<std::string>(&value)) {
           return *str;
@@ -103,109 +95,85 @@ lox::expr::Literal<T>::Literal(const Object& value)
 
 
 template <class T>
-const T lox::expr::Literal<T>::accept(
-    const lox::expr::Visitor<T>& visitor) const {
+const T lox::expr::Literal::accept(const lox::expr::Visitor<T>& visitor) const {
   return visitor.visitLiteralExpr(*this);
 }
 
 
 // logical
 
-template <class T>
-lox::expr::Logical<T>::Logical(
-    const lox::expr::Expr<T>& left,
+lox::expr::Logical::Logical(
+    const lox::expr::Expr& left,
     const Token& op,
-    const lox::expr::Expr<T>& right)
+    const lox::expr::Expr& right)
     : left(left), op(op), right(right) {}
 
 
 template <class T>
-const T lox::expr::Logical<T>::accept(
-    const lox::expr::Visitor<T>& visitor) const {
+const T lox::expr::Logical::accept(const lox::expr::Visitor<T>& visitor) const {
   return visitor.visitLogicalExpr(*this);
 }
 
 
 // set
 
-template <class T>
-lox::expr::Set<T>::Set(
-    const lox::expr::Expr<T>& object,
+lox::expr::Set::Set(
+    const lox::expr::Expr& object,
     const Token& name,
-    const lox::expr::Expr<T>& value)
+    const lox::expr::Expr& value)
     : object(object), name(name), value(value) {}
 
 
 template <class T>
-const T lox::expr::Set<T>::accept(const lox::expr::Visitor<T>& visitor) const {
+const T lox::expr::Set::accept(const lox::expr::Visitor<T>& visitor) const {
   return visitor.visitSetExpr(*this);
 }
 
 
 // super
 
-template <class T>
-lox::expr::Super<T>::Super(const Token& keyword, const Token& method)
+lox::expr::Super::Super(const Token& keyword, const Token& method)
     : keyword(keyword), method(method) {}
 
 
 template <class T>
-const T lox::expr::Super<T>::accept(
-    const lox::expr::Visitor<T>& visitor) const {
+const T lox::expr::Super::accept(const lox::expr::Visitor<T>& visitor) const {
   return visitor.visitSuperExpr(*this);
 }
 
 
 // this
 
-template <class T>
-lox::expr::This<T>::This(const Token& keyword) : keyword(keyword) {}
+lox::expr::This::This(const Token& keyword) : keyword(keyword) {}
 
 
 template <class T>
-const T lox::expr::This<T>::accept(const lox::expr::Visitor<T>& visitor) const {
+const T lox::expr::This::accept(const lox::expr::Visitor<T>& visitor) const {
   return visitor.visitThisExpr(*this);
 }
 
 
 // unary
 
-template <class T>
-lox::expr::Unary<T>::Unary(const Token& op, const lox::expr::Expr<T>& right)
+lox::expr::Unary::Unary(const Token& op, const lox::expr::Expr& right)
     : op(op), right(right) {}
 
 
 template <class T>
-const T lox::expr::Unary<T>::accept(
-    const lox::expr::Visitor<T>& visitor) const {
+const T lox::expr::Unary::accept(const lox::expr::Visitor<T>& visitor) const {
   return visitor.visitUnaryExpr(*this);
 }
 
 
 // variable
 
-template <class T>
-lox::expr::Variable<T>::Variable(const Token& name) : name(name) {}
+lox::expr::Variable::Variable(const Token& name) : name(name) {}
 
 
 template <class T>
-const T lox::expr::Variable<T>::accept(
+const T lox::expr::Variable::accept(
     const lox::expr::Visitor<T>& visitor) const {
   return visitor.visitVariableExpr(*this);
 }
 
 }  // namespace lox
-
-
-template class lox::expr::Assign<double>;
-template class lox::expr::Binary<double>;
-template class lox::expr::Call<double>;
-template class lox::expr::Get<double>;
-template class lox::expr::Grouping<double>;
-template class lox::expr::Literal<double>;
-template class lox::expr::Logical<double>;
-template class lox::expr::Set<double>;
-template class lox::expr::Super<double>;
-template class lox::expr::This<double>;
-template class lox::expr::Unary<double>;
-template class lox::expr::Variable<double>;

@@ -15,52 +15,86 @@ namespace lox {
 namespace expr {
 
 
+// forward declaration
+
 template <class T>
 class Visitor;
 
 
-// https://en.cppreference.com/w/cpp/language/template_specialization
-template <class T>
+// expr class
+
 class Expr {
  public:
-  friend bool operator==(const Expr<T>& _x, const Expr<T>& _y) {
+  friend bool operator==(const Expr& _x, const Expr& _y) {
     return _x == _y;
   }
 
-  //  virtual Object accept(const Visitor<Object>& visitor) const = 0;
-};
+  bool operator==(const std::nullptr_t& _y) {
+    return *this == _y;
+  }
 
-// template <class T>
-// class Visitor;
+  friend bool operator!=(const Expr& _x, const Expr& _y) {
+    return _x != _y;
+  }
+
+  bool operator!=(const std::nullptr_t& _y) {
+    return !(*this == _y);
+  }
+
+  Expr& operator=(const std::nullptr_t&) {
+    return *this;
+  }
+
+  Expr& operator=(const Expr&) {
+    return *this;
+  }
+
+  template <class T>
+  T accept(const Visitor<T>& visitor) const;
+};
 
 
 // TODO: template specialization
-template <class T>
-class Assign : public Expr<T> {
+// https://en.cppreference.com/w/cpp/language/template_specialization
+
+// assign expr
+
+class Assign : public Expr {
  private:
   const Token& name;
-  const Expr<T>& value;
+  const Expr& value;
 
  public:
-  Assign(const Token& name, const Expr<T>& value);
+  Assign(const Token& name, const Expr& value);
 
+  template <class T>
   const T accept(const Visitor<T>& visitor) const;
+
+  const Token& getName() const {
+    return name;
+  }
+
+  const Expr& getValue() const {
+    return value;
+  }
 };
 
 
-template <class T>
-class Binary : public Expr<T> {
+// binary expr
+
+class Binary : public Expr {
  private:
-  const Expr<T>& left;
+  const Expr& left;
   const Token& op;
-  const Expr<T>& right;
+  const Expr& right;
 
  public:
-  Binary(const Expr<T>& left, const Token& op, const Expr<T>& right);
+  Binary(const Expr& left, const Token& op, const Expr& right);
 
+  template <class T>
   const T accept(const Visitor<T>& visitor) const;
 
-  const Expr<T>& getLeft() const {
+  const Expr& getLeft() const {
     return left;
   }
 
@@ -68,100 +102,161 @@ class Binary : public Expr<T> {
     return op;
   }
 
-  const Expr<T>& getRight() const {
+  const Expr& getRight() const {
     return right;
   }
 };
 
 
-template <class T>
-class Call : public Expr<T> {
+// call expr
+
+class Call : public Expr {
  private:
-  const Expr<T>& callee;
+  const Expr& callee;
   const Token& paren;
-  const std::vector<Expr<T>>& arguments;
+  const std::vector<Expr>& arguments;
 
  public:
   Call(
-      const Expr<T>& callee,
+      const Expr& callee,
       const Token& paren,
-      const std::vector<Expr<T>>& arguments);
+      const std::vector<Expr>& arguments);
 
+  template <class T>
   const T accept(const Visitor<T>& visitor) const;
+
+  const Expr& getCallee() const {
+    return callee;
+  }
+
+  const Token& getParen() const {
+    return paren;
+  }
+
+  const std::vector<Expr>& getArguments() const {
+    return arguments;
+  }
 };
 
 
-template <class T>
-class Get : public Expr<T> {
+// get expr
+
+class Get : public Expr {
  private:
-  const Expr<T>& object;
+  const Expr& object;
   const Token& name;
 
  public:
-  Get(const Expr<T>& object, const Token& name);
+  Get(const Expr& object, const Token& name);
 
+  template <class T>
   const T accept(const Visitor<T>& visitor) const;
+
+  const Expr& getObject() const {
+    return object;
+  }
+
+  const Token& getName() const {
+    return name;
+  }
 };
 
 
-template <class T>
-class Grouping : public Expr<T> {
+// grouping expr
+
+class Grouping : public Expr {
  private:
-  const Expr<T>& expression;
+  const Expr& expression;
 
  public:
-  Grouping(const Expr<T>& expression);
+  Grouping(const Expr& expression);
 
+  template <class T>
   const T accept(const Visitor<T>& visitor) const;
+
+  const Expr& getExpression() const {
+    return expression;
+  }
 };
 
 
-template <class T>
-class Literal : public Expr<T> {
+// literal expr
+
+class Literal : public Expr {
  private:
   const std::string& value;
 
  public:
   Literal(const Object& value);
 
-  const T accept(const Visitor<T>& visitor) const;
-};
-
-
-template <class T>
-class Logical : public Expr<T> {
- private:
-  const Expr<T>& left;
-  const Token& op;
-  const Expr<T>& right;
-
- public:
-  Logical(const Expr<T>& left, const Token& op, const Expr<T>& right);
-
+  template <class T>
   const T accept(const Visitor<T>& visitor) const;
 
-  const Token& getOp() const {
-    return op;
+  const std::string& getValue() const {
+    return value;
   }
 };
 
 
-template <class T>
-class Set : public Expr<T> {
+// logical expr
+
+class Logical : public Expr {
  private:
-  const Expr<T>& object;
-  const Token& name;
-  const Expr<T>& value;
+  const Expr& left;
+  const Token& op;
+  const Expr& right;
 
  public:
-  Set(const Expr<T>& object, const Token& name, const Expr<T>& value);
+  Logical(const Expr& left, const Token& op, const Expr& right);
 
+  template <class T>
   const T accept(const Visitor<T>& visitor) const;
+
+  const Expr& getLeft() const {
+    return left;
+  }
+
+  const Token& getOp() const {
+    return op;
+  }
+
+  const Expr& getRight() const {
+    return right;
+  }
 };
 
 
-template <class T>
-class Super : public Expr<T> {
+// set expr
+
+class Set : public Expr {
+ private:
+  const Expr& object;
+  const Token& name;
+  const Expr& value;
+
+ public:
+  Set(const Expr& object, const Token& name, const Expr& value);
+
+  template <class T>
+  const T accept(const Visitor<T>& visitor) const;
+
+  const Expr& getObject() const {
+    return object;
+  }
+
+  const Token& getName() const {
+    return name;
+  }
+
+  const Expr& getValue() const {
+    return value;
+  }
+};
+
+
+// super expr
+
+class Super : public Expr {
  private:
   const Token& keyword;
   const Token& method;
@@ -169,51 +264,70 @@ class Super : public Expr<T> {
  public:
   Super(const Token& keyword, const Token& method);
 
+  template <class T>
   const T accept(const Visitor<T>& visitor) const;
+
+  const Token& getKeyword() const {
+    return keyword;
+  }
+
+  const Token& getMethod() const {
+    return method;
+  }
 };
 
 
-template <class T>
-class This : public Expr<T> {
+// this expr
+
+class This : public Expr {
  private:
   const Token& keyword;
 
  public:
   This(const Token& keyword);
 
+  template <class T>
   const T accept(const Visitor<T>& visitor) const;
+
+  const Token& getKeyword() const {
+    return keyword;
+  }
 };
 
 
-template <class T>
-class Unary : public Expr<T> {
+// unary expr
+
+class Unary : public Expr {
  private:
   const Token& op;
-  const Expr<T>& right;
+  const Expr& right;
 
  public:
-  Unary(const Token& op, const Expr<T>& right);
+  Unary(const Token& op, const Expr& right);
 
+  template <class T>
   const T accept(const Visitor<T>& visitor) const;
 
   const Token& getOp() const {
     return op;
   }
 
-  const Expr<T>& getRight() const {
+  const Expr& getRight() const {
     return right;
   }
 };
 
 
-template <class T>
-class Variable : public Expr<T> {
+// variable expr
+
+class Variable : public Expr {
  private:
   const Token& name;
 
  public:
   Variable(const Token& name);
 
+  template <class T>
   const T accept(const Visitor<T>& visitor) const;
 
   const Token& getName() const {
@@ -222,26 +336,24 @@ class Variable : public Expr<T> {
 };
 
 
+// visitor class
+
 template <class T>
-class Visitor : public Expr<T> {
+class Visitor : public Expr {
  public:
-  virtual T visitAssignExpr(const Assign<T>& expr) const = 0;
-  virtual T visitBinaryExpr(const Binary<T>& expr) const = 0;
-  virtual T visitCallExpr(const Call<T>& expr) const = 0;
-  virtual T visitGetExpr(const Get<T>& expr) const = 0;
-  virtual T visitGroupingExpr(const Grouping<T>& expr) const = 0;
-  virtual T visitLiteralExpr(const Literal<T>& expr) const = 0;
-  virtual T visitLogicalExpr(const Logical<T>& expr) const = 0;
-  virtual T visitSetExpr(const Set<T>& expr) const = 0;
-  virtual T visitSuperExpr(const Super<T>& expr) const = 0;
-  virtual T visitThisExpr(const This<T>& expr) const = 0;
-  virtual T visitUnaryExpr(const Unary<T>& expr) const = 0;
-  virtual T visitVariableExpr(const Variable<T>& expr) const = 0;
+  virtual T visitAssignExpr(const Assign& expr) const = 0;
+  virtual T visitBinaryExpr(const Binary& expr) const = 0;
+  virtual T visitCallExpr(const Call& expr) const = 0;
+  virtual T visitGetExpr(const Get& expr) const = 0;
+  virtual T visitGroupingExpr(const Grouping& expr) const = 0;
+  virtual T visitLiteralExpr(const Literal& expr) const = 0;
+  virtual T visitLogicalExpr(const Logical& expr) const = 0;
+  virtual T visitSetExpr(const Set& expr) const = 0;
+  virtual T visitSuperExpr(const Super& expr) const = 0;
+  virtual T visitThisExpr(const This& expr) const = 0;
+  virtual T visitUnaryExpr(const Unary& expr) const = 0;
+  virtual T visitVariableExpr(const Variable& expr) const = 0;
 };
-
-
-// template <typename T>
-// T accept(const Visitor<T>& visitor);
 
 
 }  // namespace expr

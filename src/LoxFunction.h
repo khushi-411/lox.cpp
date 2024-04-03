@@ -17,24 +17,23 @@ using Object = std::variant<std::nullptr_t, std::string, double, bool>;
 
 namespace lox {
 
-template <class T>
-class LoxFunction : public LoxCallable<T> {
+class LoxFunction : public LoxCallable {
  private:
-  lox::stmt::Function<T> declaration;
+  lox::stmt::Function declaration;
   Environment closure;
   bool isInitializer;
 
  public:
   LoxFunction(
-      const lox::stmt::Function<T>& declaration,
+      const lox::stmt::Function& declaration,
       const Environment& closure,
       const bool& isInitializer);
 
-  LoxFunction<T> bind(const LoxInstance<T>& instance);
+  LoxFunction bind(const LoxInstance& instance);
   const std::string& to_string() const;
   int arity();
   Object call(
-      const Interpreter<T>& interpreter,
+      const Interpreter& interpreter,
       const std::vector<Object>& arguments);
 };
 

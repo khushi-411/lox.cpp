@@ -10,24 +10,24 @@
 #include <sstream>
 #include <vector>
 
-#include "ASTPrinter.h"
+//#include "ASTPrinter.h"
 #include "Expr.h"
-#include "Interpreter.h"
-#include "Parser.h"
-#include "Resolver.h"
+//#include "Interpreter.h"
+//#include "Parser.h"
+//#include "Resolver.h"
 #include "RuntimeError.h"
 #include "Scanner.h"
+#include "Stmt.h"
 #include "Token.h"
 
 
 namespace lox {
 
-template <class T>
 class Lox {
  private:
   bool hadError = false;
   bool hadRuntimeError = false;
-  static lox::Interpreter<T> interpreter;
+  // static lox::Interpreter interpreter;
 
  public:
   void runFile(const std::string& path) {
@@ -72,23 +72,23 @@ class Lox {
   }
 
   void run(const std::string& source) {
-    lox::Scanner<T> scanner(source);
+    lox::Scanner scanner(source);
     std::vector<Token> tokens = scanner.scanTokens();
     for (Token token : tokens) {
       // TODO: check another way (https://stackoverflow.com/questions/45172025)
       std::cout << token;
     }
 
-    lox::parser::Parser<T> parser(tokens);
-    lox::expr::Expr<T> expression = parser.parse();
-    // std::vector<lox::stmt::Stmt<T>> statements = parser.parse();
+    // lox::parser::Parser parser(tokens);
+    // lox::expr::Expr expression = parser.parse();
+    //  std::vector<lox::stmt::Stmt> statements = parser.parseStmt();
 
     // To ensure code has error and we have to return the program
     if (hadError) {
       return;
     }
 
-    // lox::Resolver<T> resolver(interpreter);
+    // lox::Resolver resolver(interpreter);
     //  resolver.resolve(statements);
 
     if (hadError) {
@@ -131,6 +131,6 @@ class Lox {
 }  // namespace lox
 
 
-template class lox::Lox<double>;
+// template class lox::Lox<double>;
 
 #endif

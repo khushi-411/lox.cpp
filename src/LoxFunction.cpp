@@ -17,9 +17,8 @@ using Object = std::variant<std::nullptr_t, std::string, double, bool>;
 namespace lox {
 
 
-template <class T>
-LoxFunction<T>::LoxFunction(
-    const lox::stmt::Function<T>& declaration,
+LoxFunction::LoxFunction(
+    const lox::stmt::Function& declaration,
     const Environment& closure,
     const bool& isInitializer)
     : isInitializer(isInitializer),
@@ -27,29 +26,25 @@ LoxFunction<T>::LoxFunction(
       declaration(declaration) {}
 
 
-template <class T>
-LoxFunction<T> LoxFunction<T>::bind(const LoxInstance<T>& instance) {
+LoxFunction LoxFunction::bind(const LoxInstance& instance) {
   Environment environment = new Environment(closure);
   environment.define("this", instance);
-  return LoxFunction<T>(declaration, environment, isInitializer);
+  return LoxFunction(declaration, environment, isInitializer);
 }
 
 
-template <class T>
-const std::string& LoxFunction<T>::to_string() const {
+const std::string& LoxFunction::to_string() const {
   return "<fn " + declaration.name.getLexeme() + ">";
 }
 
 
-template <class T>
-int LoxFunction<T>::arity() {
+int LoxFunction::arity() {
   return declaration.params.size();
 }
 
 
-template <class T>
-Object LoxFunction<T>::call(
-    const Interpreter<T>& interpreter,
+Object LoxFunction::call(
+    const Interpreter& interpreter,
     const std::vector<Object>& arguments) {
   Environment environment = new Environment(closure);
 

@@ -22,7 +22,7 @@ inline int line = 1;
 
 // https://stackoverflow.com/questions/42056160
 
-template <class T>
+
 class Scanner {
  private:
   std::unordered_map<std::string, TokenType> keywords;
@@ -53,14 +53,13 @@ class Scanner {
 
 
 // https://stackoverflow.com/questions/19918369
-template <class T>
-Scanner<T>::Scanner(const std::string& source) : source(source) {}
+
+Scanner::Scanner(const std::string& source) : source(source) {}
 
 
 // reserved words
 
-template <class T>
-Scanner<T>::Scanner()
+Scanner::Scanner()
     : keywords{
           {"and", AND},
           {"class", CLASS},
@@ -82,11 +81,10 @@ Scanner<T>::Scanner()
 
 // scan single character lexemes
 
-template <class T>
-std::vector<Token> Scanner<T>::scanTokens() {
+std::vector<Token> Scanner::scanTokens() {
   while (!Scanner::isAtEnd()) {
     start = current;
-    Scanner<T>::scanToken();
+    Scanner::scanToken();
   }
   tokens.push_back(Token(TokenType::_EOF, "", nullptr, line));
   return tokens;
@@ -95,64 +93,62 @@ std::vector<Token> Scanner<T>::scanTokens() {
 
 // scan two or more number of characters
 
-template <class T>
-void Scanner<T>::scanToken() {
-  char c = Scanner<T>::advance();
+void Scanner::scanToken() {
+  char c = Scanner::advance();
   switch (c) {
     case '(':
-      Scanner<T>::addToken(TokenType::LEFT_PAREN);
+      Scanner::addToken(TokenType::LEFT_PAREN);
       break;
     case ')':
-      Scanner<T>::addToken(TokenType::RIGHT_PAREN);
+      Scanner::addToken(TokenType::RIGHT_PAREN);
       break;
     case '{':
-      Scanner<T>::addToken(TokenType::LEFT_BRACE);
+      Scanner::addToken(TokenType::LEFT_BRACE);
       break;
     case '}':
-      Scanner<T>::addToken(TokenType::RIGHT_BRACE);
+      Scanner::addToken(TokenType::RIGHT_BRACE);
       break;
     case ',':
-      Scanner<T>::addToken(TokenType::COMMA);
+      Scanner::addToken(TokenType::COMMA);
       break;
     case '.':
-      Scanner<T>::addToken(TokenType::DOT);
+      Scanner::addToken(TokenType::DOT);
       break;
     case '-':
-      Scanner<T>::addToken(TokenType::MINUS);
+      Scanner::addToken(TokenType::MINUS);
       break;
     case '+':
-      Scanner<T>::addToken(TokenType::PLUS);
+      Scanner::addToken(TokenType::PLUS);
       break;
     case ';':
-      Scanner<T>::addToken(TokenType::SEMICOLON);
+      Scanner::addToken(TokenType::SEMICOLON);
       break;
     case '*':
-      Scanner<T>::addToken(TokenType::STAR);
+      Scanner::addToken(TokenType::STAR);
       break;
     case '!':
-      Scanner<T>::addToken(
-          Scanner<T>::match('=') ? TokenType::BANG_EQUAL : TokenType::BANG);
+      Scanner::addToken(
+          Scanner::match('=') ? TokenType::BANG_EQUAL : TokenType::BANG);
       break;
     case '=':
-      Scanner<T>::addToken(
-          Scanner<T>::match('=') ? TokenType::EQUAL_EQUAL : TokenType::EQUAL);
+      Scanner::addToken(
+          Scanner::match('=') ? TokenType::EQUAL_EQUAL : TokenType::EQUAL);
       break;
     case '<':
-      Scanner<T>::addToken(
-          Scanner<T>::match('=') ? TokenType::LESS_EQUAL : TokenType::LESS);
+      Scanner::addToken(
+          Scanner::match('=') ? TokenType::LESS_EQUAL : TokenType::LESS);
       break;
     case '>':
-      Scanner<T>::addToken(
-          Scanner<T>::match('=') ? TokenType::GREATER_EQUAL
-                                 : TokenType::GREATER);
+      Scanner::addToken(
+          Scanner::match('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER);
       break;
     case '/':
-      if (Scanner<T>::match('/')) {
-        while (Scanner<T>::peek() != '\n' && !Scanner<T>::isAtEnd()) {
-          Scanner<T>::advance();
+      if (Scanner::match('/')) {
+        while (Scanner::peek() != '\n' && !Scanner::isAtEnd()) {
+          Scanner::advance();
         }
       } else {
-        Scanner<T>::addToken(SLASH);
+        Scanner::addToken(SLASH);
       }
       break;
     case ' ':
@@ -162,15 +158,15 @@ void Scanner<T>::scanToken() {
     case '\t':
       break;
     case '"':
-      Scanner<T>::string();
+      Scanner::string();
       break;
     default:
-      if (Scanner<T>::isDigit(c)) {
-        Scanner<T>::number();
-      } else if (Scanner<T>::isAlpha(c)) {
-        Scanner<T>::identifier();
+      if (Scanner::isDigit(c)) {
+        Scanner::number();
+      } else if (Scanner::isAlpha(c)) {
+        Scanner::identifier();
       } else {
-        // Lox<T>::error(line, "Unexpected character");
+        // Lox::error(line, "Unexpected character");
       }
       break;
   }
@@ -179,10 +175,9 @@ void Scanner<T>::scanToken() {
 
 // reserved words
 
-template <class T>
-void Scanner<T>::identifier() {
-  while (Scanner<T>::isAlphaNumeric(Scanner<T>::peek())) {
-    Scanner<T>::advance();
+void Scanner::identifier() {
+  while (Scanner::isAlphaNumeric(Scanner::peek())) {
+    Scanner::advance();
   }
 
   std::string text = this->source.substr(start, current);
@@ -191,58 +186,54 @@ void Scanner<T>::identifier() {
   if (type == NULL) {
     type = TokenType::IDENTIFIER;
   }
-  Scanner<T>::addToken(type);
+  Scanner::addToken(type);
 }
 
 
 // number literals
 
-template <class T>
-void Scanner<T>::number() {
-  while (Scanner<T>::isDigit(peek())) {
-    Scanner<T>::advance();
+void Scanner::number() {
+  while (Scanner::isDigit(peek())) {
+    Scanner::advance();
   }
 
-  if (Scanner<T>::peek() == '.' &&
-      Scanner<T>::isDigit(Scanner<T>::peekNext())) {
-    Scanner<T>::advance();
-    while (Scanner<T>::isDigit(Scanner<T>::peek())) {
-      Scanner<T>::advance();
+  if (Scanner::peek() == '.' && Scanner::isDigit(Scanner::peekNext())) {
+    Scanner::advance();
+    while (Scanner::isDigit(Scanner::peek())) {
+      Scanner::advance();
     }
   }
 
-  Scanner<T>::addToken(
+  Scanner::addToken(
       TokenType::NUMBER, std::stod(source.substr(start, current)));  // todo
 }
 
 
 // string literals
 
-template <class T>
-void Scanner<T>::string() {
-  while (Scanner<T>::peek() != '"' && !Scanner<T>::isAtEnd()) {
-    if (Scanner<T>::peek() == '\n') {
+void Scanner::string() {
+  while (Scanner::peek() != '"' && !Scanner::isAtEnd()) {
+    if (Scanner::peek() == '\n') {
       line++;
     }
-    Scanner<T>::advance();
+    Scanner::advance();
   }
 
-  if (Scanner<T>::isAtEnd()) {
-    // Lox<T>::error(line, "Unterminated string");
+  if (Scanner::isAtEnd()) {
+    // Lox::error(line, "Unterminated string");
     return;
   }
 
-  Scanner<T>::advance();
+  Scanner::advance();
   std::string value = source.substr(start + 1, current - 1);
-  Scanner<T>::addToken(STRING, value);
+  Scanner::addToken(STRING, value);
 }
 
 
 // check for two-character lexeme
 
-template <class T>
-bool Scanner<T>::match(const char& expected) {
-  if (Scanner<T>::isAtEnd()) {
+bool Scanner::match(const char& expected) {
+  if (Scanner::isAtEnd()) {
     return false;
   }
 
@@ -256,9 +247,8 @@ bool Scanner<T>::match(const char& expected) {
 
 // longer lexeme
 
-template <class T>
-char Scanner<T>::peek() {
-  if (Scanner<T>::isAtEnd()) {
+char Scanner::peek() {
+  if (Scanner::isAtEnd()) {
     return '\0';
   }
   return source.at(current);
@@ -267,8 +257,7 @@ char Scanner<T>::peek() {
 
 // used in number literals, because we don't want "." to consume
 
-template <class T>
-char Scanner<T>::peekNext() {
+char Scanner::peekNext() {
   if (current + 1 >= source.length()) {
     return '\0';
   }
@@ -276,48 +265,41 @@ char Scanner<T>::peekNext() {
 }
 
 
-template <class T>
-bool Scanner<T>::isAlpha(const char& c) {
+bool Scanner::isAlpha(const char& c) {
   return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
 }
 
 
-template <class T>
-bool Scanner<T>::isAlphaNumeric(const char& c) {
-  return Scanner<T>::isAlpha(c) || Scanner<T>::isDigit(c);
+bool Scanner::isAlphaNumeric(const char& c) {
+  return Scanner::isAlpha(c) || Scanner::isDigit(c);
 }
 
 
-template <class T>
-bool Scanner<T>::isDigit(const char& c) {
+bool Scanner::isDigit(const char& c) {
   return c >= '0' && c <= '9';
 }
 
 
-template <class T>
-bool Scanner<T>::isAtEnd() {
+bool Scanner::isAtEnd() {
   return current >= source.length();
 }
 
 
 // to consume the input character
 
-template <class T>
-char Scanner<T>::advance() {
+char Scanner::advance() {
   return source.at(current++);
 }
 
 
 // to produce the output
 
-template <class T>
-void Scanner<T>::addToken(const TokenType& type) {
-  Scanner<T>::addToken(type, nullptr);
+void Scanner::addToken(const TokenType& type) {
+  Scanner::addToken(type, nullptr);
 }
 
 
-template <class T>
-void Scanner<T>::addToken(const TokenType& type, const Object& literal) {
+void Scanner::addToken(const TokenType& type, const Object& literal) {
   std::string text = source.substr(start, current);
   tokens.push_back(Token(type, text, literal, line));
 }
