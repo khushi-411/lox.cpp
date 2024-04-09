@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
@@ -22,7 +24,7 @@ class Interpreter : public lox::expr::Visitor<Object>,
   std::unordered_map<lox::expr::Expr, int> locals;
 
  public:
-  // Interpreter();
+  // Interpreter() : globals(Environment()), environment(globals) {}
 
   void visitBlockStmt(const lox::stmt::Block& _stmt);
   void visitClassStmt(const lox::stmt::Class& _stmt);

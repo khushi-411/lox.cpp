@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef EXPR_H
 #define EXPR_H
 
@@ -29,7 +31,7 @@ class Expr {
     return _x == _y;
   }
 
-  bool operator==(const std::nullptr_t& _y) {
+  bool operator==(const std::nullptr_t& _y) const {
     return *this == _y;
   }
 
@@ -37,7 +39,7 @@ class Expr {
     return _x != _y;
   }
 
-  bool operator!=(const std::nullptr_t& _y) {
+  bool operator!=(const std::nullptr_t& _y) const {
     return !(*this == _y);
   }
 
@@ -50,7 +52,7 @@ class Expr {
   }
 
   template <class T>
-  T accept(const Visitor<T>& visitor) const;
+  const T accept(const Visitor<T>& visitor) const;
 };
 
 

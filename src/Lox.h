@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef LOX_H
 #define LOX_H
 
@@ -12,8 +14,8 @@
 
 //#include "ASTPrinter.h"
 #include "Expr.h"
-//#include "Interpreter.h"
-//#include "Parser.h"
+#include "Interpreter.h"
+#include "Parser.h"
 //#include "Resolver.h"
 #include "RuntimeError.h"
 #include "Scanner.h"
@@ -27,7 +29,7 @@ class Lox {
  private:
   bool hadError = false;
   bool hadRuntimeError = false;
-  // static lox::Interpreter interpreter;
+  static lox::Interpreter interpreter;
 
  public:
   void runFile(const std::string& path) {
@@ -79,9 +81,9 @@ class Lox {
       std::cout << token;
     }
 
-    // lox::parser::Parser parser(tokens);
-    // lox::expr::Expr expression = parser.parse();
-    //  std::vector<lox::stmt::Stmt> statements = parser.parseStmt();
+    lox::parser::Parser parser(tokens);
+    lox::expr::Expr expression = parser.parse();
+    std::vector<lox::stmt::Stmt> statements = parser.parseStmt();
 
     // To ensure code has error and we have to return the program
     if (hadError) {
@@ -89,7 +91,7 @@ class Lox {
     }
 
     // lox::Resolver resolver(interpreter);
-    //  resolver.resolve(statements);
+    //   resolver.resolve(statements);
 
     if (hadError) {
       return;

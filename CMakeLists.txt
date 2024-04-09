@@ -14,7 +14,7 @@ list(APPEND LOXCPP_SRCS
     ${LOXCPP_SRCS_DIR}/Environment.cpp
     ${LOXCPP_SRCS_DIR}/Expr.cpp
     ${LOXCPP_SRCS_DIR}/GenerateAST.cpp
-    #${LOXCPP_SRCS_DIR}/Interpreter.cpp
+    ${LOXCPP_SRCS_DIR}/Interpreter.cpp
     #${LOXCPP_SRCS_DIR}/LoxClass.cpp
     #${LOXCPP_SRCS_DIR}/LoxFunction.cpp
     #${LOXCPP_SRCS_DIR}/LoxInstance.cpp

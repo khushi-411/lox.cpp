@@ -7,9 +7,9 @@
 #include "Expr.h"
 #include "Interpreter.h"
 #include "Lox.h"
-#include "LoxClass.h"
-#include "LoxFunction.h"
-#include "LoxInstance.h"
+//#include "LoxClass.h"
+//#include "LoxFunction.h"
+//#include "LoxInstance.h"
 #include "Return.h"
 #include "RuntimeError.h"
 #include "Stmt.h"
@@ -25,7 +25,7 @@ namespace lox {
 // lox::Interpreter::Interpreter() : globals(), environment(&globals) {}
 
 // block stmt
-
+/*
 void Interpreter::visitBlockStmt(const lox::stmt::Block& _stmt) {
   lox::Interpreter::executeBlock(
       _stmt.getStatements(), Environment(environment));
@@ -72,7 +72,7 @@ void lox::Interpreter::visitClassStmt(const lox::stmt::Class& _stmt) {
   environment.assign(_stmt.name, klass);
 
   return;
-}
+}*/
 
 
 // expression stmt
@@ -86,13 +86,13 @@ void lox::Interpreter::visitExpressionStmt(const lox::stmt::Expression& _stmt) {
 
 // function stmt
 
-
+/*
 void lox::Interpreter::visitFunctionStmt(const lox::stmt::Function& _stmt) {
   LoxFunction function = new LoxFunction(_stmt, environment, false);
   environment.define(_stmt.name.getLexeme(), function);
   return;
 }
-
+*/
 
 // if stmt
 
@@ -117,7 +117,7 @@ void lox::Interpreter::visitIfStmt(const lox::stmt::If& _stmt) {
   if (lox::Interpreter::isTruthy(result)) {
     lox::Interpreter::execute(_stmt.getThenBranch());
 
-  } else {  // if (_stmt.getElseBranch() != nullptr) { // TODO
+  } else if (_stmt.getElseBranch() != nullptr) {
     lox::Interpreter::execute(_stmt.getElseBranch());
   }
 
@@ -160,7 +160,7 @@ void lox::Interpreter::visitReturnStmt(const lox::stmt::Return& _stmt) {
     value = lox::Interpreter::evaluate(_stmt.getValue());
   }
 
-  throw Return(getValue());
+  throw Return(value);
 }
 
 
@@ -170,11 +170,11 @@ void lox::Interpreter::visitReturnStmt(const lox::stmt::Return& _stmt) {
 void lox::Interpreter::visitVarStmt(const lox::stmt::Var& _stmt) {
   Object value = nullptr;
 
-  if (_stmt.initializer != nullptr) {
-    value = lox::Interpreter::evaluate(_stmt.initializer);
+  if (_stmt.getInitializer() != nullptr) {
+    value = lox::Interpreter::evaluate(_stmt.getInitializer());
   }
 
-  environment.define(_stmt.name.getLexeme(), value);
+  environment.define(_stmt.getName().getLexeme(), value);
   return;
 }
 
@@ -217,14 +217,15 @@ void lox::Interpreter::interpret(
       lox::Interpreter::execute(statement);
     }
   } catch (RuntimeError error) {
-    // Lox::runtimeError(error);
+    Lox _lox;
+    _lox.runtimeError(error);
   }
 }
 
 
 // evaluate
 
-//
+
 // void lox::Interpreter::evaluate(const lox::stmt::Stmt& _stmt) {
 //   return _stmt.accept(*this);
 // }
@@ -240,7 +241,7 @@ void lox::Interpreter::execute(const lox::stmt::Stmt& _stmt) {
 
 // execute block
 
-
+/*
 void executeBlock(
     const std::vector<lox::stmt::Stmt>& statements,
     const Environment& environment) {
@@ -250,37 +251,38 @@ void executeBlock(
     environment = environment;
 
     for (const lox::stmt::Stmt& statement : statements) {
-      lox::Interpreter::execute(statement);
+        lox::Interpreter::execute(statement);
     }
   } catch (...) {
     environment = previous;
   }
 }
-
+*/
 
 // assign expr
 
-
+/*
 Object lox::Interpreter::visitAssignExpr(const lox::expr::Assign& _expr) {
-  Object value = lox::Interpreter::evaluate(_expr.value);
+  Object value = lox::Interpreter::evaluate(_expr.getValue());
   int distance = locals[_expr];
 
   if (distance != NULL) {
-    environment.assignAt(distance, _expr.name, value);
+    environment.assignAt(distance, _expr.getName(), value);
   } else {
-    globals.assign(_expr.name, value);
+    globals.assign(_expr.getName(), value);
   }
 
   return value;
 }
-
+*/
 
 // binary expr
 
-
 Object lox::Interpreter::visitBinaryExpr(const lox::expr::Binary& _expr) {
-  std::string left = lox::Interpreter::evaluate(_expr.getLeft());
-  std::string right = lox::Interpreter::evaluate(_expr.getRight());
+  std::string left =
+      std::get<std::string>(lox::Interpreter::evaluate(_expr.getLeft()));
+  std::string right =
+      std::get<std::string>(lox::Interpreter::evaluate(_expr.getRight()));
 
   switch (_expr.getOp().tokentype()) {
     case TokenType::MINUS:
@@ -338,25 +340,25 @@ Object lox::Interpreter::visitBinaryExpr(const lox::expr::Binary& _expr) {
 
 
 // call expr
-
-
+/*
 Object lox::Interpreter::visitCallExpr(const lox::expr::Call& _expr) {
-  Object callee = lox::Interpreter::evaluate(_expr.callee);
+  Object callee = lox::Interpreter::evaluate(_expr.getCallee());
 
   std::vector<Object> arguments;
-  for (lox::expr::Expr argument : _expr.arguments) {
+  for (lox::expr::Expr argument : _expr.getArguments()) {
     arguments.push_back(lox::Interpreter::evaluate(argument));
   }
 
   if (! instanceof <LoxCallable>(callee)) {
-    throw new RuntimeError(_expr.paren, "Can only call functions and classes.");
+    throw new RuntimeError(
+        _expr.getParen(), "Can only call functions and classes.");
   }
 
   LoxCallable function = (LoxCallable)callee;
 
   if (arguments.size() != function.arity()) {
     throw RuntimeError(
-        _expr.paren,
+        _expr.getParen(),
         "Expected " + function.arity() + " arguments but got " +
             arguments.size() + ".");
   }
@@ -367,74 +369,69 @@ Object lox::Interpreter::visitCallExpr(const lox::expr::Call& _expr) {
 
 // get expr
 
-
 Object lox::Interpreter::visitGetExpr(const lox::expr::Get& _expr) {
-  Object object = lox::Interpreter::evaluate(_expr.object);
+  Object object = lox::Interpreter::evaluate(_expr.getObject());
 
   if (instanceof <LoxInstance>(object)) {
-    return ((LoxInstance)object).get(_expr.name);
+    return ((LoxInstance)object).get(_expr.getName());
   }
 
-  throw new RuntimeError(_expr.name, "Only instances have properties.");
+  throw new RuntimeError(_expr.getName(), "Only instances have properties.");
 }
-
+*/
 
 // grouping expr
 
-
 Object lox::Interpreter::visitGroupingExpr(const lox::expr::Grouping& _expr) {
-  return lox::Interpreter::evaluate(_expr.expression);
+  return lox::Interpreter::evaluate(_expr.getExpression());
 }
 
 
 // literal expr
 
-
 Object lox::Interpreter::visitLiteralExpr(const lox::expr::Literal& _expr) {
-  return _expr.value;
+  return _expr.getValue();
 }
 
 
 // logical expr
 
-
 Object lox::Interpreter::visitLogicalExpr(const lox::expr::Logical& _expr) {
-  Object left = lox::Interpreter::evaluate(_expr.left);
+  Object left = lox::Interpreter::evaluate(_expr.getLeft());
 
-  if (_expr.getOp().type == TokenType::OR) {
-    if (lox::Interpreter::isTruthy(left)) {
+  if (_expr.getOp().tokentype() == TokenType::OR) {
+    if (lox::Interpreter::isTruthy(std::get<std::string>(left))) {
       return left;
     }
   } else {
-    if (!lox::Interpreter::isTruthy(left)) {
+    if (!lox::Interpreter::isTruthy(std::get<std::string>(left))) {
       return left;
     }
   }
 
-  return lox::Interpreter::evaluate(_expr.right);
+  return lox::Interpreter::evaluate(_expr.getRight());
 }
 
 
 // set expr
-
-
+/*
 Object lox::Interpreter::visitSetExpr(const lox::expr::Set& _expr) {
-  Object object = lox::Interpreter::evaluate(_expr.object);
+  Object object = lox::Interpreter::evaluate(_expr.getObject());
 
   if (!(instanceof <LoxInstance>(object))) {
-    throw new RuntimeError(_expr.name, "Only instances have fields.");
+    throw new RuntimeError(_expr.getName(), "Only instances have fields.");
   }
 
-  Object value = lox::Interpreter::evaluate(_expr.value);
-  ((LoxInstance)object).set(_expr.name, value);
+  Object value = lox::Interpreter::evaluate(_expr.getValue());
+  ((LoxInstance)object).set(_expr.getName(), value);
 
   return value;
 }
-
+*/
 
 // super expr
 
-
+/*
 Object lox::Interpreter::visitSuperExpr(const lox::expr::Super& _expr) {
   int distance = locals.get(_expr);
 
@@ -442,39 +439,41 @@ Object lox::Interpreter::visitSuperExpr(const lox::expr::Super& _expr) {
 
   LoxInstance object = (LoxInstance)environment.getAt(distance - 1, "this");
 
-  LoxFunction method = superclass.findMethod(_expr.method.getLexeme);
+  LoxFunction method = superclass.findMethod(_expr.getMethod().getLexeme());
 
   if (method == nullptr) {
     throw new RuntimeError(
-        _expr.method, "Undefined property '" + _expr.method.getLexeme() + "'.");
+        _expr.getMethod(),
+        "Undefined property '" + _expr.getMethod().getLexeme() + "'.");
   }
 
   return method.bind(object);
 }
-
+*/
 
 // this expr
 
-
+/*
 Object lox::Interpreter::visitThisExpr(const lox::expr::This& _expr) {
-  return lookUpVariable(_expr.keyword, _expr);
+  return lookUpVariable(_expr.getKeyword(), _expr);
 }
-
+*/
 
 // unary expr
 
 
 Object lox::Interpreter::visitUnaryExpr(const lox::expr::Unary& _expr) {
-  std::string right = lox::Interpreter::evaluate(_expr.getRight());
+  std::string right =
+      std::get<std::string>(lox::Interpreter::evaluate(_expr.getRight()));
 
   switch (_expr.getOp().tokentype()) {
     case TokenType::BANG:
-      lox::Interpreter::checkNumberOperands(_expr.getOp(), getRight());
-      return !lox::Interpreter::isTruthy(getRight());
+      lox::Interpreter::checkNumberOperand(_expr.getOp(), right);
+      return !lox::Interpreter::isTruthy(right);
 
     case TokenType::MINUS:
-      lox::Interpreter::checkNumberOperands(_expr.getOp(), getRight());
-      return -std::stod(getRight());
+      lox::Interpreter::checkNumberOperand(_expr.getOp(), right);
+      return -std::stod(right);
   }
 
   return nullptr;
@@ -483,7 +482,7 @@ Object lox::Interpreter::visitUnaryExpr(const lox::expr::Unary& _expr) {
 
 // variable expr
 
-
+/*
 Object lox::Interpreter::visitVariableExpr(const lox::expr::Variable& _expr) {
   return lox::Interpreter::lookUpVariable(_expr.getName(), _expr);
 }
@@ -503,7 +502,7 @@ Object lox::Interpreter::lookUpVariable(
     return globals.get(name);
   }
 }
-
+*/
 
 // helper function
 

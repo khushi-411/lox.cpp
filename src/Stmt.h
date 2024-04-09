@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef STMT_H
 #define STMT_H
 
@@ -26,7 +28,7 @@ class Stmt {
     return _x == _y;
   }
 
-  bool operator==(const std::nullptr_t& _y) {
+  bool operator==(const std::nullptr_t& _y) const {
     return *this == _y;
   }
 
@@ -34,7 +36,7 @@ class Stmt {
     return _x != _y;
   }
 
-  bool operator!=(const std::nullptr_t& _y) {
+  bool operator!=(const std::nullptr_t& _y) const {
     return !(*this == _y);
   }
 
@@ -197,6 +199,9 @@ class Var : public Stmt {
 
   template <class T>
   const T accept(const Visitor<T>& visitor) const;
+
+  const Token& getName() const;
+  const lox::expr::Expr& getInitializer() const;
 };
 
 

@@ -181,6 +181,16 @@ const T lox::stmt::Var::accept(const Visitor<T>& visitor) const {
 }
 
 
+const Token& lox::stmt::Var::getName() const {
+  return name;
+}
+
+
+const lox::expr::Expr& lox::stmt::Var::getInitializer() const {
+  return initializer;
+}
+
+
 // while
 
 lox::stmt::While::While(
