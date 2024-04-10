@@ -7,11 +7,11 @@
 
 #include "Lox.h"
 
-typedef double T;
+// typedef double T;
 
 
 int main(int argc, char** argv) {
-  lox::Lox<T> _lox;
+  lox::Lox _lox;
   try {
     // https://stackoverflow.com/questions/18649547
     if (argc > 2) {

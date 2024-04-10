@@ -14,14 +14,12 @@ using Object = std::variant<std::nullptr_t, std::string, double, bool>;
 
 namespace lox {
 
-template <class T>
 class LoxClass;
 
 
-template <class T>
 class LoxInstance {
  private:
-  LoxClass<T> klass;
+  LoxClass klass;
   std::unordered_map<std::string, Object> fields;
 
  public:

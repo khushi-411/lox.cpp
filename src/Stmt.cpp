@@ -8,210 +8,209 @@ namespace lox {
 
 // block
 
-template <class T>
-lox::stmt::Block<T>::Block(const std::vector<lox::stmt::Stmt<T>>& statements)
+lox::stmt::Block::Block(const std::vector<lox::stmt::Stmt>& statements)
     : statements(statements) {}
 
 
 template <class T>
-const T lox::stmt::Block<T>::accept(const Visitor<T>& visitor) const {
+const T lox::stmt::Block::accept(const Visitor<T>& visitor) const {
   return visitor.visitBlockStmt(*this);
 }
 
 
-template <class T>
-const std::vector<lox::stmt::Stmt<T>>& lox::stmt::Block<T>::getStatements()
-    const {
+const std::vector<lox::stmt::Stmt>& lox::stmt::Block::getStatements() const {
   return statements;
 }
 
 
 // expression
 
-template <class T>
-lox::stmt::Expression<T>::Expression(const lox::expr::Expr<T>& expression)
+lox::stmt::Expression::Expression(const lox::expr::Expr& expression)
     : expression(expression) {}
 
 
 template <class T>
-const T lox::stmt::Expression<T>::accept(const Visitor<T>& visitor) const {
+const T lox::stmt::Expression::accept(const Visitor<T>& visitor) const {
   return visitor.visitExpressionStmt(*this);
 }
 
 
-template <class T>
-const lox::expr::Expr<T>& lox::stmt::Expression<T>::getExpression() const {
+const lox::expr::Expr& lox::stmt::Expression::getExpression() const {
   return expression;
 }
 
 
 // function
 
-template <class T>
-lox::stmt::Function<T>::Function(
+lox::stmt::Function::Function(
     const Token& name,
     const std::vector<Token>& params,
-    const std::vector<lox::stmt::Stmt<T>>& body)
+    const std::vector<lox::stmt::Stmt>& body)
     : name(name), params(params), body(body) {}
 
 
 template <class T>
-const T lox::stmt::Function<T>::accept(const Visitor<T>& visitor) const {
+const T lox::stmt::Function::accept(const Visitor<T>& visitor) const {
   return visitor.visitFunctionStmt(*this);
+}
+
+
+const Token& lox::stmt::Function::getName() const {
+  return name;
+}
+
+
+const std::vector<Token>& lox::stmt::Function::getParams() const {
+  return params;
+}
+
+
+const std::vector<lox::stmt::Stmt>& lox::stmt::Function::getBody() const {
+  return body;
 }
 
 
 // class
 
-template <class T>
-lox::stmt::Class<T>::Class(
+lox::stmt::Class::Class(
     const Token& name,
-    const lox::expr::Variable<T>& superclass,
-    const std::vector<lox::stmt::Function<T>>& methods)
+    const lox::expr::Variable& superclass,
+    const std::vector<lox::stmt::Function>& methods)
     : name(name), superclass(superclass), methods(methods) {}
 
 
 template <class T>
-const T lox::stmt::Class<T>::accept(const Visitor<T>& visitor) const {
+const T lox::stmt::Class::accept(const Visitor<T>& visitor) const {
   return visitor.visitClassStmt(*this);
 }
 
 
-template <class T>
-const Token& lox::stmt::Class<T>::getName() const {
+const Token& lox::stmt::Class::getName() const {
   return name;
 }
 
 
-template <class T>
-const lox::expr::Variable<T>& lox::stmt::Class<T>::getSuperclass() const {
+const lox::expr::Variable& lox::stmt::Class::getSuperclass() const {
   return superclass;
 }
 
 
-template <class T>
-const std::vector<lox::stmt::Function<T>>& lox::stmt::Class<T>::getMethods()
-    const {
+const std::vector<lox::stmt::Function>& lox::stmt::Class::getMethods() const {
   return methods;
 }
 
 
 // if
 
-template <class T>
-lox::stmt::If<T>::If(
-    const lox::expr::Expr<T>& condition,
-    const lox::stmt::Stmt<T>* thenBranch,
-    const lox::stmt::Stmt<T>* elseBranch)
+lox::stmt::If::If(
+    const lox::expr::Expr& condition,
+    const lox::stmt::Stmt* thenBranch,
+    const lox::stmt::Stmt* elseBranch)
     : condition(condition), thenBranch(thenBranch), elseBranch(elseBranch) {}
 
 
 template <class T>
-const T lox::stmt::If<T>::accept(const Visitor<T>& visitor) const {
+const T lox::stmt::If::accept(const Visitor<T>& visitor) const {
   return visitor.visitIfStmt(*this);
 }
 
 
-template <class T>
-const lox::expr::Expr<T>& lox::stmt::If<T>::getCondition() const {
+const lox::expr::Expr& lox::stmt::If::getCondition() const {
   return condition;
 }
 
 
-template <class T>
-const lox::stmt::Stmt<T>& lox::stmt::If<T>::getThenBranch() const {
+const lox::stmt::Stmt& lox::stmt::If::getThenBranch() const {
   return *thenBranch;
 }
 
 
-template <class T>
-const lox::stmt::Stmt<T>& lox::stmt::If<T>::getElseBranch() const {
+const lox::stmt::Stmt& lox::stmt::If::getElseBranch() const {
   return *elseBranch;
 }
 
 
 // print
 
-template <class T>
-lox::stmt::Print<T>::Print(const lox::expr::Expr<T>& expression)
+lox::stmt::Print::Print(const lox::expr::Expr& expression)
     : expression(expression) {}
 
 
 template <class T>
-const T lox::stmt::Print<T>::accept(const Visitor<T>& visitor) const {
+const T lox::stmt::Print::accept(const Visitor<T>& visitor) const {
   return visitor.visitPrintStmt(*this);
 }
 
 
-template <class T>
-const lox::expr::Expr<T>& lox::stmt::Print<T>::getExpression() const {
+const lox::expr::Expr& lox::stmt::Print::getExpression() const {
   return expression;
 }
 
 
 // return
 
-template <class T>
-lox::stmt::Return<T>::Return(
-    const Token& keyword,
-    const lox::expr::Expr<T>& value)
+lox::stmt::Return::Return(const Token& keyword, const lox::expr::Expr& value)
     : keyword(keyword), value(value) {}
 
 
 template <class T>
-const T lox::stmt::Return<T>::accept(const Visitor<T>& visitor) const {
+const T lox::stmt::Return::accept(const Visitor<T>& visitor) const {
   return visitor.visitReturnStmt(*this);
 }
 
 
-template <class T>
-const Token& lox::stmt::Return<T>::getKeyword() const {
+const Token& lox::stmt::Return::getKeyword() const {
   return keyword;
 }
 
 
-template <class T>
-const lox::expr::Expr<T>& lox::stmt::Return<T>::getValue() const {
+const lox::expr::Expr& lox::stmt::Return::getValue() const {
   return value;
 }
 
 
 // var
 
-template <class T>
-lox::stmt::Var<T>::Var(const Token& name, const lox::expr::Expr<T>& initializer)
+lox::stmt::Var::Var(const Token& name, const lox::expr::Expr& initializer)
     : name(name), initializer(initializer) {}
 
 
 template <class T>
-const T lox::stmt::Var<T>::accept(const Visitor<T>& visitor) const {
+const T lox::stmt::Var::accept(const Visitor<T>& visitor) const {
   return visitor.visitVarStmt(*this);
+}
+
+
+const Token& lox::stmt::Var::getName() const {
+  return name;
+}
+
+
+const lox::expr::Expr& lox::stmt::Var::getInitializer() const {
+  return initializer;
 }
 
 
 // while
 
-template <class T>
-lox::stmt::While<T>::While(
-    const lox::expr::Expr<T>& condition,
-    const lox::stmt::Stmt<T>& body)
+lox::stmt::While::While(
+    const lox::expr::Expr& condition,
+    const lox::stmt::Stmt& body)
     : condition(condition), body(body) {}
 
 
 template <class T>
-const T lox::stmt::While<T>::accept(const Visitor<T>& visitor) const {
+const T lox::stmt::While::accept(const Visitor<T>& visitor) const {
   return visitor.visitWhileStmt(*this);
 }
 
 
-template <class T>
-const lox::expr::Expr<T>& lox::stmt::While<T>::getCondition() const {
+const lox::expr::Expr& lox::stmt::While::getCondition() const {
   return condition;
 }
 
 
-template <class T>
-const lox::stmt::Stmt<T>& lox::stmt::While<T>::getBody() const {
+const lox::stmt::Stmt& lox::stmt::While::getBody() const {
   return body;
 }
 
@@ -224,15 +223,5 @@ T accept(const Visitor<T>& visitor) {
     return visitor(*this);
 }
 */
+
 }  // namespace lox
-
-
-template class lox::stmt::Block<double>;
-template class lox::stmt::Expression<double>;
-template class lox::stmt::Function<double>;
-template class lox::stmt::Class<double>;
-template class lox::stmt::If<double>;
-template class lox::stmt::Print<double>;
-template class lox::stmt::Return<double>;
-template class lox::stmt::Var<double>;
-template class lox::stmt::While<double>;
