@@ -17,6 +17,10 @@ class Return : public std::runtime_error {
 
  public:
   Return(const Object& value);
+
+  const Object& getValue() const {
+    return value;
+  }
 };
 
 }  // namespace lox

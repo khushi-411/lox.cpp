@@ -15,11 +15,11 @@ list(APPEND LOXCPP_SRCS
     ${LOXCPP_SRCS_DIR}/Expr.cpp
     ${LOXCPP_SRCS_DIR}/GenerateAST.cpp
     ${LOXCPP_SRCS_DIR}/Interpreter.cpp
-    #${LOXCPP_SRCS_DIR}/LoxClass.cpp
-    #${LOXCPP_SRCS_DIR}/LoxFunction.cpp
-    #${LOXCPP_SRCS_DIR}/LoxInstance.cpp
+    ${LOXCPP_SRCS_DIR}/LoxClass.cpp
+    ${LOXCPP_SRCS_DIR}/LoxFunction.cpp
+    ${LOXCPP_SRCS_DIR}/LoxInstance.cpp
     ${LOXCPP_SRCS_DIR}/Parser.cpp
-    #${LOXCPP_SRCS_DIR}/Resolver.cpp
+    ${LOXCPP_SRCS_DIR}/Resolver.cpp
     ${LOXCPP_SRCS_DIR}/Return.cpp
     ${LOXCPP_SRCS_DIR}/RuntimeError.cpp
     ${LOXCPP_SRCS_DIR}/Scanner.cpp

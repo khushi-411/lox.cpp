@@ -31,7 +31,7 @@ enum ClassType {
 class Resolver : public lox::expr::Visitor<void>,
                  public lox::stmt::Visitor<void> {
  private:
-  lox::Interpreter interpreter;
+  const lox::Interpreter& interpreter;
   std::stack<std::unordered_map<std::string, bool>> scopes;
   FunctionType currentFunction = FunctionType::NONE;
   ClassType currentClass = ClassType::_NONE;
@@ -73,6 +73,10 @@ class Resolver : public lox::expr::Visitor<void>,
   void declare(const Token& name);
   void define(const Token& name);
   void resolveLocal(const lox::expr::Expr& _expr, const Token& name);
+
+  lox::Interpreter& getInterpreter() {
+    return const_cast<lox::Interpreter&>(interpreter);
+  }
 };
 
 }  // namespace lox

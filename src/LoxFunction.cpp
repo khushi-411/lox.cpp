@@ -34,7 +34,7 @@ LoxFunction LoxFunction::bind(const LoxInstance& instance) {
 
 
 const std::string& LoxFunction::to_string() const {
-  return "<fn " + declaration.name.getLexeme() + ">";
+  return "<fn " + declaration.getName().getLexeme() + ">";
 }
 
 
@@ -54,12 +54,12 @@ Object LoxFunction::call(
   }
 
   try {
-    interpreter.executeBlock(declaration.body, environment);
+    interpreter.executeBlock(declaration.getBody(), environment);
   } catch (Return& returnValue) {
     if (isInitializer) {
       return closure.getAt(0, "this");
     }
-    return returnValue.value;
+    return returnValue.getValue();
   }
 
   if (isInitializer) {

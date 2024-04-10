@@ -46,7 +46,8 @@ void lox::Resolver::visitClassStmt(const lox::stmt::Class& _stmt) {
   if (_stmt.getSuperclass() != nullptr &&
       (_stmt.getName().getLexeme() ==
        _stmt.getSuperclass().getName().getLexeme())) {
-    Lox::error(
+    Lox _lox;
+    _lox.error(
         _stmt.getSuperclass().getName(), "A class can't inherit from itself.");
   }
 
@@ -63,10 +64,10 @@ void lox::Resolver::visitClassStmt(const lox::stmt::Class& _stmt) {
   lox::Resolver::beginScope();
   scopes.top()["this"] = true;
 
-  for (typename lox::stmt::Function method : _stmt.methods) {
+  for (typename lox::stmt::Function method : _stmt.getMethods()) {
     FunctionType declaration = FunctionType::METHOD;
 
-    if (method.name.getLexeme() == "init") {
+    if (method.getName().getLexeme() == "init") {
       declaration = FunctionType::INITIALIZER;
     }
     lox::Resolver::resolveFunction(method, declaration);
@@ -105,7 +106,7 @@ void lox::Resolver::visitFunctionStmt(const lox::stmt::Function& _stmt) {
 // if stmt
 
 void lox::Resolver::visitIfStmt(const lox::stmt::If& _stmt) {
-  lox::Resolver::resolve(_stmt.getCondition();
+  lox::Resolver::resolve(_stmt.getCondition());
   lox::Resolver::resolve(_stmt.getThenBranch());
 
   if (_stmt.getElseBranch() != nullptr) {
@@ -128,12 +129,14 @@ void lox::Resolver::visitPrintStmt(const lox::stmt::Print& _stmt) {
 
 void lox::Resolver::visitReturnStmt(const lox::stmt::Return& _stmt) {
   if (currentFunction == FunctionType::NONE) {
-    Lox::error(_stmt.getKeyword(), "Can't return from top-level code.");
+    Lox _lox;
+    _lox.error(_stmt.getKeyword(), "Can't return from top-level code.");
   }
 
   if (_stmt.getValue() != nullptr) {
     if (currentFunction == FunctionType::INITIALIZER) {
-      Lox::error(
+      Lox _lox;
+      _lox.error(
           _stmt.getKeyword(), "Can't return a value from an initializer.");
     }
     lox::Resolver::resolve(_stmt.getValue());
@@ -161,7 +164,7 @@ void lox::Resolver::visitVarStmt(const lox::stmt::Var& _stmt) {
 
 void lox::Resolver::visitWhileStmt(const lox::stmt::While& _stmt) {
   lox::Resolver::resolve(_stmt.getCondition());
-  lox::Resolver::resolver(_stmt.getBody());
+  lox::Resolver::resolve(_stmt.getBody());
   return;
 }
 
@@ -242,10 +245,12 @@ void lox::Resolver::visitSetExpr(const lox::expr::Set& _expr) {
 
 void lox::Resolver::visitSuperExpr(const lox::expr::Super& _expr) {
   if (currentClass == ClassType::_NONE) {
-    Lox::error(_expr.getKeyword(), "Can't use 'super' outside of a class.");
+    Lox _lox;
+    _lox.error(_expr.getKeyword(), "Can't use 'super' outside of a class.");
 
   } else if (currentClass != ClassType::SUBCLASS) {
-    Lox::error(
+    Lox _lox;
+    _lox.error(
         _expr.getKeyword(), "Can't use 'super' in a class with no superclass.");
   }
 
@@ -258,11 +263,12 @@ void lox::Resolver::visitSuperExpr(const lox::expr::Super& _expr) {
 
 void lox::Resolver::visitThisExpr(const lox::expr::This& _expr) {
   if (currentClass == ClassType::_NONE) {
-    Lox::error(_expr.getKeyword(), "Can't use 'this' outside of a class.");
+    Lox _lox;
+    _lox.error(_expr.getKeyword(), "Can't use 'this' outside of a class.");
     return;
   }
 
-  lox::Resolver::resolverLocal(_expr, _expr.getKeyword());
+  lox::Resolver::resolveLocal(_expr, _expr.getKeyword());
   return;
 }
 
@@ -279,7 +285,8 @@ void lox::Resolver::visitUnaryExpr(const lox::expr::Unary& _expr) {
 
 void lox::Resolver::visitVariableExpr(const lox::expr::Variable& _expr) {
   if (!scopes.empty() && scopes.top()[_expr.getName().getLexeme()] == false) {
-    Lox::error(
+    Lox _lox;
+    _lox.error(
         _expr.getName(), "Can't read local variable in its own initializer.");
   }
 
@@ -344,7 +351,8 @@ void lox::Resolver::declare(const Token& name) {
   std::unordered_map<std::string, bool> scope = scopes.top();
 
   if (scope[name.getLexeme()]) {
-    Lox::error(name, "Already a variable with this name in this scope.");
+    Lox _lox;
+    _lox.error(name, "Already a variable with this name in this scope.");
   }
 
   scope[name.getLexeme()] = false;
@@ -366,7 +374,7 @@ void lox::Resolver::resolveLocal(
     auto& scope = scopes.top();
     auto it = scope.find(name.getLexeme());
     if (it != scope.end()) {
-      Interpreter::interpreter.resolve(_expr, scopes.size() - 1 - i);
+      getInterpreter().resolve(_expr, scopes.size() - 1 - i);
       return;
     }
   }

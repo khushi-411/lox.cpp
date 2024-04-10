@@ -24,6 +24,22 @@ class LoxFunction : public LoxCallable {
   bool isInitializer;
 
  public:
+  friend bool operator==(const LoxFunction& _x, const LoxFunction& _y) {
+    return _x == _y;
+  }
+
+  bool operator==(const std::nullptr_t& _y) const {
+    return *this == _y;
+  }
+
+  friend bool operator!=(const LoxFunction& _x, const LoxFunction& _y) {
+    return _x != _y;
+  }
+
+  bool operator!=(const std::nullptr_t& _y) const {
+    return !(*this == _y);
+  }
+
   LoxFunction(
       const lox::stmt::Function& declaration,
       const Environment& closure,

@@ -22,13 +22,29 @@ class LoxFunction;
 class LoxClass : public lox::LoxCallable {
  private:
   std::string name;
-  LoxClass* superclass;
+  const LoxClass& superclass;
   std::unordered_map<std::string, LoxFunction> methods;
 
  public:
+  friend bool operator==(const LoxClass& _x, const LoxClass& _y) {
+    return _x == _y;
+  }
+
+  bool operator==(const std::nullptr_t& _y) const {
+    return *this == _y;
+  }
+
+  friend bool operator!=(const LoxClass& _x, const LoxClass& _y) {
+    return _x != _y;
+  }
+
+  bool operator!=(const std::nullptr_t& _y) const {
+    return !(*this == _y);
+  }
+
   LoxClass(
       const std::string& name,
-      LoxClass* superclass,
+      const LoxClass& superclass,
       const std::unordered_map<std::string, LoxFunction>& methods);
 
   lox::LoxFunction findMethod(const std::string& name);

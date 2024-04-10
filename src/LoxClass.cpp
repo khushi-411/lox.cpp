@@ -17,22 +17,22 @@ namespace lox {
 
 LoxClass::LoxClass(
     const std::string& name,
-    LoxClass* superclass,
+    const LoxClass& superclass,
     const std::unordered_map<std::string, LoxFunction>& methods)
     : superclass(superclass), name(name), methods(methods) {}
 
 
-LoxFunction LoxClass::findMethod(const std::string& name) {
+lox::LoxFunction LoxClass::findMethod(const std::string& name) {
   auto it = methods.find(name);
 
   if (it != methods.end()) {
-    return methods[name];
+    return methods.at(name);
   }
 
   if (superclass != nullptr) {
-    return superclass.findMethod(name);
+    return findMethod(name);  // TODO
   }
-  return nullptr;
+  // return nullptr;
 }
 
 
@@ -51,7 +51,7 @@ Object LoxClass::call(
     initializer.bind(instance).call(interpreter, arguments);
   }
 
-  return instance;
+  // return instance;  // TODO
 }
 
 
