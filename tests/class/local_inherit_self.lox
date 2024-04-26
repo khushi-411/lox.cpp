@@ -1,0 +1,4 @@
+{
+  // error
+  class Foo < Foo {}
+}

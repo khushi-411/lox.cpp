@@ -1,0 +1,2 @@
+// error
+if (true) "ok"; else var foo;

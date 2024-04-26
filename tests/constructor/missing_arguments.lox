@@ -1,0 +1,7 @@
+class Foo {
+  init(a, b) {}
+}
+
+
+// runtime error
+var foo = foo(1);

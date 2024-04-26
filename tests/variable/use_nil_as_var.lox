@@ -1,0 +1,2 @@
+// error
+var nil = "value";

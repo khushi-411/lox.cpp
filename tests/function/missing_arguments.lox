@@ -1,0 +1,4 @@
+fun f(a, b) {}
+
+// runtime error
+f(1);

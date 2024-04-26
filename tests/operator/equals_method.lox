@@ -1,0 +1,12 @@
+class Foo {
+  method() {}
+}
+
+var foo = Foo();
+var fooMethod = foo.method;
+
+// same bound method
+print fooMethod == fooMethod;
+
+// different closurizations
+print foo.method == foo.method;

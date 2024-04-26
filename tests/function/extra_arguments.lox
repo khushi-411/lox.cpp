@@ -1,0 +1,8 @@
+fun f(a, b) {
+  print a;
+  print b;
+}
+
+
+// runtime error
+f(1, 2, 3, 4);

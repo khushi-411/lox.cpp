@@ -1,0 +1,5 @@
+class Foo {}
+
+
+// runtime error, expected 0 arguments got 3
+var foo = Foo(1, 2, 3);
