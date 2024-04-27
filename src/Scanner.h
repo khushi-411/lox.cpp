@@ -16,9 +16,10 @@ using Object = std::variant<std::nullptr_t, std::string, double, bool>;
 namespace lox {
 
 inline std::vector<Token> tokens;
-inline int start = 0;
-inline int current = 0;
-inline int line = 1;
+// https://stackoverflow.com/questions/3660901
+inline size_t start = 0;
+inline size_t current = 0;
+inline size_t line = 1;
 
 // https://stackoverflow.com/questions/42056160
 

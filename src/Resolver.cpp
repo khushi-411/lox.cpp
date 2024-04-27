@@ -33,7 +33,7 @@ void lox::Resolver::visitBlockStmt(const lox::stmt::Block& _stmt) {
   return;
 }
 
-
+/*
 // class stmt
 
 void lox::Resolver::visitClassStmt(const lox::stmt::Class& _stmt) {
@@ -82,7 +82,7 @@ void lox::Resolver::visitClassStmt(const lox::stmt::Class& _stmt) {
   currentClass = enclosingClass;
   return;
 }
-
+*/
 
 // expression stmt
 
@@ -93,7 +93,7 @@ void lox::Resolver::visitExpressionStmt(const lox::stmt::Expression& _stmt) {
 
 
 // function stmt
-
+/*
 void lox::Resolver::visitFunctionStmt(const lox::stmt::Function& _stmt) {
   lox::Resolver::declare(_stmt.getName());
   lox::Resolver::define(_stmt.getName());
@@ -101,7 +101,7 @@ void lox::Resolver::visitFunctionStmt(const lox::stmt::Function& _stmt) {
   lox::Resolver::resolveFunction(_stmt, FunctionType::FUNCTION);
   return;
 }
-
+*/
 
 // if stmt
 
@@ -170,13 +170,13 @@ void lox::Resolver::visitWhileStmt(const lox::stmt::While& _stmt) {
 
 
 // assign expr
-
+/*
 void lox::Resolver::visitAssignExpr(const lox::expr::Assign& _expr) {
   lox::Resolver::resolve(_expr.getValue());
   lox::Resolver::resolveLocal(_expr, _expr.getName());
   return;
 }
-
+*/
 
 // binary expr
 
@@ -188,7 +188,7 @@ void lox::Resolver::visitBinaryExpr(const lox::expr::Binary& _expr) {
 
 
 // call expr
-
+/*
 void lox::Resolver::visitCallExpr(const lox::expr::Call& _expr) {
   lox::Resolver::resolve(_expr.getCallee());
 
@@ -206,7 +206,7 @@ void lox::Resolver::visitGetExpr(const lox::expr::Get& _expr) {
   lox::Resolver::resolve(_expr.getObject());
   return;
 }
-
+*/
 
 // grouping expr
 
@@ -231,7 +231,7 @@ void lox::Resolver::visitLogicalExpr(const lox::expr::Logical& _expr) {
   return;
 }
 
-
+/*
 // set expr
 
 void lox::Resolver::visitSetExpr(const lox::expr::Set& _expr) {
@@ -271,7 +271,7 @@ void lox::Resolver::visitThisExpr(const lox::expr::This& _expr) {
   lox::Resolver::resolveLocal(_expr, _expr.getKeyword());
   return;
 }
-
+*/
 
 // unary expr
 
@@ -282,7 +282,7 @@ void lox::Resolver::visitUnaryExpr(const lox::expr::Unary& _expr) {
 
 
 // variable expr
-
+/*
 void lox::Resolver::visitVariableExpr(const lox::expr::Variable& _expr) {
   if (!scopes.empty() && scopes.top()[_expr.getName().getLexeme()] == false) {
     Lox _lox;
@@ -293,7 +293,7 @@ void lox::Resolver::visitVariableExpr(const lox::expr::Variable& _expr) {
   lox::Resolver::resolveLocal(_expr, _expr.getName());
   return;
 }
-
+*/
 
 // resolving the lists of statements
 
@@ -308,7 +308,7 @@ void lox::Resolver::resolve(const lox::expr::Expr& _expr) {
   _expr.accept(*this);
 }
 
-
+/*
 void lox::Resolver::resolveFunction(
     const lox::stmt::Function& function,
     const lox::FunctionType& type) {
@@ -327,7 +327,7 @@ void lox::Resolver::resolveFunction(
 
   currentFunction = enclosingFunction;
 }
-
+*/
 
 // to create new block scope
 
@@ -366,7 +366,7 @@ void lox::Resolver::define(const Token& name) {
   scopes.top()[name.getLexeme()] = true;
 }
 
-
+/*
 void lox::Resolver::resolveLocal(
     const lox::expr::Expr& _expr,
     const Token& name) {
@@ -379,5 +379,5 @@ void lox::Resolver::resolveLocal(
     }
   }
 }
-
+*/
 }  // namespace lox

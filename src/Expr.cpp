@@ -39,7 +39,7 @@ const T lox::expr::Binary::accept(const lox::expr::Visitor<T>& visitor) const {
 
 
 // call
-
+/*
 lox::expr::Call::Call(
     const lox::expr::Expr& callee,
     const Token& paren,
@@ -63,7 +63,7 @@ template <class T>
 const T lox::expr::Get::accept(const lox::expr::Visitor<T>& visitor) const {
   return visitor.visitGetExpr(*this);
 }
-
+*/
 
 // grouping
 
@@ -114,7 +114,7 @@ const T lox::expr::Logical::accept(const lox::expr::Visitor<T>& visitor) const {
   return visitor.visitLogicalExpr(*this);
 }
 
-
+/*
 // set
 
 lox::expr::Set::Set(
@@ -151,7 +151,7 @@ template <class T>
 const T lox::expr::This::accept(const lox::expr::Visitor<T>& visitor) const {
   return visitor.visitThisExpr(*this);
 }
-
+*/
 
 // unary
 

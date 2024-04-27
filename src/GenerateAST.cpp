@@ -65,7 +65,6 @@ void GenerateAST::defineType(
     const std::string& baseName,
     const std::string& className,
     const std::string& fieldList) {
-  std::cout << "template <class T>\n";
   std::cout << "class " << baseName << " : "
             << "public " << className << " {\n";
   std::cout << "    " << baseName << "(" << fieldList << ") \n";
@@ -84,7 +83,8 @@ void GenerateAST::defineType(
 
   std::cout << "    };";
   std::cout << "\n";
-  std::cout << "    T accept(const Visitor<T>& visitor) {";
+  std::cout << "    template <class T>\n";
+  std::cout << "    const T accept(const Visitor<T>& visitor) const {";
   std::cout << "        return visitor.visit" + className + "(*this);";
   std::cout << "    }";
   std::cout << "};\n";

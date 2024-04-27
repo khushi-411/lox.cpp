@@ -216,7 +216,7 @@ void lox::Interpreter::interpret(
     for (const auto& statement : statements) {
       lox::Interpreter::execute(statement);
     }
-  } catch (RuntimeError error) {
+  } catch (const RuntimeError& error) {
     Lox _lox;
     _lox.runtimeError(error);
   }
@@ -238,6 +238,13 @@ void lox::Interpreter::execute(const lox::stmt::Stmt& _stmt) {
   _stmt.accept(*this);
 }
 
+
+// resolve
+/*
+void lox::Interpreter::resolve(const lox::expr::Expr& _expr, int depth) {
+  locals[_expr] = depth;
+}
+*/
 
 // execute block
 
@@ -333,6 +340,8 @@ Object lox::Interpreter::visitBinaryExpr(const lox::expr::Binary& _expr) {
     case TokenType::STAR:
       lox::Interpreter::checkNumberOperands(_expr.getOp(), left, right);
       return std::stod(left) * std::stod(right);
+    default:
+      break;
   }
 
   return nullptr;
@@ -474,6 +483,9 @@ Object lox::Interpreter::visitUnaryExpr(const lox::expr::Unary& _expr) {
     case TokenType::MINUS:
       lox::Interpreter::checkNumberOperand(_expr.getOp(), right);
       return -std::stod(right);
+
+    default:
+      break;
   }
 
   return nullptr;
@@ -605,7 +617,7 @@ void lox::Interpreter::interpret(const lox::expr::Expr& expression) {
     }
     std::cout << lox::Interpreter::stringify(value);
 
-  } catch (RuntimeError error) {
+  } catch (const RuntimeError& error) {
     Lox _lox;
     _lox.runtimeError(error);
   }

@@ -70,8 +70,8 @@ class Parser {
   lox::expr::Expr term();
   lox::expr::Expr factor();
   lox::expr::Expr unary();
-  lox::expr::Expr finishCall(const lox::expr::Expr& callee);
-  lox::expr::Expr call();
+  //  lox::expr::Expr finishCall(const lox::expr::Expr& callee);
+  //  lox::expr::Expr call();
   lox::expr::Expr primary();
   void synchronize();
 };
