@@ -148,11 +148,14 @@ void Scanner::identifier() {
   }
 
   std::string text = this->source.substr(start, current);
-  TokenType type = keywords[text];
+  TokenType type = TokenType::IDENTIFIER;
 
-  if (type == NULL) {
-    type = TokenType::IDENTIFIER;
+  // don't compare with NULL because we get:
+  // warning: NULL used in arithmetic
+  if (keywords.find(text) != keywords.end()) {
+    type = keywords[text];
   }
+
   Scanner::addToken(type);
 }
 

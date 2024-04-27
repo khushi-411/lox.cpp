@@ -52,7 +52,9 @@ class Expr {
   }
 
   template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  T accept(const Visitor<T>& visitor) const {
+    return visitor.visitExpr(*this);
+  }
 };
 
 
@@ -109,7 +111,7 @@ class Binary : public Expr {
   }
 };
 
-
+/*
 // call expr
 
 class Call : public Expr {
@@ -162,7 +164,7 @@ class Get : public Expr {
     return name;
   }
 };
-
+*/
 
 // grouping expr
 
@@ -227,7 +229,7 @@ class Logical : public Expr {
   }
 };
 
-
+/*
 // set expr
 
 class Set : public Expr {
@@ -295,7 +297,7 @@ class This : public Expr {
     return keyword;
   }
 };
-
+*/
 
 // unary expr
 
@@ -343,16 +345,20 @@ class Variable : public Expr {
 template <class T>
 class Visitor : public Expr {
  public:
+  virtual T visitExpr(const Expr& expr) const = 0;
+
   virtual T visitAssignExpr(const Assign& expr) const = 0;
   virtual T visitBinaryExpr(const Binary& expr) const = 0;
-  virtual T visitCallExpr(const Call& expr) const = 0;
-  virtual T visitGetExpr(const Get& expr) const = 0;
+  /*  virtual T visitCallExpr(const Call& expr) const = 0;
+    virtual T visitGetExpr(const Get& expr) const = 0;
+  */
   virtual T visitGroupingExpr(const Grouping& expr) const = 0;
   virtual T visitLiteralExpr(const Literal& expr) const = 0;
   virtual T visitLogicalExpr(const Logical& expr) const = 0;
-  virtual T visitSetExpr(const Set& expr) const = 0;
-  virtual T visitSuperExpr(const Super& expr) const = 0;
-  virtual T visitThisExpr(const This& expr) const = 0;
+  /*  virtual T visitSetExpr(const Set& expr) const = 0;
+    virtual T visitSuperExpr(const Super& expr) const = 0;
+    virtual T visitThisExpr(const This& expr) const = 0;
+  */
   virtual T visitUnaryExpr(const Unary& expr) const = 0;
   virtual T visitVariableExpr(const Variable& expr) const = 0;
 };

@@ -12,11 +12,11 @@
 #include <sstream>
 #include <vector>
 
-//#include "ASTPrinter.h"
+#include "ASTPrinter.h"
 #include "Expr.h"
 #include "Interpreter.h"
 #include "Parser.h"
-//#include "Resolver.h"
+#include "Resolver.h"
 #include "RuntimeError.h"
 #include "Scanner.h"
 #include "Stmt.h"
@@ -78,7 +78,7 @@ class Lox {
     std::vector<Token> tokens = scanner.scanTokens();
     for (Token token : tokens) {
       // TODO: check another way (https://stackoverflow.com/questions/45172025)
-      std::cout << token;
+      std::cout << token << "\n";
     }
 
     lox::parser::Parser parser(tokens);
@@ -91,7 +91,7 @@ class Lox {
     }
 
     // lox::Resolver resolver(interpreter);
-    //   resolver.resolve(statements);
+    // resolver.resolve(statements);
 
     if (hadError) {
       return;

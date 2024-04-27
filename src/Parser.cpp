@@ -199,7 +199,7 @@ lox::stmt::Stmt Parser::expressionStatement() {
   Parser::consume(TokenType::SEMICOLON, "Expect ';' after expression.");
   return lox::stmt::Expression(_expr);
 }
-
+/*
 
 lox::stmt::Function function(const std::string& kind) {
   Parser _parser;
@@ -228,7 +228,7 @@ lox::stmt::Function function(const std::string& kind) {
 
   return lox::stmt::Function(name, parameters, body);
 }
-
+*/
 
 std::vector<lox::stmt::Stmt> Parser::block() {
   std::vector<lox::stmt::Stmt> statements;
@@ -292,7 +292,8 @@ lox::stmt::Stmt Parser::classDeclaration() {
 lox::expr::Expr Parser::parse() {
   try {
     return Parser::expression();
-  } catch (ParseError error) {
+    // https://stackoverflow.com/questions/62030341
+  } catch (const ParseError& error) {
     // returns NULL because we want to take this to the interpreter
     return lox::expr::Expr();
   }
@@ -373,6 +374,8 @@ lox::expr::Expr Parser::_and() {
   return _expr;
 }
 
+
+// TODO: maybe use std::initializer_list or std::vector
 
 bool Parser::match(const TokenType& types, ...) {
   va_list args;
@@ -473,11 +476,11 @@ lox::expr::Expr Parser::unary() {
     return lox::expr::Unary(op, right);
   }
 
-  // return Parser::primary();
-  return Parser::call();
+  return Parser::primary();
+  // return Parser::call();
 }
 
-
+/*
 lox::expr::Expr Parser::finishCall(const lox::expr::Expr& callee) {
   std::vector<lox::expr::Expr> arguments;
 
@@ -515,7 +518,7 @@ lox::expr::Expr Parser::call() {
   }
   return _expr;
 }
-
+*/
 
 lox::expr::Expr Parser::primary() {
   if (Parser::match(TokenType::FALSE)) {
@@ -533,20 +536,20 @@ lox::expr::Expr Parser::primary() {
   if (Parser::match(TokenType::NUMBER, TokenType::STRING)) {
     return lox::expr::Literal(Parser::previous().getLiteral());
   }
+  /*
+    if (Parser::match(TokenType::SUPER)) {
+      Token keyword = Parser::previous();
+      Parser::consume(TokenType::DOT, "Expect '.' after 'super'.");
+      Token method = Parser::consume(
+          TokenType::IDENTIFIER, "Expect superclass method name.");
+      // don't use "new" keyword
+      return lox::expr::Super(keyword, method);
+    }
 
-  if (Parser::match(TokenType::SUPER)) {
-    Token keyword = Parser::previous();
-    Parser::consume(TokenType::DOT, "Expect '.' after 'super'.");
-    Token method = Parser::consume(
-        TokenType::IDENTIFIER, "Expect superclass method name.");
-    // don't use "new" keyword
-    return lox::expr::Super(keyword, method);
-  }
-
-  if (Parser::match(TokenType::THIS)) {
-    return lox::expr::This(Parser::previous());
-  }
-
+    if (Parser::match(TokenType::THIS)) {
+      return lox::expr::This(Parser::previous());
+    }
+  */
   if (Parser::match(TokenType::IDENTIFIER)) {
     return lox::expr::Variable(Parser::previous());
   }
@@ -588,8 +591,8 @@ void Parser::synchronize() {
       return;
     }
     switch (Parser::peek().tokentype()) {
-      case CLASS:
-      case FUN:
+      // case CLASS:
+      // case FUN:
       case VAR:
       case FOR:
       case IF:
@@ -597,6 +600,9 @@ void Parser::synchronize() {
       case PRINT:
       case RETURN:
         return;
+      // https://stackoverflow.com/questions/37254496
+      default:
+        break;
     }
     Parser::advance();
   }

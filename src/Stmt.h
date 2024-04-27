@@ -49,7 +49,9 @@ class Stmt {
   }
 
   template <class T>
-  T accept(const Visitor<T>& visitor) const;
+  T accept(const Visitor<T>& visitor) const {
+    return visitor.visitStmt(*this);
+  }
 };
 
 
@@ -84,7 +86,7 @@ class Expression : public Stmt {
   const lox::expr::Expr& getExpression() const;
 };
 
-
+/*
 // function stmt
 
 class Function : public Stmt {
@@ -129,7 +131,7 @@ class Class : public Stmt {
   const lox::expr::Variable& getSuperclass() const;
   const std::vector<lox::stmt::Function>& getMethods() const;
 };
-
+*/
 
 // if stmt
 
@@ -228,10 +230,12 @@ class While : public Stmt {
 template <class T>
 class Visitor : public Stmt {
  public:
+  virtual T visitStmt(const Stmt& stmt) const = 0;
+
   virtual T visitBlockStmt(const Block& stmt) const = 0;
-  virtual T visitClassStmt(const Class& stmt) const = 0;
+  //  virtual T visitClassStmt(const Class& stmt) const = 0;
   virtual T visitExpressionStmt(const Expression& stmt) const = 0;
-  virtual T visitFunctionStmt(const Function& stmt) const = 0;
+  //  virtual T visitFunctionStmt(const Function& stmt) const = 0;
   virtual T visitIfStmt(const If& stmt) const = 0;
   virtual T visitPrintStmt(const Print& stmt) const = 0;
   virtual T visitReturnStmt(const Return& stmt) const = 0;

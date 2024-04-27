@@ -39,7 +39,7 @@ const lox::expr::Expr& lox::stmt::Expression::getExpression() const {
   return expression;
 }
 
-
+/*
 // function
 
 lox::stmt::Function::Function(
@@ -98,7 +98,7 @@ const lox::expr::Variable& lox::stmt::Class::getSuperclass() const {
 const std::vector<lox::stmt::Function>& lox::stmt::Class::getMethods() const {
   return methods;
 }
-
+*/
 
 // if
 

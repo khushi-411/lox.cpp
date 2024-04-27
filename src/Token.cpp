@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <variant>
 
@@ -25,7 +26,24 @@ Token::Token(
 
 
 const std::string& Token::to_string() const {
-  return type + " " + lexeme + " " + std::get<std::string>(literal);
+  std::stringstream ss;
+
+  if (std::holds_alternative<std::nullptr_t>(literal)) {
+    ss << type << " " << lexeme << " " << std::get<std::nullptr_t>(literal);
+
+  } else if (std::holds_alternative<std::string>(literal)) {
+    ss << type << " " << lexeme << " " << std::get<std::string>(literal);
+
+  } else if (std::holds_alternative<double>(literal)) {
+    ss << type << " " << lexeme << " " << std::get<double>(literal);
+
+  } else if (std::holds_alternative<bool>(literal)) {
+    ss << type << " " << lexeme << " " << std::get<bool>(literal);
+  }
+
+  static std::string result;
+  result = ss.str();
+  return result;
 }
 
 
