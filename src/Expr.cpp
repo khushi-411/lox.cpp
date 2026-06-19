@@ -176,4 +176,38 @@ const T lox::expr::Variable::accept(
   return visitor.visitVariableExpr(*this);
 }
 
+
+// Explicit template instantiations for commonly used types
+namespace expr {
+
+// Instantiate all expression types with Object return type
+template const Object Assign::accept<Object>(const Visitor<Object>&) const;
+template const Object Binary::accept<Object>(const Visitor<Object>&) const;
+template const Object Call::accept<Object>(const Visitor<Object>&) const;
+template const Object Get::accept<Object>(const Visitor<Object>&) const;
+template const Object Grouping::accept<Object>(const Visitor<Object>&) const;
+template const Object Literal::accept<Object>(const Visitor<Object>&) const;
+template const Object Logical::accept<Object>(const Visitor<Object>&) const;
+template const Object Set::accept<Object>(const Visitor<Object>&) const;
+template const Object Super::accept<Object>(const Visitor<Object>&) const;
+template const Object This::accept<Object>(const Visitor<Object>&) const;
+template const Object Unary::accept<Object>(const Visitor<Object>&) const;
+template const Object Variable::accept<Object>(const Visitor<Object>&) const;
+
+// Instantiate all expression types with void return type
+template const void Assign::accept<void>(const Visitor<void>&) const;
+template const void Binary::accept<void>(const Visitor<void>&) const;
+template const void Call::accept<void>(const Visitor<void>&) const;
+template const void Get::accept<void>(const Visitor<void>&) const;
+template const void Grouping::accept<void>(const Visitor<void>&) const;
+template const void Literal::accept<void>(const Visitor<void>&) const;
+template const void Logical::accept<void>(const Visitor<void>&) const;
+template const void Set::accept<void>(const Visitor<void>&) const;
+template const void Super::accept<void>(const Visitor<void>&) const;
+template const void This::accept<void>(const Visitor<void>&) const;
+template const void Unary::accept<void>(const Visitor<void>&) const;
+template const void Variable::accept<void>(const Visitor<void>&) const;
+
+}  // namespace expr
+
 }  // namespace lox

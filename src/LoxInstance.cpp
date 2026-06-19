@@ -13,7 +13,7 @@ using Object = std::variant<std::nullptr_t, std::string, double, bool>;
 
 namespace lox {
 
-LoxInstance::LoxInstance(const auto& klass) : klass(klass) {}
+LoxInstance::LoxInstance(const LoxClass& klass) : klass(&klass) {}
 
 
 Object LoxInstance::get(const Token& name) {
@@ -21,13 +21,17 @@ Object LoxInstance::get(const Token& name) {
     return fields[name.getLexeme()];
   }
 
-  LoxFunction method = klass.findMethod(name.getLexeme());
-
-  if (method != nullptr) {
-    return method.bind(*this);
+  try {
+    LoxFunction method = klass->findMethod(name.getLexeme());
+    if (method != nullptr) {
+      // TODO: Return bound method properly
+      // return method.bind(*this);
+    }
+  } catch (const std::runtime_error&) {
+    // Method not found
   }
 
-  throw new RuntimeError(
+  throw RuntimeError(
       name, "Undefined property '" + name.getLexeme() + "'.");
 }
 
@@ -37,12 +41,12 @@ void LoxInstance::set(const Token& name, const Object& value) {
 }
 
 
-const std::string& LoxInstance::to_string() const {
-  return klass.getName() + " instance";
+std::string LoxInstance::to_string() const {
+  return klass->getName() + " instance";
 }
 
 
-const Object& LoxInstance::getKlass() const {
+const LoxClass* LoxInstance::getKlass() const {
   return klass;
 }
 

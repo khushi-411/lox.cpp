@@ -3,6 +3,7 @@
 #ifndef STMT_H
 #define STMT_H
 
+#include <stdexcept>
 #include <vector>
 
 #include "Expr.h"
@@ -23,33 +24,45 @@ class Visitor;
 // stmt class
 
 class Stmt {
+ private:
+  bool is_null_ = false;
+
  public:
+  virtual ~Stmt() = default;
+
+  // Comparison operators
   friend bool operator==(const Stmt& _x, const Stmt& _y) {
-    return _x == _y;
+    return &_x == &_y;
   }
 
-  bool operator==(const std::nullptr_t& _y) const {
-    return *this == _y;
+  bool operator==(const std::nullptr_t&) const {
+    return is_null_;
   }
 
   friend bool operator!=(const Stmt& _x, const Stmt& _y) {
-    return _x != _y;
+    return &_x != &_y;
   }
 
-  bool operator!=(const std::nullptr_t& _y) const {
-    return !(*this == _y);
+  bool operator!=(const std::nullptr_t&) const {
+    return !is_null_;
   }
 
+  // Assignment operators
   Stmt& operator=(const std::nullptr_t&) {
+    is_null_ = true;
     return *this;
   }
 
-  Stmt& operator=(const Stmt&) {
-    return *this;
-  }
+  Stmt& operator=(const Stmt&) = default;
 
+  bool isNull() const { return is_null_; }
+
+  // Pure virtual but cannot use virtual keyword with templates
+  // Each derived class must override this
   template <class T>
-  T accept(const Visitor<T>& visitor) const;
+  T accept(const Visitor<T>& visitor) const {
+    throw std::runtime_error("Base Stmt::accept called - use derived class");
+  }
 };
 
 

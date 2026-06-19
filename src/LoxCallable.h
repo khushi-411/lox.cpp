@@ -15,9 +15,10 @@ namespace lox {
 
 class LoxCallable {
  public:
+  virtual ~LoxCallable() = default;
   virtual int arity() = 0;
   virtual Object call(
-      const lox::Interpreter& interpreter,
+      lox::Interpreter& interpreter,
       const std::vector<Object>& arguments) = 0;
 };
 

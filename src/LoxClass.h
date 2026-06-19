@@ -22,39 +22,40 @@ class LoxFunction;
 class LoxClass : public lox::LoxCallable {
  private:
   std::string name;
-  const LoxClass& superclass;
+  const LoxClass* superclass;
   std::unordered_map<std::string, LoxFunction> methods;
+  bool is_null_ = false;
 
  public:
   friend bool operator==(const LoxClass& _x, const LoxClass& _y) {
-    return _x == _y;
+    return &_x == &_y;
   }
 
-  bool operator==(const std::nullptr_t& _y) const {
-    return *this == _y;
+  bool operator==(const std::nullptr_t&) const {
+    return is_null_;
   }
 
   friend bool operator!=(const LoxClass& _x, const LoxClass& _y) {
-    return _x != _y;
+    return &_x != &_y;
   }
 
-  bool operator!=(const std::nullptr_t& _y) const {
-    return !(*this == _y);
+  bool operator!=(const std::nullptr_t&) const {
+    return !is_null_;
   }
 
   LoxClass(
       const std::string& name,
-      const LoxClass& superclass,
+      const LoxClass* superclass,
       const std::unordered_map<std::string, LoxFunction>& methods);
 
-  lox::LoxFunction findMethod(const std::string& name);
+  lox::LoxFunction findMethod(const std::string& name) const;
   std::string to_string();
   Object call(
-      const lox::Interpreter& interpreter,
-      const std::vector<Object>& arguments);
-  int arity();
+      lox::Interpreter& interpreter,
+      const std::vector<Object>& arguments) override;
+  int arity() override;
 
-  const std::string& getName();
+  const std::string& getName() const;
 };
 
 

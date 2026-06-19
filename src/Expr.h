@@ -3,6 +3,7 @@
 #ifndef EXPR_H
 #define EXPR_H
 
+#include <stdexcept>
 #include <string>
 #include <variant>
 #include <vector>
@@ -26,33 +27,45 @@ class Visitor;
 // expr class
 
 class Expr {
+ private:
+  bool is_null_ = false;
+
  public:
+  virtual ~Expr() = default;
+
+  // Comparison operators
   friend bool operator==(const Expr& _x, const Expr& _y) {
-    return _x == _y;
+    return &_x == &_y;
   }
 
-  bool operator==(const std::nullptr_t& _y) const {
-    return *this == _y;
+  bool operator==(const std::nullptr_t&) const {
+    return is_null_;
   }
 
   friend bool operator!=(const Expr& _x, const Expr& _y) {
-    return _x != _y;
+    return &_x != &_y;
   }
 
-  bool operator!=(const std::nullptr_t& _y) const {
-    return !(*this == _y);
+  bool operator!=(const std::nullptr_t&) const {
+    return !is_null_;
   }
 
+  // Assignment operators
   Expr& operator=(const std::nullptr_t&) {
+    is_null_ = true;
     return *this;
   }
 
-  Expr& operator=(const Expr&) {
-    return *this;
-  }
+  Expr& operator=(const Expr&) = default;
 
+  bool isNull() const { return is_null_; }
+
+  // Pure virtual but cannot use virtual keyword with templates
+  // Each derived class must override this
   template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  const T accept(const Visitor<T>& visitor) const {
+    throw std::runtime_error("Base Expr::accept called - use derived class");
+  }
 };
 
 
