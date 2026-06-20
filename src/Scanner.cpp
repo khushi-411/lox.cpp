@@ -147,12 +147,9 @@ void Scanner::identifier() {
     Scanner::advance();
   }
 
-  std::string text = this->source.substr(start, current);
-  TokenType type = keywords[text];
-
-  if (type == NULL) {
-    type = TokenType::IDENTIFIER;
-  }
+  std::string text = this->source.substr(start, current - start);
+  auto it = keywords.find(text);
+  TokenType type = (it != keywords.end()) ? it->second : TokenType::IDENTIFIER;
   Scanner::addToken(type);
 }
 
@@ -172,7 +169,7 @@ void Scanner::number() {
   }
 
   Scanner::addToken(
-      TokenType::NUMBER, std::stod(source.substr(start, current)));  // todo
+      TokenType::NUMBER, std::stod(source.substr(start, current - start)));
 }
 
 
@@ -192,7 +189,7 @@ void Scanner::string() {
   }
 
   Scanner::advance();
-  std::string value = source.substr(start + 1, current - 1);
+  std::string value = source.substr(start + 1, current - start - 2);
   Scanner::addToken(STRING, value);
 }
 
@@ -225,7 +222,7 @@ char Scanner::peek() {
 // used in number literals, because we don't want "." to consume
 
 char Scanner::peekNext() {
-  if (current + 1 >= source.length()) {
+  if (static_cast<size_t>(current + 1) >= source.length()) {
     return '\0';
   }
   return source.at(current + 1);
@@ -248,7 +245,7 @@ bool Scanner::isDigit(const char& c) {
 
 
 bool Scanner::isAtEnd() {
-  return current >= source.length();
+  return static_cast<size_t>(current) >= source.length();
 }
 
 
@@ -267,7 +264,7 @@ void Scanner::addToken(const TokenType& type) {
 
 
 void Scanner::addToken(const TokenType& type, const Object& literal) {
-  std::string text = source.substr(start, current);
+  std::string text = source.substr(start, current - start);
   tokens.push_back(Token(type, text, literal, line));
 }
 

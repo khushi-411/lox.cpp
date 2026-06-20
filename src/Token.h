@@ -28,7 +28,7 @@ class Token {
       const decltype(literal)& literal,  // TODO: decltype type deduction
       const int& line);
 
-  const std::string& to_string() const;
+  std::string to_string() const;
   const TokenType& tokentype() const;
   const std::string& getLexeme() const;
   const Object& getLiteral() const;

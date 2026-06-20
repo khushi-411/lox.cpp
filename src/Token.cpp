@@ -19,13 +19,23 @@ Token::Token(
     const Object& literal,
     const int& line)
     : type(type),
-      lexeme(std::move(lexeme)),
-      literal(std::move(literal)),
+      lexeme(lexeme),
+      literal(literal),
       line(line) {}
 
 
-const std::string& Token::to_string() const {
-  return type + " " + lexeme + " " + std::get<std::string>(literal);
+std::string Token::to_string() const {
+  std::string lit;
+  if (std::holds_alternative<std::string>(literal)) {
+    lit = std::get<std::string>(literal);
+  } else if (std::holds_alternative<double>(literal)) {
+    lit = std::to_string(std::get<double>(literal));
+  } else if (std::holds_alternative<bool>(literal)) {
+    lit = std::get<bool>(literal) ? "true" : "false";
+  } else {
+    lit = "nil";
+  }
+  return std::to_string(static_cast<int>(type)) + " " + lexeme + " " + lit;
 }
 
 
