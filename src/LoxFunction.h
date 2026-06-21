@@ -22,22 +22,23 @@ class LoxFunction : public LoxCallable {
   lox::stmt::Function declaration;
   Environment closure;
   bool isInitializer;
+  bool is_null_ = false;
 
  public:
   friend bool operator==(const LoxFunction& _x, const LoxFunction& _y) {
-    return _x == _y;
+    return &_x == &_y;
   }
 
-  bool operator==(const std::nullptr_t& _y) const {
-    return *this == _y;
+  bool operator==(const std::nullptr_t&) const {
+    return is_null_;
   }
 
   friend bool operator!=(const LoxFunction& _x, const LoxFunction& _y) {
-    return _x != _y;
+    return &_x != &_y;
   }
 
-  bool operator!=(const std::nullptr_t& _y) const {
-    return !(*this == _y);
+  bool operator!=(const std::nullptr_t&) const {
+    return !is_null_;
   }
 
   LoxFunction(
@@ -46,10 +47,10 @@ class LoxFunction : public LoxCallable {
       const bool& isInitializer);
 
   LoxFunction bind(const LoxInstance& instance);
-  const std::string& to_string() const;
+  std::string to_string() const;
   int arity();
   Object call(
-      const Interpreter& interpreter,
+      Interpreter& interpreter,
       const std::vector<Object>& arguments);
 };
 

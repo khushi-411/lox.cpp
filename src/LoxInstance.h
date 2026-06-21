@@ -19,16 +19,16 @@ class LoxClass;
 
 class LoxInstance {
  private:
-  LoxClass klass;
+  const LoxClass* klass;
   std::unordered_map<std::string, Object> fields;
 
  public:
-  LoxInstance(const auto& klass);
+  LoxInstance(const LoxClass& klass);
 
   Object get(const Token& name);
   void set(const Token& name, const Object& value);
-  const std::string& to_string() const;
-  const Object& getKlass() const;
+  std::string to_string() const;
+  const LoxClass* getKlass() const;
 };
 
 

@@ -25,11 +25,12 @@ class Environment {
   Environment();
   Environment(const Environment& enclosing);
 
-  Object get(const Token& name);
+  Object get(const Token& name) const;
   void assign(const Token& name, const Object& value);
   void define(const std::string& name, const Object& value);
-  Environment ancestor(const int& distance);
-  Object getAt(const int& distance, const std::string& name);
+  Environment& ancestor(const int& distance);
+  const Environment& ancestor(const int& distance) const;
+  Object getAt(const int& distance, const std::string& name) const;
   void assignAt(const int& distance, const Token& name, const Object& value);
   const std::string to_string() const;
 };

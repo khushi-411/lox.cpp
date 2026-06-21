@@ -21,36 +21,37 @@ LoxFunction::LoxFunction(
     const lox::stmt::Function& declaration,
     const Environment& closure,
     const bool& isInitializer)
-    : isInitializer(isInitializer),
+    : declaration(declaration),
       closure(closure),
-      declaration(declaration) {}
+      isInitializer(isInitializer) {}
 
 
 LoxFunction LoxFunction::bind(const LoxInstance& instance) {
-  Environment environment = new Environment(closure);
-  environment.define("this", instance);
+  Environment environment(closure);
+  // Note: instance needs to be converted to Object type
+  // environment.define("this", instance);  // TODO: Fix instance conversion
   return LoxFunction(declaration, environment, isInitializer);
 }
 
 
-const std::string& LoxFunction::to_string() const {
+std::string LoxFunction::to_string() const {
   return "<fn " + declaration.getName().getLexeme() + ">";
 }
 
 
 int LoxFunction::arity() {
-  return declaration.params.size();
+  return declaration.getParams().size();
 }
 
 
 Object LoxFunction::call(
-    const Interpreter& interpreter,
+    Interpreter& interpreter,
     const std::vector<Object>& arguments) {
-  Environment environment = new Environment(closure);
+  Environment environment(closure);
 
-  for (int i = 0; i < declaration.params.size(); i++) {
+  for (size_t i = 0; i < declaration.getParams().size(); i++) {
     environment.define(
-        declaration.params[i].getLexeme(), arguments[i]);  // TODO
+        declaration.getParams()[i].getLexeme(), arguments[i]);
   }
 
   try {
@@ -63,7 +64,7 @@ Object LoxFunction::call(
   }
 
   if (isInitializer) {
-    closure.getAt(0, "this");
+    return closure.getAt(0, "this");
   }
 
   return nullptr;

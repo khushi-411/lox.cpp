@@ -4,7 +4,7 @@
 #define INTERPRETER_H
 
 #include <string.h>
-#include <unordered_map>
+#include <map>
 #include <vector>
 
 #include "Environment.h"
@@ -21,7 +21,7 @@ class Interpreter : public lox::expr::Visitor<Object>,
  private:
   Environment globals;  // = new Environment();
   Environment environment;  // = globals;
-  std::unordered_map<lox::expr::Expr, int> locals;
+  std::map<const lox::expr::Expr*, int> locals;
 
  public:
   // Interpreter() : globals(Environment()), environment(globals) {}

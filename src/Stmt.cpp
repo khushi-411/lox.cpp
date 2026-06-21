@@ -224,4 +224,21 @@ T accept(const Visitor<T>& visitor) {
 }
 */
 
+
+// Explicit template instantiations for commonly used types
+namespace stmt {
+
+// Instantiate all statement types with void return type
+template const void Block::accept<void>(const Visitor<void>&) const;
+template const void Class::accept<void>(const Visitor<void>&) const;
+template const void Expression::accept<void>(const Visitor<void>&) const;
+template const void Function::accept<void>(const Visitor<void>&) const;
+template const void If::accept<void>(const Visitor<void>&) const;
+template const void Print::accept<void>(const Visitor<void>&) const;
+template const void Return::accept<void>(const Visitor<void>&) const;
+template const void Var::accept<void>(const Visitor<void>&) const;
+template const void While::accept<void>(const Visitor<void>&) const;
+
+}  // namespace stmt
+
 }  // namespace lox

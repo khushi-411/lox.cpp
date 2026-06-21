@@ -82,7 +82,8 @@ class Lox {
     }
 
     lox::parser::Parser parser(tokens);
-    lox::expr::Expr expression = parser.parse();
+    // Parse both expressions and statements
+    // lox::expr::Expr expression = parser.parse();  // Unused - commented out
     std::vector<lox::stmt::Stmt> statements = parser.parseStmt();
 
     // To ensure code has error and we have to return the program

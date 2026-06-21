@@ -3,7 +3,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include <stdarg.h>
+#include <initializer_list>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -59,7 +59,7 @@ class Parser {
   lox::expr::Expr _and();
   lox::expr::Expr expression();
   lox::expr::Expr equality();
-  bool match(const TokenType& types, ...);
+  bool match(std::initializer_list<TokenType> types);
   Token consume(const TokenType& type, const std::string& message);
   bool check(const TokenType& type);
   Token advance();

@@ -17,12 +17,12 @@ namespace lox {
 
 LoxClass::LoxClass(
     const std::string& name,
-    const LoxClass& superclass,
+    const LoxClass* superclass,
     const std::unordered_map<std::string, LoxFunction>& methods)
-    : superclass(superclass), name(name), methods(methods) {}
+    : name(name), superclass(superclass), methods(methods) {}
 
 
-lox::LoxFunction LoxClass::findMethod(const std::string& name) {
+lox::LoxFunction LoxClass::findMethod(const std::string& name) const {
   auto it = methods.find(name);
 
   if (it != methods.end()) {
@@ -30,9 +30,11 @@ lox::LoxFunction LoxClass::findMethod(const std::string& name) {
   }
 
   if (superclass != nullptr) {
-    return findMethod(name);  // TODO
+    return superclass->findMethod(name);
   }
-  // return nullptr;
+
+  // Return a null LoxFunction
+  throw std::runtime_error("Method not found: " + name);
 }
 
 
@@ -42,16 +44,21 @@ std::string LoxClass::to_string() {
 
 
 Object LoxClass::call(
-    const Interpreter& interpreter,
+    Interpreter& interpreter,
     const std::vector<Object>& arguments) {
   LoxInstance* instance = new LoxInstance(*this);
-  LoxFunction initializer = LoxClass::findMethod("init");
 
-  if (initializer != nullptr) {
-    initializer.bind(instance).call(interpreter, arguments);
+  try {
+    LoxFunction initializer = LoxClass::findMethod("init");
+    if (initializer != nullptr) {
+      initializer.bind(*instance).call(interpreter, arguments);
+    }
+  } catch (const std::runtime_error&) {
+    // ...
   }
 
-  // return instance;  // TODO
+  // TODO: Return instance as Object
+  return nullptr;
 }
 
 
@@ -66,7 +73,7 @@ int LoxClass::arity() {
 }
 
 
-const std::string& LoxClass::getName() {
+const std::string& LoxClass::getName() const {
   return name;
 }
 

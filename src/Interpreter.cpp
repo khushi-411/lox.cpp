@@ -216,7 +216,7 @@ void lox::Interpreter::interpret(
     for (const auto& statement : statements) {
       lox::Interpreter::execute(statement);
     }
-  } catch (RuntimeError error) {
+  } catch (const RuntimeError& error) {
     Lox _lox;
     _lox.runtimeError(error);
   }
@@ -241,23 +241,24 @@ void lox::Interpreter::execute(const lox::stmt::Stmt& _stmt) {
 
 // execute block
 
-/*
-void executeBlock(
+void lox::Interpreter::executeBlock(
     const std::vector<lox::stmt::Stmt>& statements,
-    const Environment& environment) {
-  Environment previous = environment;
+    const Environment& newEnvironment) {
+  Environment previous = this->environment;
 
   try {
-    environment = environment;
+    this->environment = newEnvironment;
 
     for (const lox::stmt::Stmt& statement : statements) {
-        lox::Interpreter::execute(statement);
+      lox::Interpreter::execute(statement);
     }
   } catch (...) {
-    environment = previous;
+    this->environment = previous;
+    throw;
   }
+
+  this->environment = previous;
 }
-*/
 
 // assign expr
 
@@ -303,7 +304,6 @@ Object lox::Interpreter::visitBinaryExpr(const lox::expr::Binary& _expr) {
 
     case TokenType::GREATER:
       lox::Interpreter::checkNumberOperands(_expr.getOp(), left, right);
-
       return std::stod(left) > std::stod(right);
 
     case TokenType::GREATER_EQUAL:
@@ -333,6 +333,9 @@ Object lox::Interpreter::visitBinaryExpr(const lox::expr::Binary& _expr) {
     case TokenType::STAR:
       lox::Interpreter::checkNumberOperands(_expr.getOp(), left, right);
       return std::stod(left) * std::stod(right);
+
+    default:
+      throw RuntimeError(_expr.getOp(), "Unknown binary operator.");
   }
 
   return nullptr;
@@ -474,6 +477,9 @@ Object lox::Interpreter::visitUnaryExpr(const lox::expr::Unary& _expr) {
     case TokenType::MINUS:
       lox::Interpreter::checkNumberOperand(_expr.getOp(), right);
       return -std::stod(right);
+
+    default:
+      throw RuntimeError(_expr.getOp(), "Unknown unary operator.");
   }
 
   return nullptr;
@@ -494,15 +500,24 @@ Object lox::Interpreter::visitVariableExpr(const lox::expr::Variable& _expr) {
 Object lox::Interpreter::lookUpVariable(
     const Token& name,
     const lox::expr::Expr& _expr) {
-  int distance = locals[_expr];
+  auto it = locals.find(&_expr);
 
-  if (distance != NULL) {
+  if (it != locals.end()) {
+    int distance = it->second;
     return environment.getAt(distance, name.getLexeme());
   } else {
     return globals.get(name);
   }
 }
+
+
 */
+
+// resolve - bind variable to scope depth
+
+void lox::Interpreter::resolve(const lox::expr::Expr& _expr, const int& depth) {
+  locals[&_expr] = depth;
+}
 
 // helper function
 
@@ -605,7 +620,7 @@ void lox::Interpreter::interpret(const lox::expr::Expr& expression) {
     }
     std::cout << lox::Interpreter::stringify(value);
 
-  } catch (RuntimeError error) {
+  } catch (const RuntimeError& error) {
     Lox _lox;
     _lox.runtimeError(error);
   }
