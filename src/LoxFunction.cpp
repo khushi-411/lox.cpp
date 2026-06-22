@@ -11,7 +11,8 @@
 #include "Stmt.h"
 
 
-using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+using Object = std::variant<std::nullptr_t, std::string, double, bool,
+    std::shared_ptr<lox::LoxCallable>, std::shared_ptr<lox::LoxInstance>>;
 
 
 namespace lox {
@@ -28,8 +29,7 @@ LoxFunction::LoxFunction(
 
 LoxFunction LoxFunction::bind(const LoxInstance& instance) {
   Environment environment(closure);
-  // Note: instance needs to be converted to Object type
-  // environment.define("this", instance);  // TODO: Fix instance conversion
+  environment.define("this", std::make_shared<LoxInstance>(instance));
   return LoxFunction(declaration, environment, isInitializer);
 }
 

@@ -241,15 +241,15 @@ class While : public Stmt {
 template <class T>
 class Visitor : public Stmt {
  public:
-  virtual T visitBlockStmt(const Block& stmt) const = 0;
-  virtual T visitClassStmt(const Class& stmt) const = 0;
-  virtual T visitExpressionStmt(const Expression& stmt) const = 0;
-  virtual T visitFunctionStmt(const Function& stmt) const = 0;
-  virtual T visitIfStmt(const If& stmt) const = 0;
-  virtual T visitPrintStmt(const Print& stmt) const = 0;
-  virtual T visitReturnStmt(const Return& stmt) const = 0;
-  virtual T visitVarStmt(const Var& stmt) const = 0;
-  virtual T visitWhileStmt(const While& stmt) const = 0;
+  virtual T visitBlockStmt(const Block& stmt) = 0;
+  virtual T visitClassStmt(const Class& stmt) = 0;
+  virtual T visitExpressionStmt(const Expression& stmt) = 0;
+  virtual T visitFunctionStmt(const Function& stmt) = 0;
+  virtual T visitIfStmt(const If& stmt) = 0;
+  virtual T visitPrintStmt(const Print& stmt) = 0;
+  virtual T visitReturnStmt(const Return& stmt) = 0;
+  virtual T visitVarStmt(const Var& stmt) = 0;
+  virtual T visitWhileStmt(const While& stmt) = 0;
 };
 
 

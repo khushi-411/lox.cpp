@@ -2,13 +2,20 @@
 #define TOKEN_H
 
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <variant>
 
 #include "TokenType.h"
 
+// Forward declarations for Lox runtime objects
+namespace lox {
+class LoxCallable;
+class LoxInstance;
+}  // namespace lox
 
-using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+using Object = std::variant<std::nullptr_t, std::string, double, bool,
+    std::shared_ptr<lox::LoxCallable>, std::shared_ptr<lox::LoxInstance>>;
 
 namespace lox {
 

@@ -14,7 +14,7 @@ lox::stmt::Block::Block(const std::vector<lox::stmt::Stmt>& statements)
 
 template <class T>
 const T lox::stmt::Block::accept(const Visitor<T>& visitor) const {
-  return visitor.visitBlockStmt(*this);
+  return const_cast<Visitor<T>&>(visitor).visitBlockStmt(*this);
 }
 
 
@@ -31,7 +31,7 @@ lox::stmt::Expression::Expression(const lox::expr::Expr& expression)
 
 template <class T>
 const T lox::stmt::Expression::accept(const Visitor<T>& visitor) const {
-  return visitor.visitExpressionStmt(*this);
+  return const_cast<Visitor<T>&>(visitor).visitExpressionStmt(*this);
 }
 
 
@@ -51,7 +51,7 @@ lox::stmt::Function::Function(
 
 template <class T>
 const T lox::stmt::Function::accept(const Visitor<T>& visitor) const {
-  return visitor.visitFunctionStmt(*this);
+  return const_cast<Visitor<T>&>(visitor).visitFunctionStmt(*this);
 }
 
 
@@ -81,7 +81,7 @@ lox::stmt::Class::Class(
 
 template <class T>
 const T lox::stmt::Class::accept(const Visitor<T>& visitor) const {
-  return visitor.visitClassStmt(*this);
+  return const_cast<Visitor<T>&>(visitor).visitClassStmt(*this);
 }
 
 
@@ -111,7 +111,7 @@ lox::stmt::If::If(
 
 template <class T>
 const T lox::stmt::If::accept(const Visitor<T>& visitor) const {
-  return visitor.visitIfStmt(*this);
+  return const_cast<Visitor<T>&>(visitor).visitIfStmt(*this);
 }
 
 
@@ -138,7 +138,7 @@ lox::stmt::Print::Print(const lox::expr::Expr& expression)
 
 template <class T>
 const T lox::stmt::Print::accept(const Visitor<T>& visitor) const {
-  return visitor.visitPrintStmt(*this);
+  return const_cast<Visitor<T>&>(visitor).visitPrintStmt(*this);
 }
 
 
@@ -155,7 +155,7 @@ lox::stmt::Return::Return(const Token& keyword, const lox::expr::Expr& value)
 
 template <class T>
 const T lox::stmt::Return::accept(const Visitor<T>& visitor) const {
-  return visitor.visitReturnStmt(*this);
+  return const_cast<Visitor<T>&>(visitor).visitReturnStmt(*this);
 }
 
 
@@ -177,7 +177,7 @@ lox::stmt::Var::Var(const Token& name, const lox::expr::Expr& initializer)
 
 template <class T>
 const T lox::stmt::Var::accept(const Visitor<T>& visitor) const {
-  return visitor.visitVarStmt(*this);
+  return const_cast<Visitor<T>&>(visitor).visitVarStmt(*this);
 }
 
 
@@ -201,7 +201,7 @@ lox::stmt::While::While(
 
 template <class T>
 const T lox::stmt::While::accept(const Visitor<T>& visitor) const {
-  return visitor.visitWhileStmt(*this);
+  return const_cast<Visitor<T>&>(visitor).visitWhileStmt(*this);
 }
 
 

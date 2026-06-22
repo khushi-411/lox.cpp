@@ -1,18 +1,22 @@
 #ifndef LOXFUNCTION_H
 #define LOXFUNCTION_H
 
+#include <memory>
 #include <string>
 #include <variant>
 #include <vector>
 
 #include "Environment.h"
-#include "Interpreter.h"
 #include "LoxCallable.h"
 #include "LoxInstance.h"
 #include "Stmt.h"
 
+namespace lox {
+class Interpreter;
+}  // namespace lox
 
-using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+using Object = std::variant<std::nullptr_t, std::string, double, bool,
+    std::shared_ptr<lox::LoxCallable>, std::shared_ptr<lox::LoxInstance>>;
 
 
 namespace lox {

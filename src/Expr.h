@@ -3,6 +3,7 @@
 #ifndef EXPR_H
 #define EXPR_H
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <variant>
@@ -11,7 +12,14 @@
 #include "Token.h"
 
 
-using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+// Forward declarations for Lox runtime objects
+namespace lox {
+class LoxCallable;
+class LoxInstance;
+}  // namespace lox
+
+using Object = std::variant<std::nullptr_t, std::string, double, bool,
+    std::shared_ptr<lox::LoxCallable>, std::shared_ptr<lox::LoxInstance>>;
 
 namespace lox {
 
@@ -356,18 +364,18 @@ class Variable : public Expr {
 template <class T>
 class Visitor : public Expr {
  public:
-  virtual T visitAssignExpr(const Assign& expr) const = 0;
-  virtual T visitBinaryExpr(const Binary& expr) const = 0;
-  virtual T visitCallExpr(const Call& expr) const = 0;
-  virtual T visitGetExpr(const Get& expr) const = 0;
-  virtual T visitGroupingExpr(const Grouping& expr) const = 0;
-  virtual T visitLiteralExpr(const Literal& expr) const = 0;
-  virtual T visitLogicalExpr(const Logical& expr) const = 0;
-  virtual T visitSetExpr(const Set& expr) const = 0;
-  virtual T visitSuperExpr(const Super& expr) const = 0;
-  virtual T visitThisExpr(const This& expr) const = 0;
-  virtual T visitUnaryExpr(const Unary& expr) const = 0;
-  virtual T visitVariableExpr(const Variable& expr) const = 0;
+  virtual T visitAssignExpr(const Assign& expr) = 0;
+  virtual T visitBinaryExpr(const Binary& expr) = 0;
+  virtual T visitCallExpr(const Call& expr) = 0;
+  virtual T visitGetExpr(const Get& expr) = 0;
+  virtual T visitGroupingExpr(const Grouping& expr) = 0;
+  virtual T visitLiteralExpr(const Literal& expr) = 0;
+  virtual T visitLogicalExpr(const Logical& expr) = 0;
+  virtual T visitSetExpr(const Set& expr) = 0;
+  virtual T visitSuperExpr(const Super& expr) = 0;
+  virtual T visitThisExpr(const This& expr) = 0;
+  virtual T visitUnaryExpr(const Unary& expr) = 0;
+  virtual T visitVariableExpr(const Variable& expr) = 0;
 };
 
 

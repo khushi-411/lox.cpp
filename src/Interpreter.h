@@ -3,6 +3,7 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
+#include <memory>
 #include <string.h>
 #include <map>
 #include <vector>
@@ -11,8 +12,14 @@
 #include "Expr.h"
 #include "Stmt.h"
 
+// Forward declarations for extended Object type
+namespace lox {
+class LoxCallable;
+class LoxInstance;
+}  // namespace lox
 
-using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+using Object = std::variant<std::nullptr_t, std::string, double, bool,
+    std::shared_ptr<lox::LoxCallable>, std::shared_ptr<lox::LoxInstance>>;
 
 namespace lox {
 
@@ -24,7 +31,7 @@ class Interpreter : public lox::expr::Visitor<Object>,
   std::map<const lox::expr::Expr*, int> locals;
 
  public:
-  // Interpreter() : globals(Environment()), environment(globals) {}
+  Interpreter() : globals(), environment(globals) {}
 
   void visitBlockStmt(const lox::stmt::Block& _stmt);
   void visitClassStmt(const lox::stmt::Class& _stmt);

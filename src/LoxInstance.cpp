@@ -8,7 +8,8 @@
 #include "Token.h"
 
 
-using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+using Object = std::variant<std::nullptr_t, std::string, double, bool,
+    std::shared_ptr<lox::LoxCallable>, std::shared_ptr<lox::LoxInstance>>;
 
 
 namespace lox {
@@ -23,12 +24,10 @@ Object LoxInstance::get(const Token& name) {
 
   try {
     LoxFunction method = klass->findMethod(name.getLexeme());
-    if (method != nullptr) {
-      // TODO: Return bound method properly
-      // return method.bind(*this);
-    }
+    auto bound = std::make_shared<LoxFunction>(method.bind(*this));
+    return std::static_pointer_cast<LoxCallable>(bound);
   } catch (const std::runtime_error&) {
-    // Method not found
+    // Method not found — fall through to error
   }
 
   throw RuntimeError(

@@ -7,9 +7,9 @@
 #include "Expr.h"
 #include "Interpreter.h"
 #include "Lox.h"
-//#include "LoxClass.h"
-//#include "LoxFunction.h"
-//#include "LoxInstance.h"
+#include "LoxClass.h"
+#include "LoxFunction.h"
+#include "LoxInstance.h"
 #include "Return.h"
 #include "RuntimeError.h"
 #include "Stmt.h"
@@ -17,15 +17,14 @@
 #include "TokenType.h"
 
 
-using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+using Object = std::variant<std::nullptr_t, std::string, double, bool,
+    std::shared_ptr<lox::LoxCallable>, std::shared_ptr<lox::LoxInstance>>;
 
 namespace lox {
 
-//
-// lox::Interpreter::Interpreter() : globals(), environment(&globals) {}
-
 // block stmt
-/*
+
+
 void Interpreter::visitBlockStmt(const lox::stmt::Block& _stmt) {
   lox::Interpreter::executeBlock(
       _stmt.getStatements(), Environment(environment));
@@ -41,38 +40,48 @@ void lox::Interpreter::visitClassStmt(const lox::stmt::Class& _stmt) {
 
   if (_stmt.getSuperclass() != nullptr) {
     superclass = lox::Interpreter::evaluate(_stmt.getSuperclass());
-    if (!(instanceof <LoxClass>(superclass))) {
-      throw new RuntimeError(
+    if (!std::holds_alternative<std::shared_ptr<LoxCallable>>(superclass) ||
+        !dynamic_cast<LoxClass*>(
+            std::get<std::shared_ptr<LoxCallable>>(superclass).get())) {
+      throw RuntimeError(
           _stmt.getSuperclass().getName(), "Superclass must be a class.");
     }
   }
 
   environment.define(_stmt.getName().getLexeme(), nullptr);
 
-  if (_stmt.superclass != nullptr) {
+  // Save environment so we can restore it after pushing the "super" scope
+  Environment previous = environment;
+  if (_stmt.getSuperclass() != nullptr) {
     environment = Environment(environment);
     environment.define("super", superclass);
   }
 
   std::unordered_map<std::string, LoxFunction> methods;
-
-  for (lox::stmt::Function method : _stmt.methods) {
-    LoxFunction function = new LoxFunction(
-        method, environment, method.name.getLexeme().equals("init"));
-    methods[method.name.getLexeme()] = function;
+  for (const lox::stmt::Function& method : _stmt.getMethods()) {
+    LoxFunction function(
+        method, environment, method.getName().getLexeme() == "init");
+    methods.emplace(method.getName().getLexeme(), std::move(function));
   }
 
-  LoxClass klass =
-      new LoxClass(_stmt.name.getLexeme(), (LoxClass)superclass, methods);
-
-  if (std::holds_alternative<Object>(superclass)) {
-    environment = environment.enclosing;
+  LoxClass* superclassPtr = nullptr;
+  if (std::holds_alternative<std::shared_ptr<LoxCallable>>(superclass)) {
+    superclassPtr = dynamic_cast<LoxClass*>(
+        std::get<std::shared_ptr<LoxCallable>>(superclass).get());
   }
 
-  environment.assign(_stmt.name, klass);
+  auto klass = std::make_shared<LoxClass>(
+      _stmt.getName().getLexeme(), superclassPtr, methods);
+
+  if (_stmt.getSuperclass() != nullptr) {
+    environment = previous;
+  }
+
+  environment.assign(
+      _stmt.getName(), std::static_pointer_cast<LoxCallable>(klass));
 
   return;
-}*/
+}
 
 
 // expression stmt
@@ -86,13 +95,14 @@ void lox::Interpreter::visitExpressionStmt(const lox::stmt::Expression& _stmt) {
 
 // function stmt
 
-/*
+
 void lox::Interpreter::visitFunctionStmt(const lox::stmt::Function& _stmt) {
-  LoxFunction function = new LoxFunction(_stmt, environment, false);
-  environment.define(_stmt.name.getLexeme(), function);
+  auto function = std::make_shared<LoxFunction>(_stmt, environment, false);
+  environment.define(
+      _stmt.getName().getLexeme(),
+      std::static_pointer_cast<LoxCallable>(function));
   return;
 }
-*/
 
 // if stmt
 
@@ -133,7 +143,7 @@ void lox::Interpreter::visitPrintStmt(const lox::stmt::Print& _stmt) {
   std::string result;
 
   if (std::holds_alternative<std::nullptr_t>(value)) {
-    result = "nullptr";
+    result = "nil";
 
   } else if (std::holds_alternative<std::string>(value)) {
     result = std::get<std::string>(value);
@@ -143,9 +153,22 @@ void lox::Interpreter::visitPrintStmt(const lox::stmt::Print& _stmt) {
 
   } else if (std::holds_alternative<bool>(value)) {
     result = std::get<bool>(value) ? "true" : "false";
+
+  } else if (std::holds_alternative<std::shared_ptr<LoxCallable>>(value)) {
+    auto& callable = std::get<std::shared_ptr<LoxCallable>>(value);
+    if (auto* fn = dynamic_cast<LoxFunction*>(callable.get())) {
+      result = fn->to_string();
+    } else if (auto* cls = dynamic_cast<LoxClass*>(callable.get())) {
+      result = cls->to_string();
+    } else {
+      result = "<callable>";
+    }
+
+  } else if (std::holds_alternative<std::shared_ptr<LoxInstance>>(value)) {
+    result = std::get<std::shared_ptr<LoxInstance>>(value)->to_string();
   }
 
-  std::cout << stringify(result);
+  std::cout << stringify(result) << "\n";
   return;
 }
 
@@ -262,20 +285,19 @@ void lox::Interpreter::executeBlock(
 
 // assign expr
 
-/*
+
 Object lox::Interpreter::visitAssignExpr(const lox::expr::Assign& _expr) {
   Object value = lox::Interpreter::evaluate(_expr.getValue());
-  int distance = locals[_expr];
 
-  if (distance != NULL) {
-    environment.assignAt(distance, _expr.getName(), value);
+  auto it = locals.find(&_expr);
+  if (it != locals.end()) {
+    environment.assignAt(it->second, _expr.getName(), value);
   } else {
     globals.assign(_expr.getName(), value);
   }
 
   return value;
 }
-*/
 
 // binary expr
 
@@ -343,45 +365,46 @@ Object lox::Interpreter::visitBinaryExpr(const lox::expr::Binary& _expr) {
 
 
 // call expr
-/*
+
+
 Object lox::Interpreter::visitCallExpr(const lox::expr::Call& _expr) {
   Object callee = lox::Interpreter::evaluate(_expr.getCallee());
 
   std::vector<Object> arguments;
-  for (lox::expr::Expr argument : _expr.getArguments()) {
+  for (const lox::expr::Expr& argument : _expr.getArguments()) {
     arguments.push_back(lox::Interpreter::evaluate(argument));
   }
 
-  if (! instanceof <LoxCallable>(callee)) {
-    throw new RuntimeError(
+  if (!std::holds_alternative<std::shared_ptr<LoxCallable>>(callee)) {
+    throw RuntimeError(
         _expr.getParen(), "Can only call functions and classes.");
   }
 
-  LoxCallable function = (LoxCallable)callee;
+  auto& function = std::get<std::shared_ptr<LoxCallable>>(callee);
 
-  if (arguments.size() != function.arity()) {
+  if (arguments.size() != static_cast<size_t>(function->arity())) {
     throw RuntimeError(
         _expr.getParen(),
-        "Expected " + function.arity() + " arguments but got " +
-            arguments.size() + ".");
+        "Expected " + std::to_string(function->arity()) + " arguments but got " +
+            std::to_string(arguments.size()) + ".");
   }
 
-  return function.call(this, arguments);
+  return function->call(*this, arguments);
 }
 
 
 // get expr
 
+
 Object lox::Interpreter::visitGetExpr(const lox::expr::Get& _expr) {
   Object object = lox::Interpreter::evaluate(_expr.getObject());
 
-  if (instanceof <LoxInstance>(object)) {
-    return ((LoxInstance)object).get(_expr.getName());
+  if (std::holds_alternative<std::shared_ptr<LoxInstance>>(object)) {
+    return std::get<std::shared_ptr<LoxInstance>>(object)->get(_expr.getName());
   }
 
-  throw new RuntimeError(_expr.getName(), "Only instances have properties.");
+  throw RuntimeError(_expr.getName(), "Only instances have properties.");
 }
-*/
 
 // grouping expr
 
@@ -417,50 +440,54 @@ Object lox::Interpreter::visitLogicalExpr(const lox::expr::Logical& _expr) {
 
 
 // set expr
-/*
+
+
 Object lox::Interpreter::visitSetExpr(const lox::expr::Set& _expr) {
   Object object = lox::Interpreter::evaluate(_expr.getObject());
 
-  if (!(instanceof <LoxInstance>(object))) {
-    throw new RuntimeError(_expr.getName(), "Only instances have fields.");
+  if (!std::holds_alternative<std::shared_ptr<LoxInstance>>(object)) {
+    throw RuntimeError(_expr.getName(), "Only instances have fields.");
   }
 
   Object value = lox::Interpreter::evaluate(_expr.getValue());
-  ((LoxInstance)object).set(_expr.getName(), value);
+  std::get<std::shared_ptr<LoxInstance>>(object)->set(_expr.getName(), value);
 
   return value;
 }
-*/
+
 
 // super expr
 
-/*
+
 Object lox::Interpreter::visitSuperExpr(const lox::expr::Super& _expr) {
-  int distance = locals.get(_expr);
+  auto it = locals.find(&_expr);
+  int distance = it->second;
 
-  LoxClass superclass = (LoxClass)environment.getAt(distance, "super");
+  Object superObj = environment.getAt(distance, "super");
+  Object thisObj = environment.getAt(distance - 1, "this");
 
-  LoxInstance object = (LoxInstance)environment.getAt(distance - 1, "this");
+  auto* superclass = dynamic_cast<LoxClass*>(
+      std::get<std::shared_ptr<LoxCallable>>(superObj).get());
+  LoxInstance& object = *std::get<std::shared_ptr<LoxInstance>>(thisObj);
 
-  LoxFunction method = superclass.findMethod(_expr.getMethod().getLexeme());
-
-  if (method == nullptr) {
-    throw new RuntimeError(
+  try {
+    LoxFunction method = superclass->findMethod(_expr.getMethod().getLexeme());
+    auto bound = std::make_shared<LoxFunction>(method.bind(object));
+    return std::static_pointer_cast<LoxCallable>(bound);
+  } catch (const std::runtime_error&) {
+    throw RuntimeError(
         _expr.getMethod(),
         "Undefined property '" + _expr.getMethod().getLexeme() + "'.");
   }
-
-  return method.bind(object);
 }
-*/
+
 
 // this expr
 
-/*
+
 Object lox::Interpreter::visitThisExpr(const lox::expr::This& _expr) {
   return lookUpVariable(_expr.getKeyword(), _expr);
 }
-*/
 
 // unary expr
 
@@ -488,7 +515,7 @@ Object lox::Interpreter::visitUnaryExpr(const lox::expr::Unary& _expr) {
 
 // variable expr
 
-/*
+
 Object lox::Interpreter::visitVariableExpr(const lox::expr::Variable& _expr) {
   return lox::Interpreter::lookUpVariable(_expr.getName(), _expr);
 }
@@ -509,9 +536,6 @@ Object lox::Interpreter::lookUpVariable(
     return globals.get(name);
   }
 }
-
-
-*/
 
 // resolve - bind variable to scope depth
 
@@ -607,7 +631,7 @@ void lox::Interpreter::interpret(const lox::expr::Expr& expression) {
     std::string value;
 
     if (std::holds_alternative<std::nullptr_t>(result)) {
-      value = "nullptr";
+      value = "nil";
 
     } else if (std::holds_alternative<std::string>(result)) {
       value = std::get<std::string>(result);
@@ -617,8 +641,22 @@ void lox::Interpreter::interpret(const lox::expr::Expr& expression) {
 
     } else if (std::holds_alternative<bool>(result)) {
       value = std::get<bool>(result) ? "true" : "false";
+
+    } else if (std::holds_alternative<std::shared_ptr<LoxCallable>>(result)) {
+      auto& callable = std::get<std::shared_ptr<LoxCallable>>(result);
+      if (auto* fn = dynamic_cast<LoxFunction*>(callable.get())) {
+        value = fn->to_string();
+      } else if (auto* cls = dynamic_cast<LoxClass*>(callable.get())) {
+        value = cls->to_string();
+      } else {
+        value = "<callable>";
+      }
+
+    } else if (std::holds_alternative<std::shared_ptr<LoxInstance>>(result)) {
+      value = std::get<std::shared_ptr<LoxInstance>>(result)->to_string();
     }
-    std::cout << lox::Interpreter::stringify(value);
+
+    std::cout << lox::Interpreter::stringify(value) << "\n";
 
   } catch (const RuntimeError& error) {
     Lox _lox;

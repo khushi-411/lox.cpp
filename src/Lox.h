@@ -16,7 +16,7 @@
 #include "Expr.h"
 #include "Interpreter.h"
 #include "Parser.h"
-//#include "Resolver.h"
+#include "Resolver.h"
 #include "RuntimeError.h"
 #include "Scanner.h"
 #include "Stmt.h"
@@ -29,13 +29,13 @@ class Lox {
  private:
   bool hadError = false;
   bool hadRuntimeError = false;
-  static lox::Interpreter interpreter;
+  lox::Interpreter interpreter;
 
  public:
   void runFile(const std::string& path) {
     try {
       // https://stackoverflow.com/questions/38032800
-      std::fstream bytes{path.c_str(), std::ios::binary};
+      std::fstream bytes{path.c_str(), std::ios::in | std::ios::binary};
       // https://stackoverflow.com/questions/2602013
       std::stringstream buffer;
       buffer << bytes.rdbuf();
@@ -91,15 +91,15 @@ class Lox {
       return;
     }
 
-    // lox::Resolver resolver(interpreter);
-    //   resolver.resolve(statements);
+    lox::Resolver resolver(interpreter);
+    resolver.resolve(statements);
 
     if (hadError) {
       return;
     }
 
     // std::cout << ASTPrinter().print(expression);
-    // interpreter.interpret(statements);
+    interpreter.interpret(statements);
   }
 
 

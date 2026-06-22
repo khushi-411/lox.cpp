@@ -6,7 +6,8 @@
 #include "Token.h"
 
 
-using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+using Object = std::variant<std::nullptr_t, std::string, double, bool,
+    std::shared_ptr<lox::LoxCallable>, std::shared_ptr<lox::LoxInstance>>;
 
 namespace lox {
 
@@ -19,7 +20,7 @@ lox::expr::Assign::Assign(const Token& name, const lox::expr::Expr& value)
 
 template <class T>
 const T lox::expr::Assign::accept(const lox::expr::Visitor<T>& visitor) const {
-  return visitor.visitAssignExpr(*this);
+  return const_cast<lox::expr::Visitor<T>&>(visitor).visitAssignExpr(*this);
 }
 
 
@@ -34,7 +35,7 @@ lox::expr::Binary::Binary(
 
 template <class T>
 const T lox::expr::Binary::accept(const lox::expr::Visitor<T>& visitor) const {
-  return visitor.visitBinaryExpr(*this);
+  return const_cast<lox::expr::Visitor<T>&>(visitor).visitBinaryExpr(*this);
 }
 
 
@@ -49,7 +50,7 @@ lox::expr::Call::Call(
 
 template <class T>
 const T lox::expr::Call::accept(const lox::expr::Visitor<T>& visitor) const {
-  return visitor.visitCallExpr(*this);
+  return const_cast<lox::expr::Visitor<T>&>(visitor).visitCallExpr(*this);
 }
 
 
@@ -61,7 +62,7 @@ lox::expr::Get::Get(const lox::expr::Expr& object, const Token& name)
 
 template <class T>
 const T lox::expr::Get::accept(const lox::expr::Visitor<T>& visitor) const {
-  return visitor.visitGetExpr(*this);
+  return const_cast<lox::expr::Visitor<T>&>(visitor).visitGetExpr(*this);
 }
 
 
@@ -74,7 +75,7 @@ lox::expr::Grouping::Grouping(const lox::expr::Expr& expression)
 template <class T>
 const T lox::expr::Grouping::accept(
     const lox::expr::Visitor<T>& visitor) const {
-  return visitor.visitGroupingExpr(*this);
+  return const_cast<lox::expr::Visitor<T>&>(visitor).visitGroupingExpr(*this);
 }
 
 
@@ -96,7 +97,7 @@ lox::expr::Literal::Literal(const Object& value)
 
 template <class T>
 const T lox::expr::Literal::accept(const lox::expr::Visitor<T>& visitor) const {
-  return visitor.visitLiteralExpr(*this);
+  return const_cast<lox::expr::Visitor<T>&>(visitor).visitLiteralExpr(*this);
 }
 
 
@@ -111,7 +112,7 @@ lox::expr::Logical::Logical(
 
 template <class T>
 const T lox::expr::Logical::accept(const lox::expr::Visitor<T>& visitor) const {
-  return visitor.visitLogicalExpr(*this);
+  return const_cast<lox::expr::Visitor<T>&>(visitor).visitLogicalExpr(*this);
 }
 
 
@@ -126,7 +127,7 @@ lox::expr::Set::Set(
 
 template <class T>
 const T lox::expr::Set::accept(const lox::expr::Visitor<T>& visitor) const {
-  return visitor.visitSetExpr(*this);
+  return const_cast<lox::expr::Visitor<T>&>(visitor).visitSetExpr(*this);
 }
 
 
@@ -138,7 +139,7 @@ lox::expr::Super::Super(const Token& keyword, const Token& method)
 
 template <class T>
 const T lox::expr::Super::accept(const lox::expr::Visitor<T>& visitor) const {
-  return visitor.visitSuperExpr(*this);
+  return const_cast<lox::expr::Visitor<T>&>(visitor).visitSuperExpr(*this);
 }
 
 
@@ -149,7 +150,7 @@ lox::expr::This::This(const Token& keyword) : keyword(keyword) {}
 
 template <class T>
 const T lox::expr::This::accept(const lox::expr::Visitor<T>& visitor) const {
-  return visitor.visitThisExpr(*this);
+  return const_cast<lox::expr::Visitor<T>&>(visitor).visitThisExpr(*this);
 }
 
 
@@ -161,7 +162,7 @@ lox::expr::Unary::Unary(const Token& op, const lox::expr::Expr& right)
 
 template <class T>
 const T lox::expr::Unary::accept(const lox::expr::Visitor<T>& visitor) const {
-  return visitor.visitUnaryExpr(*this);
+  return const_cast<lox::expr::Visitor<T>&>(visitor).visitUnaryExpr(*this);
 }
 
 
@@ -173,7 +174,7 @@ lox::expr::Variable::Variable(const Token& name) : name(name) {}
 template <class T>
 const T lox::expr::Variable::accept(
     const lox::expr::Visitor<T>& visitor) const {
-  return visitor.visitVariableExpr(*this);
+  return const_cast<lox::expr::Visitor<T>&>(visitor).visitVariableExpr(*this);
 }
 
 

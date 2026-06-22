@@ -1,6 +1,7 @@
 #ifndef LOXINSTANCE_H
 #define LOXINSTANCE_H
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -8,8 +9,8 @@
 #include "LoxClass.h"
 #include "Token.h"
 
-
-using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+using Object = std::variant<std::nullptr_t, std::string, double, bool,
+    std::shared_ptr<lox::LoxCallable>, std::shared_ptr<lox::LoxInstance>>;
 
 
 namespace lox {

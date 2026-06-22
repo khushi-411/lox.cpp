@@ -4,11 +4,13 @@
 #include <variant>
 
 #include "Environment.h"
+#include "LoxInstance.h"
 #include "RuntimeError.h"
 #include "Token.h"
 
 
-using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+using Object = std::variant<std::nullptr_t, std::string, double, bool,
+    std::shared_ptr<lox::LoxCallable>, std::shared_ptr<lox::LoxInstance>>;
 
 
 namespace lox {
@@ -91,7 +93,7 @@ void Environment::assignAt(
 
 std::string object_to_string(const Object& values) {
   if (std::holds_alternative<std::nullptr_t>(values)) {
-    return "nullptr";
+    return "nil";
 
   } else if (std::holds_alternative<std::string>(values)) {
     return std::get<std::string>(values);
@@ -101,6 +103,12 @@ std::string object_to_string(const Object& values) {
 
   } else if (std::holds_alternative<bool>(values)) {
     return std::get<bool>(values) ? "true" : "false";
+
+  } else if (std::holds_alternative<std::shared_ptr<lox::LoxCallable>>(values)) {
+    return "<callable>";
+
+  } else if (std::holds_alternative<std::shared_ptr<lox::LoxInstance>>(values)) {
+    return std::get<std::shared_ptr<lox::LoxInstance>>(values)->to_string();
   }
 
   return "Encountered unknown data type.";
