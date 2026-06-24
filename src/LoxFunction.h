@@ -24,7 +24,7 @@ namespace lox {
 class LoxFunction : public LoxCallable {
  private:
   lox::stmt::Function declaration;
-  Environment closure;
+  std::shared_ptr<Environment> closure;
   bool isInitializer;
   bool is_null_ = false;
 
@@ -47,15 +47,15 @@ class LoxFunction : public LoxCallable {
 
   LoxFunction(
       const lox::stmt::Function& declaration,
-      const Environment& closure,
+      std::shared_ptr<Environment> closure,
       const bool& isInitializer);
 
-  LoxFunction bind(const LoxInstance& instance);
+  LoxFunction bind(const std::shared_ptr<LoxInstance>& instance);
   std::string to_string() const;
-  int arity();
+  int arity() override;
   Object call(
       Interpreter& interpreter,
-      const std::vector<Object>& arguments);
+      const std::vector<Object>& arguments) override;
 };
 
 }  // namespace lox

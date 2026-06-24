@@ -1,3 +1,4 @@
+#include <utility>
 #include <vector>
 
 #include "Stmt.h"
@@ -5,239 +6,213 @@
 
 namespace lox {
 
+namespace stmt {
+
 
 // block
 
-lox::stmt::Block::Block(const std::vector<lox::stmt::Stmt>& statements)
-    : statements(statements) {}
+Block::Block(std::vector<std::shared_ptr<Stmt>> statements)
+    : statements(std::move(statements)) {}
 
 
-template <class T>
-const T lox::stmt::Block::accept(const Visitor<T>& visitor) const {
-  return const_cast<Visitor<T>&>(visitor).visitBlockStmt(*this);
+void Block::accept(StmtVisitor& visitor) const {
+  visitor.visitBlockStmt(*this);
 }
 
 
-const std::vector<lox::stmt::Stmt>& lox::stmt::Block::getStatements() const {
+const std::vector<std::shared_ptr<Stmt>>& Block::getStatements() const {
   return statements;
 }
 
 
 // expression
 
-lox::stmt::Expression::Expression(const lox::expr::Expr& expression)
-    : expression(expression) {}
+Expression::Expression(std::shared_ptr<lox::expr::Expr> expression)
+    : expression(std::move(expression)) {}
 
 
-template <class T>
-const T lox::stmt::Expression::accept(const Visitor<T>& visitor) const {
-  return const_cast<Visitor<T>&>(visitor).visitExpressionStmt(*this);
+void Expression::accept(StmtVisitor& visitor) const {
+  visitor.visitExpressionStmt(*this);
 }
 
 
-const lox::expr::Expr& lox::stmt::Expression::getExpression() const {
+const std::shared_ptr<lox::expr::Expr>& Expression::getExpression() const {
   return expression;
 }
 
 
 // function
 
-lox::stmt::Function::Function(
+Function::Function(
     const Token& name,
-    const std::vector<Token>& params,
-    const std::vector<lox::stmt::Stmt>& body)
-    : name(name), params(params), body(body) {}
+    std::vector<Token> params,
+    std::vector<std::shared_ptr<Stmt>> body)
+    : name(name), params(std::move(params)), body(std::move(body)) {}
 
 
-template <class T>
-const T lox::stmt::Function::accept(const Visitor<T>& visitor) const {
-  return const_cast<Visitor<T>&>(visitor).visitFunctionStmt(*this);
+void Function::accept(StmtVisitor& visitor) const {
+  visitor.visitFunctionStmt(*this);
 }
 
 
-const Token& lox::stmt::Function::getName() const {
+const Token& Function::getName() const {
   return name;
 }
 
 
-const std::vector<Token>& lox::stmt::Function::getParams() const {
+const std::vector<Token>& Function::getParams() const {
   return params;
 }
 
 
-const std::vector<lox::stmt::Stmt>& lox::stmt::Function::getBody() const {
+const std::vector<std::shared_ptr<Stmt>>& Function::getBody() const {
   return body;
 }
 
 
 // class
 
-lox::stmt::Class::Class(
+Class::Class(
     const Token& name,
-    const lox::expr::Variable& superclass,
-    const std::vector<lox::stmt::Function>& methods)
-    : name(name), superclass(superclass), methods(methods) {}
+    std::shared_ptr<lox::expr::Variable> superclass,
+    std::vector<std::shared_ptr<lox::stmt::Function>> methods)
+    : name(name),
+      superclass(std::move(superclass)),
+      methods(std::move(methods)) {}
 
 
-template <class T>
-const T lox::stmt::Class::accept(const Visitor<T>& visitor) const {
-  return const_cast<Visitor<T>&>(visitor).visitClassStmt(*this);
+void Class::accept(StmtVisitor& visitor) const {
+  visitor.visitClassStmt(*this);
 }
 
 
-const Token& lox::stmt::Class::getName() const {
+const Token& Class::getName() const {
   return name;
 }
 
 
-const lox::expr::Variable& lox::stmt::Class::getSuperclass() const {
+const std::shared_ptr<lox::expr::Variable>& Class::getSuperclass() const {
   return superclass;
 }
 
 
-const std::vector<lox::stmt::Function>& lox::stmt::Class::getMethods() const {
+const std::vector<std::shared_ptr<lox::stmt::Function>>& Class::getMethods()
+    const {
   return methods;
 }
 
 
 // if
 
-lox::stmt::If::If(
-    const lox::expr::Expr& condition,
-    const lox::stmt::Stmt* thenBranch,
-    const lox::stmt::Stmt* elseBranch)
-    : condition(condition), thenBranch(thenBranch), elseBranch(elseBranch) {}
+If::If(
+    std::shared_ptr<lox::expr::Expr> condition,
+    std::shared_ptr<Stmt> thenBranch,
+    std::shared_ptr<Stmt> elseBranch)
+    : condition(std::move(condition)),
+      thenBranch(std::move(thenBranch)),
+      elseBranch(std::move(elseBranch)) {}
 
 
-template <class T>
-const T lox::stmt::If::accept(const Visitor<T>& visitor) const {
-  return const_cast<Visitor<T>&>(visitor).visitIfStmt(*this);
+void If::accept(StmtVisitor& visitor) const {
+  visitor.visitIfStmt(*this);
 }
 
 
-const lox::expr::Expr& lox::stmt::If::getCondition() const {
+const std::shared_ptr<lox::expr::Expr>& If::getCondition() const {
   return condition;
 }
 
 
-const lox::stmt::Stmt& lox::stmt::If::getThenBranch() const {
-  return *thenBranch;
+const std::shared_ptr<lox::stmt::Stmt>& If::getThenBranch() const {
+  return thenBranch;
 }
 
 
-const lox::stmt::Stmt& lox::stmt::If::getElseBranch() const {
-  return *elseBranch;
+const std::shared_ptr<lox::stmt::Stmt>& If::getElseBranch() const {
+  return elseBranch;
 }
 
 
 // print
 
-lox::stmt::Print::Print(const lox::expr::Expr& expression)
-    : expression(expression) {}
+Print::Print(std::shared_ptr<lox::expr::Expr> expression)
+    : expression(std::move(expression)) {}
 
 
-template <class T>
-const T lox::stmt::Print::accept(const Visitor<T>& visitor) const {
-  return const_cast<Visitor<T>&>(visitor).visitPrintStmt(*this);
+void Print::accept(StmtVisitor& visitor) const {
+  visitor.visitPrintStmt(*this);
 }
 
 
-const lox::expr::Expr& lox::stmt::Print::getExpression() const {
+const std::shared_ptr<lox::expr::Expr>& Print::getExpression() const {
   return expression;
 }
 
 
 // return
 
-lox::stmt::Return::Return(const Token& keyword, const lox::expr::Expr& value)
-    : keyword(keyword), value(value) {}
+Return::Return(const Token& keyword, std::shared_ptr<lox::expr::Expr> value)
+    : keyword(keyword), value(std::move(value)) {}
 
 
-template <class T>
-const T lox::stmt::Return::accept(const Visitor<T>& visitor) const {
-  return const_cast<Visitor<T>&>(visitor).visitReturnStmt(*this);
+void Return::accept(StmtVisitor& visitor) const {
+  visitor.visitReturnStmt(*this);
 }
 
 
-const Token& lox::stmt::Return::getKeyword() const {
+const Token& Return::getKeyword() const {
   return keyword;
 }
 
 
-const lox::expr::Expr& lox::stmt::Return::getValue() const {
+const std::shared_ptr<lox::expr::Expr>& Return::getValue() const {
   return value;
 }
 
 
 // var
 
-lox::stmt::Var::Var(const Token& name, const lox::expr::Expr& initializer)
-    : name(name), initializer(initializer) {}
+Var::Var(const Token& name, std::shared_ptr<lox::expr::Expr> initializer)
+    : name(name), initializer(std::move(initializer)) {}
 
 
-template <class T>
-const T lox::stmt::Var::accept(const Visitor<T>& visitor) const {
-  return const_cast<Visitor<T>&>(visitor).visitVarStmt(*this);
+void Var::accept(StmtVisitor& visitor) const {
+  visitor.visitVarStmt(*this);
 }
 
 
-const Token& lox::stmt::Var::getName() const {
+const Token& Var::getName() const {
   return name;
 }
 
 
-const lox::expr::Expr& lox::stmt::Var::getInitializer() const {
+const std::shared_ptr<lox::expr::Expr>& Var::getInitializer() const {
   return initializer;
 }
 
 
 // while
 
-lox::stmt::While::While(
-    const lox::expr::Expr& condition,
-    const lox::stmt::Stmt& body)
-    : condition(condition), body(body) {}
+While::While(
+    std::shared_ptr<lox::expr::Expr> condition,
+    std::shared_ptr<Stmt> body)
+    : condition(std::move(condition)), body(std::move(body)) {}
 
 
-template <class T>
-const T lox::stmt::While::accept(const Visitor<T>& visitor) const {
-  return const_cast<Visitor<T>&>(visitor).visitWhileStmt(*this);
+void While::accept(StmtVisitor& visitor) const {
+  visitor.visitWhileStmt(*this);
 }
 
 
-const lox::expr::Expr& lox::stmt::While::getCondition() const {
+const std::shared_ptr<lox::expr::Expr>& While::getCondition() const {
   return condition;
 }
 
 
-const lox::stmt::Stmt& lox::stmt::While::getBody() const {
+const std::shared_ptr<lox::stmt::Stmt>& While::getBody() const {
   return body;
 }
 
-
-// accept
-
-/*
-template <class T>
-T accept(const Visitor<T>& visitor) {
-    return visitor(*this);
-}
-*/
-
-
-// Explicit template instantiations for commonly used types
-namespace stmt {
-
-// Instantiate all statement types with void return type
-template const void Block::accept<void>(const Visitor<void>&) const;
-template const void Class::accept<void>(const Visitor<void>&) const;
-template const void Expression::accept<void>(const Visitor<void>&) const;
-template const void Function::accept<void>(const Visitor<void>&) const;
-template const void If::accept<void>(const Visitor<void>&) const;
-template const void Print::accept<void>(const Visitor<void>&) const;
-template const void Return::accept<void>(const Visitor<void>&) const;
-template const void Var::accept<void>(const Visitor<void>&) const;
-template const void While::accept<void>(const Visitor<void>&) const;
 
 }  // namespace stmt
 

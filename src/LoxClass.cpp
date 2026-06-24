@@ -51,7 +51,7 @@ Object LoxClass::call(
 
   try {
     LoxFunction initializer = LoxClass::findMethod("init");
-    initializer.bind(*instance).call(interpreter, arguments);
+    initializer.bind(instance).call(interpreter, arguments);
   } catch (const std::runtime_error&) {
     // No "init" method — that's fine
   }

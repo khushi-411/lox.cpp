@@ -17,8 +17,9 @@ Resolver::Resolver(const lox::Interpreter& interpreter)
     : interpreter(interpreter) {}
 
 
-void lox::Resolver::resolve(const std::vector<lox::stmt::Stmt>& statements) {
-  for (lox::stmt::Stmt statement : statements) {
+void lox::Resolver::resolve(
+    const std::vector<std::shared_ptr<lox::stmt::Stmt>>& statements) {
+  for (const auto& statement : statements) {
     lox::Resolver::resolve(statement);
   }
 }
@@ -45,10 +46,9 @@ void lox::Resolver::visitClassStmt(const lox::stmt::Class& _stmt) {
 
   if (_stmt.getSuperclass() != nullptr &&
       (_stmt.getName().getLexeme() ==
-       _stmt.getSuperclass().getName().getLexeme())) {
-    Lox _lox;
-    _lox.error(
-        _stmt.getSuperclass().getName(), "A class can't inherit from itself.");
+       _stmt.getSuperclass()->getName().getLexeme())) {
+    Lox::error(
+        _stmt.getSuperclass()->getName(), "A class can't inherit from itself.");
   }
 
   if (_stmt.getSuperclass() != nullptr) {
@@ -64,13 +64,13 @@ void lox::Resolver::visitClassStmt(const lox::stmt::Class& _stmt) {
   lox::Resolver::beginScope();
   scopes.top()["this"] = true;
 
-  for (typename lox::stmt::Function method : _stmt.getMethods()) {
+  for (const auto& method : _stmt.getMethods()) {
     FunctionType declaration = FunctionType::METHOD;
 
-    if (method.getName().getLexeme() == "init") {
+    if (method->getName().getLexeme() == "init") {
       declaration = FunctionType::INITIALIZER;
     }
-    lox::Resolver::resolveFunction(method, declaration);
+    lox::Resolver::resolveFunction(*method, declaration);
   }
 
   lox::Resolver::endScope();
@@ -129,14 +129,12 @@ void lox::Resolver::visitPrintStmt(const lox::stmt::Print& _stmt) {
 
 void lox::Resolver::visitReturnStmt(const lox::stmt::Return& _stmt) {
   if (currentFunction == FunctionType::NONE) {
-    Lox _lox;
-    _lox.error(_stmt.getKeyword(), "Can't return from top-level code.");
+    Lox::error(_stmt.getKeyword(), "Can't return from top-level code.");
   }
 
   if (_stmt.getValue() != nullptr) {
     if (currentFunction == FunctionType::INITIALIZER) {
-      Lox _lox;
-      _lox.error(
+      Lox::error(
           _stmt.getKeyword(), "Can't return a value from an initializer.");
     }
     lox::Resolver::resolve(_stmt.getValue());
@@ -171,141 +169,141 @@ void lox::Resolver::visitWhileStmt(const lox::stmt::While& _stmt) {
 
 // assign expr
 
-void lox::Resolver::visitAssignExpr(const lox::expr::Assign& _expr) {
+Object lox::Resolver::visitAssignExpr(const lox::expr::Assign& _expr) {
   lox::Resolver::resolve(_expr.getValue());
   lox::Resolver::resolveLocal(_expr, _expr.getName());
-  return;
+  return nullptr;
 }
 
 
 // binary expr
 
-void lox::Resolver::visitBinaryExpr(const lox::expr::Binary& _expr) {
+Object lox::Resolver::visitBinaryExpr(const lox::expr::Binary& _expr) {
   lox::Resolver::resolve(_expr.getLeft());
   lox::Resolver::resolve(_expr.getRight());
-  return;
+  return nullptr;
 }
 
 
 // call expr
 
-void lox::Resolver::visitCallExpr(const lox::expr::Call& _expr) {
+Object lox::Resolver::visitCallExpr(const lox::expr::Call& _expr) {
   lox::Resolver::resolve(_expr.getCallee());
 
-  for (lox::expr::Expr argument : _expr.getArguments()) {
+  for (const auto& argument : _expr.getArguments()) {
     lox::Resolver::resolve(argument);
   }
 
-  return;
+  return nullptr;
 }
 
 
 // get expr
 
-void lox::Resolver::visitGetExpr(const lox::expr::Get& _expr) {
+Object lox::Resolver::visitGetExpr(const lox::expr::Get& _expr) {
   lox::Resolver::resolve(_expr.getObject());
-  return;
+  return nullptr;
 }
 
 
 // grouping expr
 
-void lox::Resolver::visitGroupingExpr(const lox::expr::Grouping& _expr) {
+Object lox::Resolver::visitGroupingExpr(const lox::expr::Grouping& _expr) {
   lox::Resolver::resolve(_expr.getExpression());
-  return;
+  return nullptr;
 }
 
 
 // literal expr
 
-void lox::Resolver::visitLiteralExpr(const lox::expr::Literal& _expr) {
-  return;
+Object lox::Resolver::visitLiteralExpr(const lox::expr::Literal& _expr) {
+  return nullptr;
 }
 
 
 // logical expr
 
-void lox::Resolver::visitLogicalExpr(const lox::expr::Logical& _expr) {
+Object lox::Resolver::visitLogicalExpr(const lox::expr::Logical& _expr) {
   lox::Resolver::resolve(_expr.getLeft());
   lox::Resolver::resolve(_expr.getRight());
-  return;
+  return nullptr;
 }
 
 
 // set expr
 
-void lox::Resolver::visitSetExpr(const lox::expr::Set& _expr) {
+Object lox::Resolver::visitSetExpr(const lox::expr::Set& _expr) {
   lox::Resolver::resolve(_expr.getValue());
   lox::Resolver::resolve(_expr.getObject());
-  return;
+  return nullptr;
 }
 
 
 // super expr
 
-void lox::Resolver::visitSuperExpr(const lox::expr::Super& _expr) {
+Object lox::Resolver::visitSuperExpr(const lox::expr::Super& _expr) {
   if (currentClass == ClassType::_NONE) {
-    Lox _lox;
-    _lox.error(_expr.getKeyword(), "Can't use 'super' outside of a class.");
+    Lox::error(_expr.getKeyword(), "Can't use 'super' outside of a class.");
 
   } else if (currentClass != ClassType::SUBCLASS) {
-    Lox _lox;
-    _lox.error(
+    Lox::error(
         _expr.getKeyword(), "Can't use 'super' in a class with no superclass.");
   }
 
   lox::Resolver::resolveLocal(_expr, _expr.getKeyword());
-  return;
+  return nullptr;
 }
 
 
 // this expr
 
-void lox::Resolver::visitThisExpr(const lox::expr::This& _expr) {
+Object lox::Resolver::visitThisExpr(const lox::expr::This& _expr) {
   if (currentClass == ClassType::_NONE) {
-    Lox _lox;
-    _lox.error(_expr.getKeyword(), "Can't use 'this' outside of a class.");
-    return;
+    Lox::error(_expr.getKeyword(), "Can't use 'this' outside of a class.");
+    return nullptr;
   }
 
   lox::Resolver::resolveLocal(_expr, _expr.getKeyword());
-  return;
+  return nullptr;
 }
 
 
 // unary expr
 
-void lox::Resolver::visitUnaryExpr(const lox::expr::Unary& _expr) {
+Object lox::Resolver::visitUnaryExpr(const lox::expr::Unary& _expr) {
   lox::Resolver::resolve(_expr.getRight());
-  return;
+  return nullptr;
 }
 
 
 // variable expr
 
-void lox::Resolver::visitVariableExpr(const lox::expr::Variable& _expr) {
-  if (!scopes.empty() && scopes.top()[_expr.getName().getLexeme()] == false) {
-    Lox _lox;
-    _lox.error(
-        _expr.getName(), "Can't read local variable in its own initializer.");
+Object lox::Resolver::visitVariableExpr(const lox::expr::Variable& _expr) {
+  if (!scopes.empty()) {
+    auto& scope = scopes.top();
+    auto it = scope.find(_expr.getName().getLexeme());
+    if (it != scope.end() && it->second == false) {
+      Lox::error(
+          _expr.getName(), "Can't read local variable in its own initializer.");
+    }
   }
 
   lox::Resolver::resolveLocal(_expr, _expr.getName());
-  return;
+  return nullptr;
 }
 
 
 // resolving the lists of statements
 
-void lox::Resolver::resolve(const lox::stmt::Stmt& _stmt) {
-  _stmt.accept(*this);
+void lox::Resolver::resolve(const std::shared_ptr<lox::stmt::Stmt>& _stmt) {
+  _stmt->accept(*this);
 }
 
 
 // resolving the expressions
 
-void lox::Resolver::resolve(const lox::expr::Expr& _expr) {
-  _expr.accept(*this);
+void lox::Resolver::resolve(const std::shared_ptr<lox::expr::Expr>& _expr) {
+  _expr->accept(*this);
 }
 
 
@@ -348,7 +346,7 @@ void lox::Resolver::declare(const Token& name) {
     return;
   }
 
-  std::unordered_map<std::string, bool> scope = scopes.top();
+  auto& scope = scopes.top();
 
   if (scope[name.getLexeme()]) {
     Lox _lox;
@@ -370,13 +368,16 @@ void lox::Resolver::define(const Token& name) {
 void lox::Resolver::resolveLocal(
     const lox::expr::Expr& _expr,
     const Token& name) {
+  std::stack<std::unordered_map<std::string, bool>> temp = scopes;
+
   for (int i = scopes.size() - 1; i >= 0; i--) {
-    auto& scope = scopes.top();
+    auto& scope = temp.top();
     auto it = scope.find(name.getLexeme());
     if (it != scope.end()) {
       getInterpreter().resolve(_expr, scopes.size() - 1 - i);
       return;
     }
+    temp.pop();
   }
 }
 

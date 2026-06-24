@@ -28,8 +28,8 @@ enum ClassType {
 };
 
 
-class Resolver : public lox::expr::Visitor<void>,
-                 public lox::stmt::Visitor<void> {
+class Resolver : public lox::expr::ExprVisitor,
+                 public lox::stmt::StmtVisitor {
  private:
   const lox::Interpreter& interpreter;
   std::stack<std::unordered_map<std::string, bool>> scopes;
@@ -38,33 +38,33 @@ class Resolver : public lox::expr::Visitor<void>,
 
  public:
   Resolver(const lox::Interpreter& interpreter);
-  void resolve(const std::vector<lox::stmt::Stmt>& statements);
+  void resolve(const std::vector<std::shared_ptr<lox::stmt::Stmt>>& statements);
 
-  void visitBlockStmt(const lox::stmt::Block& _stmt);
-  void visitClassStmt(const lox::stmt::Class& _stmt);
-  void visitExpressionStmt(const lox::stmt::Expression& _stmt);
-  void visitFunctionStmt(const lox::stmt::Function& _stmt);
-  void visitIfStmt(const lox::stmt::If& _stmt);
-  void visitPrintStmt(const lox::stmt::Print& _stmt);
-  void visitReturnStmt(const lox::stmt::Return& _stmt);
-  void visitVarStmt(const lox::stmt::Var& _stmt);
-  void visitWhileStmt(const lox::stmt::While& _stmt);
+  void visitBlockStmt(const lox::stmt::Block& _stmt) override;
+  void visitClassStmt(const lox::stmt::Class& _stmt) override;
+  void visitExpressionStmt(const lox::stmt::Expression& _stmt) override;
+  void visitFunctionStmt(const lox::stmt::Function& _stmt) override;
+  void visitIfStmt(const lox::stmt::If& _stmt) override;
+  void visitPrintStmt(const lox::stmt::Print& _stmt) override;
+  void visitReturnStmt(const lox::stmt::Return& _stmt) override;
+  void visitVarStmt(const lox::stmt::Var& _stmt) override;
+  void visitWhileStmt(const lox::stmt::While& _stmt) override;
 
-  void visitAssignExpr(const lox::expr::Assign& _expr);
-  void visitBinaryExpr(const lox::expr::Binary& _expr);
-  void visitCallExpr(const lox::expr::Call& _expr);
-  void visitGetExpr(const lox::expr::Get& _expr);
-  void visitGroupingExpr(const lox::expr::Grouping& _expr);
-  void visitLiteralExpr(const lox::expr::Literal& _expr);
-  void visitLogicalExpr(const lox::expr::Logical& _expr);
-  void visitSetExpr(const lox::expr::Set& _expr);
-  void visitSuperExpr(const lox::expr::Super& _expr);
-  void visitThisExpr(const lox::expr::This& _expr);
-  void visitUnaryExpr(const lox::expr::Unary& _expr);
-  void visitVariableExpr(const lox::expr::Variable& _expr);
+  Object visitAssignExpr(const lox::expr::Assign& _expr) override;
+  Object visitBinaryExpr(const lox::expr::Binary& _expr) override;
+  Object visitCallExpr(const lox::expr::Call& _expr) override;
+  Object visitGetExpr(const lox::expr::Get& _expr) override;
+  Object visitGroupingExpr(const lox::expr::Grouping& _expr) override;
+  Object visitLiteralExpr(const lox::expr::Literal& _expr) override;
+  Object visitLogicalExpr(const lox::expr::Logical& _expr) override;
+  Object visitSetExpr(const lox::expr::Set& _expr) override;
+  Object visitSuperExpr(const lox::expr::Super& _expr) override;
+  Object visitThisExpr(const lox::expr::This& _expr) override;
+  Object visitUnaryExpr(const lox::expr::Unary& _expr) override;
+  Object visitVariableExpr(const lox::expr::Variable& _expr) override;
 
-  void resolve(const lox::stmt::Stmt& _stmt);
-  void resolve(const lox::expr::Expr& _expr);
+  void resolve(const std::shared_ptr<lox::stmt::Stmt>& _stmt);
+  void resolve(const std::shared_ptr<lox::expr::Expr>& _expr);
   void resolveFunction(
       const lox::stmt::Function& function,
       const FunctionType& type);

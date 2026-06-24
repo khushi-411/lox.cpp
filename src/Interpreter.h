@@ -23,60 +23,59 @@ using Object = std::variant<std::nullptr_t, std::string, double, bool,
 
 namespace lox {
 
-class Interpreter : public lox::expr::Visitor<Object>,
-                    public lox::stmt::Visitor<void> {
+class Interpreter : public lox::expr::ExprVisitor,
+                    public lox::stmt::StmtVisitor {
  private:
-  Environment globals;  // = new Environment();
-  Environment environment;  // = globals;
+  std::shared_ptr<Environment> globals;
+  std::shared_ptr<Environment> environment;
   std::map<const lox::expr::Expr*, int> locals;
 
  public:
-  Interpreter() : globals(), environment(globals) {}
+  Interpreter()
+      : globals(std::make_shared<Environment>()), environment(globals) {}
 
-  void visitBlockStmt(const lox::stmt::Block& _stmt);
-  void visitClassStmt(const lox::stmt::Class& _stmt);
-  void visitExpressionStmt(const lox::stmt::Expression& _stmt);
-  void visitFunctionStmt(const lox::stmt::Function& _stmt);
-  void visitIfStmt(const lox::stmt::If& _stmt);
-  void visitPrintStmt(const lox::stmt::Print& _stmt);
-  void visitReturnStmt(const lox::stmt::Return& _stmt);
-  void visitVarStmt(const lox::stmt::Var& _stmt);
-  void visitWhileStmt(const lox::stmt::While& _stmt);
+  void visitBlockStmt(const lox::stmt::Block& _stmt) override;
+  void visitClassStmt(const lox::stmt::Class& _stmt) override;
+  void visitExpressionStmt(const lox::stmt::Expression& _stmt) override;
+  void visitFunctionStmt(const lox::stmt::Function& _stmt) override;
+  void visitIfStmt(const lox::stmt::If& _stmt) override;
+  void visitPrintStmt(const lox::stmt::Print& _stmt) override;
+  void visitReturnStmt(const lox::stmt::Return& _stmt) override;
+  void visitVarStmt(const lox::stmt::Var& _stmt) override;
+  void visitWhileStmt(const lox::stmt::While& _stmt) override;
 
-  void interpret(const std::vector<lox::stmt::Stmt>& statements);
-  void execute(const lox::stmt::Stmt& _stmt);
-  // void evaluate(const lox::stmt::Stmt& _stmt);
-  void resolve(const lox::expr::Expr& _expr, const int& depth);
+  void interpret(const std::vector<std::shared_ptr<lox::stmt::Stmt>>& statements);
+  void execute(const std::shared_ptr<lox::stmt::Stmt>& _stmt);
+  void resolve(const lox::expr::Expr& _expr, int depth);
   void executeBlock(
-      const std::vector<lox::stmt::Stmt>& statements,
-      const Environment& environment);
+      const std::vector<std::shared_ptr<lox::stmt::Stmt>>& statements,
+      std::shared_ptr<Environment> environment);
   Object lookUpVariable(const Token& name, const lox::expr::Expr& _expr);
 
-  Object visitAssignExpr(const lox::expr::Assign& _expr);
-  Object visitBinaryExpr(const lox::expr::Binary& _expr);
-  Object visitCallExpr(const lox::expr::Call& _expr);
-  Object visitGetExpr(const lox::expr::Get& _expr);
-  Object visitGroupingExpr(const lox::expr::Grouping& _expr);
-  Object visitLiteralExpr(const lox::expr::Literal& _expr);
-  Object visitLogicalExpr(const lox::expr::Logical& _expr);
-  Object visitSetExpr(const lox::expr::Set& _expr);
-  Object visitSuperExpr(const lox::expr::Super& _expr);
-  Object visitThisExpr(const lox::expr::This& _expr);
-  Object visitUnaryExpr(const lox::expr::Unary& _expr);
-  Object visitVariableExpr(const lox::expr::Variable& _expr);
+  Object visitAssignExpr(const lox::expr::Assign& _expr) override;
+  Object visitBinaryExpr(const lox::expr::Binary& _expr) override;
+  Object visitCallExpr(const lox::expr::Call& _expr) override;
+  Object visitGetExpr(const lox::expr::Get& _expr) override;
+  Object visitGroupingExpr(const lox::expr::Grouping& _expr) override;
+  Object visitLiteralExpr(const lox::expr::Literal& _expr) override;
+  Object visitLogicalExpr(const lox::expr::Logical& _expr) override;
+  Object visitSetExpr(const lox::expr::Set& _expr) override;
+  Object visitSuperExpr(const lox::expr::Super& _expr) override;
+  Object visitThisExpr(const lox::expr::This& _expr) override;
+  Object visitUnaryExpr(const lox::expr::Unary& _expr) override;
+  Object visitVariableExpr(const lox::expr::Variable& _expr) override;
 
-  Object evaluate(const lox::expr::Expr& _expr);
+  Object evaluate(const std::shared_ptr<lox::expr::Expr>& _expr);
 
-  void checkNumberOperand(const Token& op, const std::string& operand);
-  bool isTruthy(const std::string& object);
+  void checkNumberOperand(const Token& op, const Object& operand);
+  bool isTruthy(const Object& object);
   void checkNumberOperands(
       const Token& op,
-      const std::string& left,
-      const std::string& right);
-  bool isEqual(const std::string& a, const std::string& b);
+      const Object& left,
+      const Object& right);
+  bool isEqual(const Object& a, const Object& b);
 
-  void interpret(const lox::expr::Expr& expression);
-  std::string stringify(const std::string& object);
+  std::string stringify(const Object& object);
 };
 
 

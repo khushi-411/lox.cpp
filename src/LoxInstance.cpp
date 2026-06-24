@@ -24,7 +24,7 @@ Object LoxInstance::get(const Token& name) {
 
   try {
     LoxFunction method = klass->findMethod(name.getLexeme());
-    auto bound = std::make_shared<LoxFunction>(method.bind(*this));
+    auto bound = std::make_shared<LoxFunction>(method.bind(shared_from_this()));
     return std::static_pointer_cast<LoxCallable>(bound);
   } catch (const std::runtime_error&) {
     // Method not found — fall through to error

@@ -1,6 +1,7 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <variant>
 
 #include "Environment.h"
@@ -17,8 +18,8 @@ namespace lox {
 
 Environment::Environment() : enclosing(nullptr) {}
 
-Environment::Environment(const Environment& enclosing)
-    : enclosing(&enclosing) {}
+Environment::Environment(std::shared_ptr<Environment> enclosing)
+    : enclosing(std::move(enclosing)) {}
 
 
 Object Environment::get(const Token& name) const {
@@ -43,7 +44,7 @@ void Environment::assign(const Token& name, const Object& value) {
   }
 
   if (enclosing != nullptr) {
-    const_cast<Environment*>(enclosing)->assign(name, value);
+    enclosing->assign(name, value);
     return;
   }
 
@@ -56,38 +57,27 @@ void Environment::define(const std::string& name, const Object& value) {
 }
 
 
-Environment& Environment::ancestor(const int& distance) {
-  const Environment* environment = this;
+Environment* Environment::ancestor(int distance) {
+  Environment* environment = this;
 
   for (int i = 0; i < distance; i++) {
-    environment = environment->enclosing;
+    environment = environment->enclosing.get();
   }
 
-  return *const_cast<Environment*>(environment);
+  return environment;
 }
 
 
-const Environment& Environment::ancestor(const int& distance) const {
-  const Environment* environment = this;
-
-  for (int i = 0; i < distance; i++) {
-    environment = environment->enclosing;
-  }
-
-  return *environment;
-}
-
-
-Object Environment::getAt(const int& distance, const std::string& name) const {
-  return Environment::ancestor(distance).values.at(name);
+Object Environment::getAt(int distance, const std::string& name) {
+  return Environment::ancestor(distance)->values.at(name);
 }
 
 
 void Environment::assignAt(
-    const int& distance,
+    int distance,
     const Token& name,
     const Object& value) {
-  ancestor(distance).values[name.getLexeme()] = value;
+  ancestor(distance)->values[name.getLexeme()] = value;
 }
 
 

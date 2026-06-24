@@ -12,7 +12,7 @@ using Object = std::variant<std::nullptr_t, std::string, double, bool,
 
 namespace lox {
 
-Return::Return(const Object& value) : super(nullptr), value(value) {}
+Return::Return(const Object& value) : super(""), value(value) {}
 
 
 }  // namespace lox

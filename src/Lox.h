@@ -27,11 +27,12 @@ namespace lox {
 
 class Lox {
  private:
-  bool hadError = false;
-  bool hadRuntimeError = false;
   lox::Interpreter interpreter;
 
  public:
+  static inline bool hadError = false;
+  static inline bool hadRuntimeError = false;
+
   void runFile(const std::string& path) {
     try {
       // https://stackoverflow.com/questions/38032800
@@ -46,25 +47,19 @@ class Lox {
     }
 
     if (hadError) {
-      std::exit(1);
+      std::exit(65);
     }
 
     if (hadRuntimeError) {
-      std::exit(1);
+      std::exit(70);
     }
   }
 
   void runPrompt() {
-    std::string input;
-    std::cin >> input;
-    std::ifstream file(input);
-
     for (;;) {
       std::cout << "> ";
       std::string line;
-      std::getline(file, line);
-      // https://stackoverflow.com/questions/462165
-      if (line.empty()) {
+      if (!std::getline(std::cin, line)) {
         break;
       }
       run(line);
@@ -76,15 +71,9 @@ class Lox {
   void run(const std::string& source) {
     lox::Scanner scanner(source);
     std::vector<Token> tokens = scanner.scanTokens();
-    for (Token token : tokens) {
-      // TODO: check another way (https://stackoverflow.com/questions/45172025)
-      std::cout << token;
-    }
 
     lox::parser::Parser parser(tokens);
-    // Parse both expressions and statements
-    // lox::expr::Expr expression = parser.parse();  // Unused - commented out
-    std::vector<lox::stmt::Stmt> statements = parser.parseStmt();
+    std::vector<std::shared_ptr<lox::stmt::Stmt>> statements = parser.parse();
 
     // To ensure code has error and we have to return the program
     if (hadError) {
@@ -98,24 +87,24 @@ class Lox {
       return;
     }
 
-    // std::cout << ASTPrinter().print(expression);
     interpreter.interpret(statements);
   }
 
 
-  void error(int line, const std::string& message) {
+  static void error(int line, const std::string& message) {
     report(line, "", message);
   }
 
-  void report(
+  static void report(
       const int& line,
       const std::string& where,
       const std::string& message) {
-    std::cout << "[line " << line << "] Error" << where << ": " << message;
+    std::cerr << "[line " << line << "] Error" << where << ": " << message
+              << "\n";
     hadError = true;
   }
 
-  void error(const Token& token, const std::string& message) {
+  static void error(const Token& token, const std::string& message) {
     if (token.tokentype() == TokenType::_EOF) {
       report(token.getLine(), " at end", message);
     } else {
@@ -123,10 +112,10 @@ class Lox {
     }
   }
 
-  void runtimeError(const RuntimeError& error) {
-    std::cerr << error.what() << "[" << error.getToken().getLine() << "]";
+  static void runtimeError(const RuntimeError& error) {
+    std::cerr << error.what() << "\n[line " << error.getToken().getLine()
+              << "]\n";
     hadRuntimeError = true;
-    std::exit(1);
   }
 };
 
