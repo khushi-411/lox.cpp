@@ -12,7 +12,7 @@
 #include <sstream>
 #include <vector>
 
-//#include "ASTPrinter.h"
+#include "ASTPrinter.h"
 #include "Expr.h"
 #include "Interpreter.h"
 #include "Parser.h"
@@ -33,14 +33,14 @@ class Lox {
   static inline bool hadError = false;
   static inline bool hadRuntimeError = false;
 
-  void runFile(const std::string& path) {
+  void runFile(const std::string& path, bool dumpAst = false) {
     try {
       // https://stackoverflow.com/questions/38032800
       std::fstream bytes{path.c_str(), std::ios::in | std::ios::binary};
       // https://stackoverflow.com/questions/2602013
       std::stringstream buffer;
       buffer << bytes.rdbuf();
-      run(buffer.str());
+      run(buffer.str(), dumpAst);
     } catch (const std::exception& e) {
       std::cerr << "Exception: " << e.what() << std::endl;
       return;
@@ -55,20 +55,20 @@ class Lox {
     }
   }
 
-  void runPrompt() {
+  void runPrompt(bool dumpAst = false) {
     for (;;) {
       std::cout << "> ";
       std::string line;
       if (!std::getline(std::cin, line)) {
         break;
       }
-      run(line);
+      run(line, dumpAst);
       // reseting the flag
       hadError = false;
     }
   }
 
-  void run(const std::string& source) {
+  void run(const std::string& source, bool dumpAst = false) {
     lox::Scanner scanner(source);
     std::vector<Token> tokens = scanner.scanTokens();
 
@@ -78,6 +78,13 @@ class Lox {
     // To ensure code has error and we have to return the program
     if (hadError) {
       return;
+    }
+
+    if (dumpAst) {
+      lox::ASTPrinter printer;
+      for (const auto& stmt : statements) {
+        std::cout << printer.print(stmt) << "\n";
+      }
     }
 
     lox::Resolver resolver(interpreter);

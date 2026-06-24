@@ -3,6 +3,7 @@
 #ifndef ASTPRINTER_H
 #define ASTPRINTER_H
 
+#include <memory>
 #include <string>
 #include <variant>
 
@@ -16,38 +17,41 @@ using Object = std::variant<std::nullptr_t, std::string, double, bool,
 namespace lox {
 
 
-class ASTPrinter : public lox::expr::Visitor<std::string>,
-                   lox::stmt::Visitor<std::string> {
+class ASTPrinter : public lox::expr::ExprVisitor,
+                   public lox::stmt::StmtVisitor {
  public:
-  std::string visitAssignExpr(const lox::expr::Assign& _expr);
-  std::string visitBinaryExpr(const lox::expr::Binary& _expr);
-  std::string visitCallExpr(const lox::expr::Call& _expr);
-  std::string visitGetExpr(const lox::expr::Get& _expr);
-  std::string visitGroupingExpr(const lox::expr::Grouping& _expr);
-  std::string visitLiteralExpr(const lox::expr::Literal& _expr);
-  std::string visitLogicalExpr(const lox::expr::Logical& _expr);
-  std::string visitSetExpr(const lox::expr::Set& _expr);
-  std::string visitSuperExpr(const lox::expr::Super& _expr);
-  std::string visitThisExpr(const lox::expr::This& _expr);
-  std::string visitUnaryExpr(const lox::expr::Unary& _expr);
-  std::string visitVariableExpr(const lox::expr::Variable& _expr);
+  std::string print(const std::shared_ptr<lox::expr::Expr>& _expr);
+  std::string print(const std::shared_ptr<lox::stmt::Stmt>& _stmt);
 
-  std::string visitBlockStmt(const lox::stmt::Block& _stmt);
-  std::string visitClassStmt(const lox::stmt::Class& _stmt);
-  std::string visitExpressionStmt(const lox::stmt::Expression& _stmt);
-  std::string visitFunctionStmt(const lox::stmt::Function& _stmt);
-  std::string visitIfStmt(const lox::stmt::If& _stmt);
-  std::string visitPrintStmt(const lox::stmt::Print& _stmt);
-  std::string visitReturnStmt(const lox::stmt::Return& _stmt);
-  std::string visitVarStmt(const lox::stmt::Var& _stmt);
-  std::string visitWhileStmt(const lox::stmt::While& _stmt);
+  Object visitAssignExpr(const lox::expr::Assign& _expr) override;
+  Object visitBinaryExpr(const lox::expr::Binary& _expr) override;
+  Object visitCallExpr(const lox::expr::Call& _expr) override;
+  Object visitGetExpr(const lox::expr::Get& _expr) override;
+  Object visitGroupingExpr(const lox::expr::Grouping& _expr) override;
+  Object visitLiteralExpr(const lox::expr::Literal& _expr) override;
+  Object visitLogicalExpr(const lox::expr::Logical& _expr) override;
+  Object visitSetExpr(const lox::expr::Set& _expr) override;
+  Object visitSuperExpr(const lox::expr::Super& _expr) override;
+  Object visitThisExpr(const lox::expr::This& _expr) override;
+  Object visitUnaryExpr(const lox::expr::Unary& _expr) override;
+  Object visitVariableExpr(const lox::expr::Variable& _expr) override;
 
-  std::string print(const lox::expr::Expr& _expr);
-  std::string print(const lox::stmt::Stmt& _stmt);
-  std::string parenthesize(
-      const std::string& name,
-      const lox::expr::Expr& exprs);
-  std::string parenthesize2(const std::string& name, const Object& exprs);
+  void visitBlockStmt(const lox::stmt::Block& _stmt) override;
+  void visitClassStmt(const lox::stmt::Class& _stmt) override;
+  void visitExpressionStmt(const lox::stmt::Expression& _stmt) override;
+  void visitFunctionStmt(const lox::stmt::Function& _stmt) override;
+  void visitIfStmt(const lox::stmt::If& _stmt) override;
+  void visitPrintStmt(const lox::stmt::Print& _stmt) override;
+  void visitReturnStmt(const lox::stmt::Return& _stmt) override;
+  void visitVarStmt(const lox::stmt::Var& _stmt) override;
+  void visitWhileStmt(const lox::stmt::While& _stmt) override;
+
+ private:
+  std::string result;
+
+  std::string stringify(const std::shared_ptr<lox::expr::Expr>& _expr);
+  std::string stringify(const std::shared_ptr<lox::stmt::Stmt>& _stmt);
+  std::string literalToString(const Object& value);
 };
 
 
