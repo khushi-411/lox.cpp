@@ -9,7 +9,8 @@
 #include "LoxInstance.h"
 
 
-using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+using Object = std::variant<std::nullptr_t, std::string, double, bool,
+    std::shared_ptr<lox::LoxCallable>, std::shared_ptr<lox::LoxInstance>>;
 
 
 namespace lox {
@@ -46,30 +47,26 @@ std::string LoxClass::to_string() {
 Object LoxClass::call(
     Interpreter& interpreter,
     const std::vector<Object>& arguments) {
-  LoxInstance* instance = new LoxInstance(*this);
+  auto instance = std::make_shared<LoxInstance>(*this);
 
   try {
     LoxFunction initializer = LoxClass::findMethod("init");
-    if (initializer != nullptr) {
-      initializer.bind(*instance).call(interpreter, arguments);
-    }
+    initializer.bind(instance).call(interpreter, arguments);
   } catch (const std::runtime_error&) {
-    // ...
+    // No "init" method — that's fine
   }
 
-  // TODO: Return instance as Object
-  return nullptr;
+  return instance;
 }
 
 
 int LoxClass::arity() {
-  LoxFunction initializer = LoxClass::findMethod("init");
-
-  if (initializer == nullptr) {
+  try {
+    LoxFunction initializer = LoxClass::findMethod("init");
+    return initializer.arity();
+  } catch (const std::runtime_error&) {
     return 0;
   }
-
-  return initializer.arity();
 }
 
 

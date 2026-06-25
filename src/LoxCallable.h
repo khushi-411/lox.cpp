@@ -1,14 +1,20 @@
 #ifndef LOXCALLABLE_H
 #define LOXCALLABLE_H
 
+#include <memory>
 #include <string>
 #include <variant>
 #include <vector>
 
-#include "Interpreter.h"
+// Forward declarations (no Interpreter.h needed — only its type is referenced)
+namespace lox {
+class Interpreter;
+class LoxCallable;
+class LoxInstance;
+}  // namespace lox
 
-
-using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+using Object = std::variant<std::nullptr_t, std::string, double, bool,
+    std::shared_ptr<lox::LoxCallable>, std::shared_ptr<lox::LoxInstance>>;
 
 
 namespace lox {

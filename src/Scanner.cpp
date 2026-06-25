@@ -10,7 +10,8 @@
 #include "TokenType.h"
 
 
-using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+using Object = std::variant<std::nullptr_t, std::string, double, bool,
+    std::shared_ptr<lox::LoxCallable>, std::shared_ptr<lox::LoxInstance>>;
 
 namespace lox {
 
@@ -21,7 +22,9 @@ namespace lox {
 
 // https://stackoverflow.com/questions/19918369
 
-Scanner::Scanner(const std::string& source) : source(source) {}
+Scanner::Scanner(const std::string& source) : Scanner() {
+  this->source = source;
+}
 
 
 // reserved words
@@ -124,6 +127,9 @@ void Scanner::scanToken() {
       break;
     case '\t':
       break;
+    case '\n':
+      line++;
+      break;
     case '"':
       Scanner::string();
       break;
@@ -133,7 +139,7 @@ void Scanner::scanToken() {
       } else if (Scanner::isAlpha(c)) {
         Scanner::identifier();
       } else {
-        // Lox::error(line, "Unexpected character");
+        Lox::error(line, "Unexpected character.");
       }
       break;
   }
@@ -184,7 +190,7 @@ void Scanner::string() {
   }
 
   if (Scanner::isAtEnd()) {
-    // Lox::error(line, "Unterminated string");
+    Lox::error(line, "Unterminated string.");
     return;
   }
 

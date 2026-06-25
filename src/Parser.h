@@ -4,6 +4,7 @@
 #define PARSER_H
 
 #include <initializer_list>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -25,8 +26,7 @@ class ParseError : public std::runtime_error {
   ParseError(const Token& token, const std::string& message)
       : std::runtime_error(message), token(token) {}
 
-  const Token& token;
-  ParseError error(const Token& token, const std::string& message);
+  Token token;
 };
 
 
@@ -39,26 +39,26 @@ class Parser {
   Parser() {}
   Parser(const std::vector<Token>& tokens);
 
-  std::vector<lox::stmt::Stmt> parseStmt();
-  lox::stmt::Stmt statement();
-  lox::stmt::Stmt printStatement();
-  lox::stmt::Stmt expressionStatement();
-  // lox::stmt::Stmt declaration();
-  // lox::stmt::Stmt classDeclaration();
-  lox::stmt::Stmt forStatement();
-  lox::stmt::Stmt ifStatement();
-  lox::stmt::Stmt returnStatement();
-  lox::stmt::Stmt varDeclaration();
-  lox::stmt::Stmt whileStatement();
-  // lox::stmt::Stmt function(const std::string& kind);
-  std::vector<lox::stmt::Stmt> block();
+  std::vector<std::shared_ptr<lox::stmt::Stmt>> parse();
 
-  lox::expr::Expr parse();
-  // lox::expr::Expr assignment();
-  lox::expr::Expr _or();
-  lox::expr::Expr _and();
-  lox::expr::Expr expression();
-  lox::expr::Expr equality();
+  std::shared_ptr<lox::stmt::Stmt> declaration();
+  std::shared_ptr<lox::stmt::Stmt> classDeclaration();
+  std::shared_ptr<lox::stmt::Stmt> statement();
+  std::shared_ptr<lox::stmt::Stmt> printStatement();
+  std::shared_ptr<lox::stmt::Stmt> expressionStatement();
+  std::shared_ptr<lox::stmt::Stmt> forStatement();
+  std::shared_ptr<lox::stmt::Stmt> ifStatement();
+  std::shared_ptr<lox::stmt::Stmt> returnStatement();
+  std::shared_ptr<lox::stmt::Stmt> varDeclaration();
+  std::shared_ptr<lox::stmt::Stmt> whileStatement();
+  std::shared_ptr<lox::stmt::Function> function(const std::string& kind);
+  std::vector<std::shared_ptr<lox::stmt::Stmt>> block();
+
+  std::shared_ptr<lox::expr::Expr> expression();
+  std::shared_ptr<lox::expr::Expr> assignment();
+  std::shared_ptr<lox::expr::Expr> _or();
+  std::shared_ptr<lox::expr::Expr> _and();
+  std::shared_ptr<lox::expr::Expr> equality();
   bool match(std::initializer_list<TokenType> types);
   Token consume(const TokenType& type, const std::string& message);
   bool check(const TokenType& type);
@@ -66,13 +66,15 @@ class Parser {
   bool isAtEnd();
   Token peek();
   Token previous();
-  lox::expr::Expr comparison();
-  lox::expr::Expr term();
-  lox::expr::Expr factor();
-  lox::expr::Expr unary();
-  lox::expr::Expr finishCall(const lox::expr::Expr& callee);
-  lox::expr::Expr call();
-  lox::expr::Expr primary();
+  std::shared_ptr<lox::expr::Expr> comparison();
+  std::shared_ptr<lox::expr::Expr> term();
+  std::shared_ptr<lox::expr::Expr> factor();
+  std::shared_ptr<lox::expr::Expr> unary();
+  std::shared_ptr<lox::expr::Expr> finishCall(
+      std::shared_ptr<lox::expr::Expr> callee);
+  std::shared_ptr<lox::expr::Expr> call();
+  std::shared_ptr<lox::expr::Expr> primary();
+  ParseError error(const Token& token, const std::string& message);
   void synchronize();
 };
 

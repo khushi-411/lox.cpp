@@ -1,7 +1,7 @@
-#include <iostream>
+#include <memory>
+#include <sstream>
 #include <string>
 #include <variant>
-#include <vector>
 
 #include "ASTPrinter.h"
 #include "Expr.h"
@@ -9,314 +9,284 @@
 #include "Token.h"
 
 
-using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+using Object = std::variant<std::nullptr_t, std::string, double, bool,
+    std::shared_ptr<lox::LoxCallable>, std::shared_ptr<lox::LoxInstance>>;
 
 // convert tree to the string
 
 namespace lox {
 
 
-std::string ASTPrinter::print(const lox::expr::Expr& _expr) {
-  return _expr.accept(*this);
+std::string ASTPrinter::print(const std::shared_ptr<lox::expr::Expr>& _expr) {
+  return ASTPrinter::stringify(_expr);
 }
 
 
-std::string ASTPrinter::print(const lox::stmt::Stmt& _stmt) {
-  return _stmt.accept(*this);
+std::string ASTPrinter::print(const std::shared_ptr<lox::stmt::Stmt>& _stmt) {
+  return ASTPrinter::stringify(_stmt);
+}
+
+
+// dispatch helpers — accept() writes into result, which we return
+
+std::string ASTPrinter::stringify(
+    const std::shared_ptr<lox::expr::Expr>& _expr) {
+  if (_expr == nullptr) {
+    return "nil";
+  }
+  _expr->accept(*this);
+  return result;
+}
+
+
+std::string ASTPrinter::stringify(
+    const std::shared_ptr<lox::stmt::Stmt>& _stmt) {
+  if (_stmt == nullptr) {
+    return "nil";
+  }
+  _stmt->accept(*this);
+  return result;
+}
+
+
+std::string ASTPrinter::literalToString(const Object& value) {
+  if (std::holds_alternative<std::string>(value)) {
+    return std::get<std::string>(value);
+  }
+  if (std::holds_alternative<bool>(value)) {
+    return std::get<bool>(value) ? "true" : "false";
+  }
+  if (std::holds_alternative<double>(value)) {
+    std::ostringstream oss;
+    oss << std::get<double>(value);
+    return oss.str();
+  }
+  return "nil";
 }
 
 
 // assign expr
 
-std::string ASTPrinter::visitAssignExpr(const lox::expr::Assign& _expr) {
-  return ASTPrinter::parenthesize2(
-      "=", _expr.getName().getLexeme(), _expr.getValue());
+Object ASTPrinter::visitAssignExpr(const lox::expr::Assign& _expr) {
+  result = "(= " + _expr.getName().getLexeme() + " " +
+      stringify(_expr.getValue()) + ")";
+  return nullptr;
 }
 
 
 // binary expr
 
-std::string ASTPrinter::visitBinaryExpr(const lox::expr::Binary& _expr) {
-  return ASTPrinter::parenthesize(
-      _expr.getOp().getLexeme(), _expr.getLeft(), _expr.getRight());
+Object ASTPrinter::visitBinaryExpr(const lox::expr::Binary& _expr) {
+  result = "(" + _expr.getOp().getLexeme() + " " +
+      stringify(_expr.getLeft()) + " " + stringify(_expr.getRight()) + ")";
+  return nullptr;
 }
 
 
 // call expr
 
-std::string ASTPrinter::visitCallExpr(const lox::expr::Call& _expr) {
-  return ASTPrinter::parenthesize2(
-      "call", _expr.getCallee(), _expr.getArguments());
+Object ASTPrinter::visitCallExpr(const lox::expr::Call& _expr) {
+  std::string out = "(call " + stringify(_expr.getCallee());
+  for (const auto& argument : _expr.getArguments()) {
+    out += " " + stringify(argument);
+  }
+  out += ")";
+  result = out;
+  return nullptr;
 }
 
 
 // get expr
 
-std::string ASTPrinter::visitGetExpr(const lox::expr::Get& _expr) {
-  return ASTPrinter::parenthesize2(
-      ".", _expr.getObject(), _expr.getName().getLexeme());
+Object ASTPrinter::visitGetExpr(const lox::expr::Get& _expr) {
+  result =
+      "(. " + stringify(_expr.getObject()) + " " +
+      _expr.getName().getLexeme() + ")";
+  return nullptr;
 }
 
 
 // grouping expr
 
-std::string ASTPrinter::visitGroupingExpr(const lox::expr::Grouping& _expr) {
-  return ASTPrinter::parenthesize("group", _expr.getExpression());
+Object ASTPrinter::visitGroupingExpr(const lox::expr::Grouping& _expr) {
+  result = "(group " + stringify(_expr.getExpression()) + ")";
+  return nullptr;
 }
 
 
 // literal expr
 
-std::string ASTPrinter::visitLiteralExpr(const lox::expr::Literal& _expr) {
-  if (_expr.getValue() == NULL) {
-    return "nil";
-  }
-  return _expr.getValue().to_string();
+Object ASTPrinter::visitLiteralExpr(const lox::expr::Literal& _expr) {
+  result = literalToString(_expr.getValue());
+  return nullptr;
 }
 
 
 // logical expr
 
-std::string ASTPrinter::visitLogicalExpr(const lox::expr::Logical& _expr) {
-  return ASTPrinter::parenthesize(
-      _expr.getOp().getLexeme(), _expr.getLeft(), _expr.getRight());
+Object ASTPrinter::visitLogicalExpr(const lox::expr::Logical& _expr) {
+  result = "(" + _expr.getOp().getLexeme() + " " +
+      stringify(_expr.getLeft()) + " " + stringify(_expr.getRight()) + ")";
+  return nullptr;
 }
 
 
 // set expr
 
-std::string ASTPrinter::visitSetExpr(const lox::expr::Set& _expr) {
-  return ASTPrinter::parenthesize2(
-      "=", _expr.getObject(), _expr.getName().getLexeme(), _expr.getValue());
+Object ASTPrinter::visitSetExpr(const lox::expr::Set& _expr) {
+  result =
+      "(= " + stringify(_expr.getObject()) + " " +
+      _expr.getName().getLexeme() + " " + stringify(_expr.getValue()) + ")";
+  return nullptr;
 }
 
 
 // super expr
 
-std::string ASTPrinter::visitSuperExpr(const lox::expr::Super& _expr) {
-  return ASTPrinter::parenthesize2("super", _expr.getMethod());
+Object ASTPrinter::visitSuperExpr(const lox::expr::Super& _expr) {
+  result = "(super " + _expr.getMethod().getLexeme() + ")";
+  return nullptr;
 }
 
 
 // this expr
 
-std::string ASTPrinter::visitThisExpr(const lox::expr::This& _expr) {
-  return "this";
+Object ASTPrinter::visitThisExpr(const lox::expr::This& _expr) {
+  result = "this";
+  return nullptr;
 }
 
 
 // unary expr
 
-std::string ASTPrinter::visitUnaryExpr(const lox::expr::Unary& _expr) {
-  return ASTPrinter::parenthesize(_expr.getOp().getLexeme(), _expr.getRight());
+Object ASTPrinter::visitUnaryExpr(const lox::expr::Unary& _expr) {
+  result =
+      "(" + _expr.getOp().getLexeme() + " " + stringify(_expr.getRight()) + ")";
+  return nullptr;
 }
 
 
 // variable expr
 
-std::string ASTPrinter::visitVariableExpr(const lox::expr::Variable& _expr) {
-  return _expr.getName().getLexeme();
+Object ASTPrinter::visitVariableExpr(const lox::expr::Variable& _expr) {
+  result = _expr.getName().getLexeme();
+  return nullptr;
 }
 
 
 // block stmt
 
-std::string ASTPrinter::visitBlockStmt(const lox::stmt::Block& _stmt) {
-  std::vector<std::string> builder;
-  builder.push_back("(block ");
-
-  for (lox::stmt::Stmt statement : _stmt.getStatements()) {
-    builder.push_back(statement.accept(*this));
+void ASTPrinter::visitBlockStmt(const lox::stmt::Block& _stmt) {
+  std::string out = "(block";
+  for (const auto& statement : _stmt.getStatements()) {
+    out += " " + stringify(statement);
   }
-
-  builder.push_back(")");
-  std::string _builder(builder.begin(), builder.end());
-  return _builder;
+  out += ")";
+  result = out;
 }
 
 
 // class stmt
 
-std::string ASTPrinter::visitClassStmt(const lox::stmt::Class& _stmt) {
-  std::vector<std::string> builder;
-  builder.push_back("class " + _stmt.getName().getLexeme());
+void ASTPrinter::visitClassStmt(const lox::stmt::Class& _stmt) {
+  std::string out = "(class " + _stmt.getName().getLexeme();
 
-  if (_stmt.getSuperclass() != NULL) {
-    builder.push_back(" < " + print(_stmt.getSuperclass()));
+  if (_stmt.getSuperclass() != nullptr) {
+    out += " < " + stringify(_stmt.getSuperclass());
   }
 
-  for (typename lox::stmt::Function method : _stmt.getMethods()) {
-    builder.push_back(" " + print(method));
+  for (const auto& method : _stmt.getMethods()) {
+    out += " " + stringify(method);
   }
 
-  builder.push_back(")");
-  std::string _builder(builder.begin(), builder.end());
-  return _builder;
+  out += ")";
+  result = out;
 }
 
 
 // expression stmt
 
-std::string ASTPrinter::visitExpressionStmt(
-    const lox::stmt::Expression& _stmt) {
-  return ASTPrinter::parenthesize(";", _stmt.getExpression());
+void ASTPrinter::visitExpressionStmt(const lox::stmt::Expression& _stmt) {
+  result = "(; " + stringify(_stmt.getExpression()) + ")";
 }
 
 
 // function stmt
 
-std::string ASTPrinter::visitFunctionStmt(const lox::stmt::Function& _stmt) {
-  std::vector<std::string> builder;
-  builder.push_back("fun( " + _stmt.getName().getLexeme() + "(");
+void ASTPrinter::visitFunctionStmt(const lox::stmt::Function& _stmt) {
+  std::string out = "(fun " + _stmt.getName().getLexeme() + " (";
 
-  for (Token param : _stmt.getParams()) {
-    if (param != _stmt.params[0]) {  // TODO
-      builder.push_back(" ");
+  bool first = true;
+  for (const auto& param : _stmt.getParams()) {
+    if (!first) {
+      out += " ";
     }
-    builder.push_back(param.getLexeme());
+    out += param.getLexeme();
+    first = false;
+  }
+  out += ")";
+
+  for (const auto& body : _stmt.getBody()) {
+    out += " " + stringify(body);
   }
 
-  builder.push_back(")");
-
-  for (lox::stmt::Stmt body : _stmt.getBody()) {
-    builder.push_back(body.accept(*this));
-  }
-
-  builder.push_back(")");
-  std::string _builder(builder.begin(), builder.end());
-  return _builder;
+  out += ")";
+  result = out;
 }
 
 
 // if stmt
 
-std::string ASTPrinter::visitIfStmt(const lox::stmt::If& _stmt) {
-  if (_stmt.getElseBranch() == NULL) {
-    return ASTPrinter::parenthesize2(
-        "if", _stmt.getCondition(), _stmt.getThenBranch());
+void ASTPrinter::visitIfStmt(const lox::stmt::If& _stmt) {
+  if (_stmt.getElseBranch() == nullptr) {
+    result = "(if " + stringify(_stmt.getCondition()) + " " +
+        stringify(_stmt.getThenBranch()) + ")";
+    return;
   }
 
-  return ASTPrinter::parenthesize2(
-      "if-else",
-      _stmt.getCondition(),
-      _stmt.getThenBranch(),
-      _stmt.getElseBranch());
+  result = "(if-else " + stringify(_stmt.getCondition()) + " " +
+      stringify(_stmt.getThenBranch()) + " " +
+      stringify(_stmt.getElseBranch()) + ")";
 }
 
 
 // print stmt
 
-std::string ASTPrinter::visitPrintStmt(const lox::stmt::Print& _stmt) {
-  return ASTPrinter::parenthesize("print", _stmt.getExpression());
+void ASTPrinter::visitPrintStmt(const lox::stmt::Print& _stmt) {
+  result = "(print " + stringify(_stmt.getExpression()) + ")";
 }
 
 
 // return stmt
 
-std::string ASTPrinter::visitReturnStmt(const lox::stmt::Return& _stmt) {
-  if (_stmt.getValue() == NULL) {
-    return "(return)";
+void ASTPrinter::visitReturnStmt(const lox::stmt::Return& _stmt) {
+  if (_stmt.getValue() == nullptr) {
+    result = "(return)";
+    return;
   }
 
-  return ASTPrinter::parenthesize("return", _stmt.getValue());
+  result = "(return " + stringify(_stmt.getValue()) + ")";
 }
 
 
 // var stmt
 
-std::string ASTPrinter::visitVarStmt(const lox::stmt::Var& _stmt) {
-  if (_stmt.getInitializer() == NULL) {
-    return ASTPrinter::parenthesize2("var", _stmt.getName());
+void ASTPrinter::visitVarStmt(const lox::stmt::Var& _stmt) {
+  if (_stmt.getInitializer() == nullptr) {
+    result = "(var " + _stmt.getName().getLexeme() + ")";
+    return;
   }
 
-  return ASTPrinter::parenthesize2(
-      "var", _stmt.getName(), "=", _stmt.getInitializer());
+  result = "(var " + _stmt.getName().getLexeme() + " = " +
+      stringify(_stmt.getInitializer()) + ")";
 }
 
 
 // while stmt
 
-std::string ASTPrinter::visitWhileStmt(const lox::stmt::While& _stmt) {
-  return ASTPrinter::parenthesize2(
-      "while", _stmt.getCondition(), _stmt.getBody());
-}
-
-
-std::string ASTPrinter::parenthesize(
-    const std::string& name,
-    const lox::expr::Expr& exprs) {
-  std::vector<std::string> builder;
-  builder.push_back("(");
-  builder.push_back(name);
-  for (lox::expr::Expr _expr : exprs) {
-    builder.push_back(" ");
-    builder.push_back(_expr.accept(*this));
-  }
-  builder.push_back(")");
-  std::string _builder(builder.begin(), builder.end());
-  return _builder;
-}
-
-
-template <typename base, typename T>
-bool instanceof (const T* ptr) {
-  return dynamic_cast<const base*>(ptr) != nullptr;
-}
-
-
-void transform(std::vector<std::string>& builder, const Object& parts) {
-  for (const Object& part : parts) {
-    builder.push_back(" ");
-    // https://stackoverflow.com/questions/500493
-    if (instanceof <lox::expr::Expr>(part)) {
-      lox::expr::Expr _expr = static_cast<lox::expr::Expr>(part);
-      // TODO: re-check the reason
-      // error: invalid use of ‘this’ in non-member function
-      builder.push_back(_expr.accept());
-
-    } else if (instanceof <lox::stmt::Stmt>(part)) {
-      lox::stmt::Stmt _stmt = static_cast<lox::stmt::Stmt>(part);
-      builder.push_back(_stmt.accept());
-
-    } else if (instanceof <Token>(part)) {
-      builder.push_back(static_cast<Token>(part).getLexeme());
-
-    } else if (std::holds_alternative<std::vector<std::string>>(part)) {
-      const auto& _part = std::get<std::vector<std::string>>(part);
-      transform(builder, _part);
-
-    } else {
-      // https://stackoverflow.com/questions/23799174
-      std::string _str = std::get<std::string>(part);
-      builder.push_back(_str);
-    }
-  }
-}
-
-
-std::string ASTPrinter::parenthesize2(
-    const std::string& name,
-    const Object& parts) {
-  std::vector<std::string> builder;
-
-  builder.push_back("(");
-  builder.push_back(name);
-
-  transform(builder, parts);
-  builder.push_back(")");
-  std::string _builder(builder.begin(), builder.end());
-
-  return _builder;
-}
-
-
-static void main(std::vector<std::string> args) {
-  lox::expr::Expr expression = lox::expr::Binary(
-      lox::expr::Unary(
-          Token(TokenType::MINUS, "-", NULL, 1), lox::expr::Literal(123)),
-      Token(TokenType::STAR, "*", NULL, 1),
-      lox::expr::Grouping(lox::expr::Literal(45.67)));
-  std::cout << ASTPrinter::print(expression);
+void ASTPrinter::visitWhileStmt(const lox::stmt::While& _stmt) {
+  result = "(while " + stringify(_stmt.getCondition()) + " " +
+      stringify(_stmt.getBody()) + ")";
 }
 
 

@@ -13,14 +13,26 @@
 int main(int argc, char** argv) {
   lox::Lox _lox;
   try {
-    // https://stackoverflow.com/questions/18649547
-    if (argc > 2) {
-      std::cout << "Usage: " << argv[0] << " [script]\n";
+    // Parse optional --ast flag
+    bool dumpAst = false;
+    int scriptArgIdx = -1;
+
+    for (int i = 1; i < argc; ++i) {
+      if (strcmp(argv[i], "--ast") == 0) {
+        dumpAst = true;
+      } else {
+        scriptArgIdx = i;
+      }
+    }
+
+    int nonFlagArgs = (scriptArgIdx != -1) ? 1 : 0;
+    if (argc - (dumpAst ? 1 : 0) > 2) {
+      std::cout << "Usage: " << argv[0] << " [--ast] [script]\n";
       std::exit(1);
-    } else if (argc == 2) {
-      _lox.runFile(argv[1]);
+    } else if (scriptArgIdx != -1) {
+      _lox.runFile(argv[scriptArgIdx], dumpAst);
     } else {
-      _lox.runPrompt();
+      _lox.runPrompt(dumpAst);
     }
 
   } catch (const std::exception& e) {

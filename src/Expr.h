@@ -3,6 +3,7 @@
 #ifndef EXPR_H
 #define EXPR_H
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <variant>
@@ -11,85 +12,84 @@
 #include "Token.h"
 
 
-using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+// Forward declarations for Lox runtime objects
+namespace lox {
+class LoxCallable;
+class LoxInstance;
+}  // namespace lox
+
+using Object = std::variant<std::nullptr_t, std::string, double, bool,
+    std::shared_ptr<lox::LoxCallable>, std::shared_ptr<lox::LoxInstance>>;
 
 namespace lox {
 
 namespace expr {
 
 
-// forward declaration
+// forward declarations
 
-template <class T>
-class Visitor;
+class Expr;
+class Assign;
+class Binary;
+class Call;
+class Get;
+class Grouping;
+class Literal;
+class Logical;
+class Set;
+class Super;
+class This;
+class Unary;
+class Variable;
 
 
-// expr class
+// visitor interface
 
-class Expr {
- private:
-  bool is_null_ = false;
-
+class ExprVisitor {
  public:
-  virtual ~Expr() = default;
+  virtual ~ExprVisitor() = default;
 
-  // Comparison operators
-  friend bool operator==(const Expr& _x, const Expr& _y) {
-    return &_x == &_y;
-  }
-
-  bool operator==(const std::nullptr_t&) const {
-    return is_null_;
-  }
-
-  friend bool operator!=(const Expr& _x, const Expr& _y) {
-    return &_x != &_y;
-  }
-
-  bool operator!=(const std::nullptr_t&) const {
-    return !is_null_;
-  }
-
-  // Assignment operators
-  Expr& operator=(const std::nullptr_t&) {
-    is_null_ = true;
-    return *this;
-  }
-
-  Expr& operator=(const Expr&) = default;
-
-  bool isNull() const { return is_null_; }
-
-  // Pure virtual but cannot use virtual keyword with templates
-  // Each derived class must override this
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const {
-    throw std::runtime_error("Base Expr::accept called - use derived class");
-  }
+  virtual Object visitAssignExpr(const Assign& expr) = 0;
+  virtual Object visitBinaryExpr(const Binary& expr) = 0;
+  virtual Object visitCallExpr(const Call& expr) = 0;
+  virtual Object visitGetExpr(const Get& expr) = 0;
+  virtual Object visitGroupingExpr(const Grouping& expr) = 0;
+  virtual Object visitLiteralExpr(const Literal& expr) = 0;
+  virtual Object visitLogicalExpr(const Logical& expr) = 0;
+  virtual Object visitSetExpr(const Set& expr) = 0;
+  virtual Object visitSuperExpr(const Super& expr) = 0;
+  virtual Object visitThisExpr(const This& expr) = 0;
+  virtual Object visitUnaryExpr(const Unary& expr) = 0;
+  virtual Object visitVariableExpr(const Variable& expr) = 0;
 };
 
 
-// TODO: template specialization
-// https://en.cppreference.com/w/cpp/language/template_specialization
+// expr base class
+
+class Expr {
+ public:
+  virtual ~Expr() = default;
+  virtual Object accept(ExprVisitor& visitor) const = 0;
+};
+
 
 // assign expr
 
 class Assign : public Expr {
  private:
-  const Token& name;
-  const Expr& value;
+  Token name;
+  std::shared_ptr<Expr> value;
 
  public:
-  Assign(const Token& name, const Expr& value);
+  Assign(const Token& name, std::shared_ptr<Expr> value);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  Object accept(ExprVisitor& visitor) const override;
 
   const Token& getName() const {
     return name;
   }
 
-  const Expr& getValue() const {
+  const std::shared_ptr<Expr>& getValue() const {
     return value;
   }
 };
@@ -99,17 +99,16 @@ class Assign : public Expr {
 
 class Binary : public Expr {
  private:
-  const Expr& left;
-  const Token& op;
-  const Expr& right;
+  std::shared_ptr<Expr> left;
+  Token op;
+  std::shared_ptr<Expr> right;
 
  public:
-  Binary(const Expr& left, const Token& op, const Expr& right);
+  Binary(std::shared_ptr<Expr> left, const Token& op, std::shared_ptr<Expr> right);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  Object accept(ExprVisitor& visitor) const override;
 
-  const Expr& getLeft() const {
+  const std::shared_ptr<Expr>& getLeft() const {
     return left;
   }
 
@@ -117,7 +116,7 @@ class Binary : public Expr {
     return op;
   }
 
-  const Expr& getRight() const {
+  const std::shared_ptr<Expr>& getRight() const {
     return right;
   }
 };
@@ -127,20 +126,19 @@ class Binary : public Expr {
 
 class Call : public Expr {
  private:
-  const Expr& callee;
-  const Token& paren;
-  const std::vector<Expr>& arguments;
+  std::shared_ptr<Expr> callee;
+  Token paren;
+  std::vector<std::shared_ptr<Expr>> arguments;
 
  public:
   Call(
-      const Expr& callee,
+      std::shared_ptr<Expr> callee,
       const Token& paren,
-      const std::vector<Expr>& arguments);
+      std::vector<std::shared_ptr<Expr>> arguments);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  Object accept(ExprVisitor& visitor) const override;
 
-  const Expr& getCallee() const {
+  const std::shared_ptr<Expr>& getCallee() const {
     return callee;
   }
 
@@ -148,7 +146,7 @@ class Call : public Expr {
     return paren;
   }
 
-  const std::vector<Expr>& getArguments() const {
+  const std::vector<std::shared_ptr<Expr>>& getArguments() const {
     return arguments;
   }
 };
@@ -158,16 +156,15 @@ class Call : public Expr {
 
 class Get : public Expr {
  private:
-  const Expr& object;
-  const Token& name;
+  std::shared_ptr<Expr> object;
+  Token name;
 
  public:
-  Get(const Expr& object, const Token& name);
+  Get(std::shared_ptr<Expr> object, const Token& name);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  Object accept(ExprVisitor& visitor) const override;
 
-  const Expr& getObject() const {
+  const std::shared_ptr<Expr>& getObject() const {
     return object;
   }
 
@@ -181,15 +178,14 @@ class Get : public Expr {
 
 class Grouping : public Expr {
  private:
-  const Expr& expression;
+  std::shared_ptr<Expr> expression;
 
  public:
-  Grouping(const Expr& expression);
+  Grouping(std::shared_ptr<Expr> expression);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  Object accept(ExprVisitor& visitor) const override;
 
-  const Expr& getExpression() const {
+  const std::shared_ptr<Expr>& getExpression() const {
     return expression;
   }
 };
@@ -199,15 +195,14 @@ class Grouping : public Expr {
 
 class Literal : public Expr {
  private:
-  const std::string& value;
+  Object value;
 
  public:
   Literal(const Object& value);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  Object accept(ExprVisitor& visitor) const override;
 
-  const std::string& getValue() const {
+  const Object& getValue() const {
     return value;
   }
 };
@@ -217,17 +212,16 @@ class Literal : public Expr {
 
 class Logical : public Expr {
  private:
-  const Expr& left;
-  const Token& op;
-  const Expr& right;
+  std::shared_ptr<Expr> left;
+  Token op;
+  std::shared_ptr<Expr> right;
 
  public:
-  Logical(const Expr& left, const Token& op, const Expr& right);
+  Logical(std::shared_ptr<Expr> left, const Token& op, std::shared_ptr<Expr> right);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  Object accept(ExprVisitor& visitor) const override;
 
-  const Expr& getLeft() const {
+  const std::shared_ptr<Expr>& getLeft() const {
     return left;
   }
 
@@ -235,7 +229,7 @@ class Logical : public Expr {
     return op;
   }
 
-  const Expr& getRight() const {
+  const std::shared_ptr<Expr>& getRight() const {
     return right;
   }
 };
@@ -245,17 +239,16 @@ class Logical : public Expr {
 
 class Set : public Expr {
  private:
-  const Expr& object;
-  const Token& name;
-  const Expr& value;
+  std::shared_ptr<Expr> object;
+  Token name;
+  std::shared_ptr<Expr> value;
 
  public:
-  Set(const Expr& object, const Token& name, const Expr& value);
+  Set(std::shared_ptr<Expr> object, const Token& name, std::shared_ptr<Expr> value);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  Object accept(ExprVisitor& visitor) const override;
 
-  const Expr& getObject() const {
+  const std::shared_ptr<Expr>& getObject() const {
     return object;
   }
 
@@ -263,7 +256,7 @@ class Set : public Expr {
     return name;
   }
 
-  const Expr& getValue() const {
+  const std::shared_ptr<Expr>& getValue() const {
     return value;
   }
 };
@@ -273,14 +266,13 @@ class Set : public Expr {
 
 class Super : public Expr {
  private:
-  const Token& keyword;
-  const Token& method;
+  Token keyword;
+  Token method;
 
  public:
   Super(const Token& keyword, const Token& method);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  Object accept(ExprVisitor& visitor) const override;
 
   const Token& getKeyword() const {
     return keyword;
@@ -296,13 +288,12 @@ class Super : public Expr {
 
 class This : public Expr {
  private:
-  const Token& keyword;
+  Token keyword;
 
  public:
   This(const Token& keyword);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  Object accept(ExprVisitor& visitor) const override;
 
   const Token& getKeyword() const {
     return keyword;
@@ -314,20 +305,19 @@ class This : public Expr {
 
 class Unary : public Expr {
  private:
-  const Token& op;
-  const Expr& right;
+  Token op;
+  std::shared_ptr<Expr> right;
 
  public:
-  Unary(const Token& op, const Expr& right);
+  Unary(const Token& op, std::shared_ptr<Expr> right);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  Object accept(ExprVisitor& visitor) const override;
 
   const Token& getOp() const {
     return op;
   }
 
-  const Expr& getRight() const {
+  const std::shared_ptr<Expr>& getRight() const {
     return right;
   }
 };
@@ -337,37 +327,16 @@ class Unary : public Expr {
 
 class Variable : public Expr {
  private:
-  const Token& name;
+  Token name;
 
  public:
   Variable(const Token& name);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  Object accept(ExprVisitor& visitor) const override;
 
   const Token& getName() const {
     return name;
   }
-};
-
-
-// visitor class
-
-template <class T>
-class Visitor : public Expr {
- public:
-  virtual T visitAssignExpr(const Assign& expr) const = 0;
-  virtual T visitBinaryExpr(const Binary& expr) const = 0;
-  virtual T visitCallExpr(const Call& expr) const = 0;
-  virtual T visitGetExpr(const Get& expr) const = 0;
-  virtual T visitGroupingExpr(const Grouping& expr) const = 0;
-  virtual T visitLiteralExpr(const Literal& expr) const = 0;
-  virtual T visitLogicalExpr(const Logical& expr) const = 0;
-  virtual T visitSetExpr(const Set& expr) const = 0;
-  virtual T visitSuperExpr(const Super& expr) const = 0;
-  virtual T visitThisExpr(const This& expr) const = 0;
-  virtual T visitUnaryExpr(const Unary& expr) const = 0;
-  virtual T visitVariableExpr(const Variable& expr) const = 0;
 };
 
 

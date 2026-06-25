@@ -15,54 +15,44 @@ namespace lox {
 namespace stmt {
 
 
-// forward declaration
+// forward declarations
 
-template <class T>
-class Visitor;
+class Stmt;
+class Block;
+class Class;
+class Expression;
+class Function;
+class If;
+class Print;
+class Return;
+class Var;
+class While;
 
 
-// stmt class
+// visitor interface
+
+class StmtVisitor {
+ public:
+  virtual ~StmtVisitor() = default;
+
+  virtual void visitBlockStmt(const Block& stmt) = 0;
+  virtual void visitClassStmt(const Class& stmt) = 0;
+  virtual void visitExpressionStmt(const Expression& stmt) = 0;
+  virtual void visitFunctionStmt(const Function& stmt) = 0;
+  virtual void visitIfStmt(const If& stmt) = 0;
+  virtual void visitPrintStmt(const Print& stmt) = 0;
+  virtual void visitReturnStmt(const Return& stmt) = 0;
+  virtual void visitVarStmt(const Var& stmt) = 0;
+  virtual void visitWhileStmt(const While& stmt) = 0;
+};
+
+
+// stmt base class
 
 class Stmt {
- private:
-  bool is_null_ = false;
-
  public:
   virtual ~Stmt() = default;
-
-  // Comparison operators
-  friend bool operator==(const Stmt& _x, const Stmt& _y) {
-    return &_x == &_y;
-  }
-
-  bool operator==(const std::nullptr_t&) const {
-    return is_null_;
-  }
-
-  friend bool operator!=(const Stmt& _x, const Stmt& _y) {
-    return &_x != &_y;
-  }
-
-  bool operator!=(const std::nullptr_t&) const {
-    return !is_null_;
-  }
-
-  // Assignment operators
-  Stmt& operator=(const std::nullptr_t&) {
-    is_null_ = true;
-    return *this;
-  }
-
-  Stmt& operator=(const Stmt&) = default;
-
-  bool isNull() const { return is_null_; }
-
-  // Pure virtual but cannot use virtual keyword with templates
-  // Each derived class must override this
-  template <class T>
-  T accept(const Visitor<T>& visitor) const {
-    throw std::runtime_error("Base Stmt::accept called - use derived class");
-  }
+  virtual void accept(StmtVisitor& visitor) const = 0;
 };
 
 
@@ -70,15 +60,14 @@ class Stmt {
 
 class Block : public Stmt {
  private:
-  const std::vector<Stmt>& statements;
+  std::vector<std::shared_ptr<Stmt>> statements;
 
  public:
-  Block(const std::vector<Stmt>& statements);
+  Block(std::vector<std::shared_ptr<Stmt>> statements);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  void accept(StmtVisitor& visitor) const override;
 
-  const std::vector<Stmt>& getStatements() const;
+  const std::vector<std::shared_ptr<Stmt>>& getStatements() const;
 };
 
 
@@ -86,15 +75,14 @@ class Block : public Stmt {
 
 class Expression : public Stmt {
  private:
-  const lox::expr::Expr& expression;
+  std::shared_ptr<lox::expr::Expr> expression;
 
  public:
-  Expression(const lox::expr::Expr& expression);
+  Expression(std::shared_ptr<lox::expr::Expr> expression);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  void accept(StmtVisitor& visitor) const override;
 
-  const lox::expr::Expr& getExpression() const;
+  const std::shared_ptr<lox::expr::Expr>& getExpression() const;
 };
 
 
@@ -102,22 +90,21 @@ class Expression : public Stmt {
 
 class Function : public Stmt {
  private:
-  const Token& name;
-  const std::vector<Token>& params;
-  const std::vector<Stmt>& body;
+  Token name;
+  std::vector<Token> params;
+  std::vector<std::shared_ptr<Stmt>> body;
 
  public:
   Function(
       const Token& name,
-      const std::vector<Token>& params,
-      const std::vector<Stmt>& body);
+      std::vector<Token> params,
+      std::vector<std::shared_ptr<Stmt>> body);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  void accept(StmtVisitor& visitor) const override;
 
   const Token& getName() const;
   const std::vector<Token>& getParams() const;
-  const std::vector<Stmt>& getBody() const;
+  const std::vector<std::shared_ptr<Stmt>>& getBody() const;
 };
 
 
@@ -125,22 +112,21 @@ class Function : public Stmt {
 
 class Class : public Stmt {
  private:
-  const Token& name;
-  const lox::expr::Variable& superclass;
-  const std::vector<lox::stmt::Function>& methods;
+  Token name;
+  std::shared_ptr<lox::expr::Variable> superclass;
+  std::vector<std::shared_ptr<lox::stmt::Function>> methods;
 
  public:
   Class(
       const Token& name,
-      const lox::expr::Variable& superclass,
-      const std::vector<lox::stmt::Function>& methods);
+      std::shared_ptr<lox::expr::Variable> superclass,
+      std::vector<std::shared_ptr<lox::stmt::Function>> methods);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  void accept(StmtVisitor& visitor) const override;
 
   const Token& getName() const;
-  const lox::expr::Variable& getSuperclass() const;
-  const std::vector<lox::stmt::Function>& getMethods() const;
+  const std::shared_ptr<lox::expr::Variable>& getSuperclass() const;
+  const std::vector<std::shared_ptr<lox::stmt::Function>>& getMethods() const;
 };
 
 
@@ -148,21 +134,20 @@ class Class : public Stmt {
 
 class If : public Stmt {
  private:
-  const lox::expr::Expr& condition;
-  const Stmt* thenBranch;
-  const Stmt* elseBranch;
+  std::shared_ptr<lox::expr::Expr> condition;
+  std::shared_ptr<Stmt> thenBranch;
+  std::shared_ptr<Stmt> elseBranch;
 
  public:
-  If(const lox::expr::Expr& condition,
-     const Stmt* thenBranch,
-     const Stmt* elseBranch);
+  If(std::shared_ptr<lox::expr::Expr> condition,
+     std::shared_ptr<Stmt> thenBranch,
+     std::shared_ptr<Stmt> elseBranch);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  void accept(StmtVisitor& visitor) const override;
 
-  const lox::expr::Expr& getCondition() const;
-  const Stmt& getThenBranch() const;
-  const Stmt& getElseBranch() const;
+  const std::shared_ptr<lox::expr::Expr>& getCondition() const;
+  const std::shared_ptr<Stmt>& getThenBranch() const;
+  const std::shared_ptr<Stmt>& getElseBranch() const;
 };
 
 
@@ -170,15 +155,14 @@ class If : public Stmt {
 
 class Print : public Stmt {
  private:
-  const lox::expr::Expr& expression;
+  std::shared_ptr<lox::expr::Expr> expression;
 
  public:
-  Print(const lox::expr::Expr& expression);
+  Print(std::shared_ptr<lox::expr::Expr> expression);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  void accept(StmtVisitor& visitor) const override;
 
-  const lox::expr::Expr& getExpression() const;
+  const std::shared_ptr<lox::expr::Expr>& getExpression() const;
 };
 
 
@@ -186,17 +170,16 @@ class Print : public Stmt {
 
 class Return : public Stmt {
  private:
-  const Token& keyword;
-  const lox::expr::Expr& value;
+  Token keyword;
+  std::shared_ptr<lox::expr::Expr> value;
 
  public:
-  Return(const Token& keyword, const lox::expr::Expr& value);
+  Return(const Token& keyword, std::shared_ptr<lox::expr::Expr> value);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  void accept(StmtVisitor& visitor) const override;
 
   const Token& getKeyword() const;
-  const lox::expr::Expr& getValue() const;
+  const std::shared_ptr<lox::expr::Expr>& getValue() const;
 };
 
 
@@ -204,17 +187,16 @@ class Return : public Stmt {
 
 class Var : public Stmt {
  private:
-  const Token& name;
-  const lox::expr::Expr& initializer;
+  Token name;
+  std::shared_ptr<lox::expr::Expr> initializer;
 
  public:
-  Var(const Token& name, const lox::expr::Expr& initializer);
+  Var(const Token& name, std::shared_ptr<lox::expr::Expr> initializer);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  void accept(StmtVisitor& visitor) const override;
 
   const Token& getName() const;
-  const lox::expr::Expr& getInitializer() const;
+  const std::shared_ptr<lox::expr::Expr>& getInitializer() const;
 };
 
 
@@ -222,34 +204,16 @@ class Var : public Stmt {
 
 class While : public Stmt {
  private:
-  const lox::expr::Expr& condition;
-  const Stmt& body;
+  std::shared_ptr<lox::expr::Expr> condition;
+  std::shared_ptr<Stmt> body;
 
  public:
-  While(const lox::expr::Expr& condition, const Stmt& body);
+  While(std::shared_ptr<lox::expr::Expr> condition, std::shared_ptr<Stmt> body);
 
-  template <class T>
-  const T accept(const Visitor<T>& visitor) const;
+  void accept(StmtVisitor& visitor) const override;
 
-  const lox::expr::Expr& getCondition() const;
-  const Stmt& getBody() const;
-};
-
-
-// visitor class
-
-template <class T>
-class Visitor : public Stmt {
- public:
-  virtual T visitBlockStmt(const Block& stmt) const = 0;
-  virtual T visitClassStmt(const Class& stmt) const = 0;
-  virtual T visitExpressionStmt(const Expression& stmt) const = 0;
-  virtual T visitFunctionStmt(const Function& stmt) const = 0;
-  virtual T visitIfStmt(const If& stmt) const = 0;
-  virtual T visitPrintStmt(const Print& stmt) const = 0;
-  virtual T visitReturnStmt(const Return& stmt) const = 0;
-  virtual T visitVarStmt(const Var& stmt) const = 0;
-  virtual T visitWhileStmt(const While& stmt) const = 0;
+  const std::shared_ptr<lox::expr::Expr>& getCondition() const;
+  const std::shared_ptr<Stmt>& getBody() const;
 };
 
 

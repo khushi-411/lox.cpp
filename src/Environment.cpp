@@ -1,22 +1,25 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <variant>
 
 #include "Environment.h"
+#include "LoxInstance.h"
 #include "RuntimeError.h"
 #include "Token.h"
 
 
-using Object = std::variant<std::nullptr_t, std::string, double, bool>;
+using Object = std::variant<std::nullptr_t, std::string, double, bool,
+    std::shared_ptr<lox::LoxCallable>, std::shared_ptr<lox::LoxInstance>>;
 
 
 namespace lox {
 
 Environment::Environment() : enclosing(nullptr) {}
 
-Environment::Environment(const Environment& enclosing)
-    : enclosing(&enclosing) {}
+Environment::Environment(std::shared_ptr<Environment> enclosing)
+    : enclosing(std::move(enclosing)) {}
 
 
 Object Environment::get(const Token& name) const {
@@ -41,7 +44,7 @@ void Environment::assign(const Token& name, const Object& value) {
   }
 
   if (enclosing != nullptr) {
-    const_cast<Environment*>(enclosing)->assign(name, value);
+    enclosing->assign(name, value);
     return;
   }
 
@@ -54,44 +57,33 @@ void Environment::define(const std::string& name, const Object& value) {
 }
 
 
-Environment& Environment::ancestor(const int& distance) {
-  const Environment* environment = this;
+Environment* Environment::ancestor(int distance) {
+  Environment* environment = this;
 
   for (int i = 0; i < distance; i++) {
-    environment = environment->enclosing;
+    environment = environment->enclosing.get();
   }
 
-  return *const_cast<Environment*>(environment);
+  return environment;
 }
 
 
-const Environment& Environment::ancestor(const int& distance) const {
-  const Environment* environment = this;
-
-  for (int i = 0; i < distance; i++) {
-    environment = environment->enclosing;
-  }
-
-  return *environment;
-}
-
-
-Object Environment::getAt(const int& distance, const std::string& name) const {
-  return Environment::ancestor(distance).values.at(name);
+Object Environment::getAt(int distance, const std::string& name) {
+  return Environment::ancestor(distance)->values.at(name);
 }
 
 
 void Environment::assignAt(
-    const int& distance,
+    int distance,
     const Token& name,
     const Object& value) {
-  ancestor(distance).values[name.getLexeme()] = value;
+  ancestor(distance)->values[name.getLexeme()] = value;
 }
 
 
 std::string object_to_string(const Object& values) {
   if (std::holds_alternative<std::nullptr_t>(values)) {
-    return "nullptr";
+    return "nil";
 
   } else if (std::holds_alternative<std::string>(values)) {
     return std::get<std::string>(values);
@@ -101,6 +93,12 @@ std::string object_to_string(const Object& values) {
 
   } else if (std::holds_alternative<bool>(values)) {
     return std::get<bool>(values) ? "true" : "false";
+
+  } else if (std::holds_alternative<std::shared_ptr<lox::LoxCallable>>(values)) {
+    return "<callable>";
+
+  } else if (std::holds_alternative<std::shared_ptr<lox::LoxInstance>>(values)) {
+    return std::get<std::shared_ptr<lox::LoxInstance>>(values)->to_string();
   }
 
   return "Encountered unknown data type.";
